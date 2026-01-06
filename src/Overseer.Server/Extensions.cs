@@ -61,6 +61,16 @@ namespace Overseer.Server
           return machineProvider;
         }
       );
+      services.AddSingleton<Func<Machine, MachineJob, JobSentinel>>(provider =>
+        (machine, job) =>
+        {
+          var httpClientFactory = provider.GetRequiredService<IHttpClientFactory>();
+          var failureDetectionService = provider.GetRequiredService<IJobFailureDetectionService>();
+          var jobFailureChannel = provider.GetRequiredService<IJobFailureChannel>();
+          var configurationManager = provider.GetRequiredService<Settings.IConfigurationManager>();
+          return new JobSentinel(machine, job, httpClientFactory, configurationManager, failureDetectionService, jobFailureChannel);
+        }
+      );
       services.AddTransient<IAuthenticationManager, Users.AuthenticationManager>();
       services.AddTransient<IAuthorizationManager, AuthorizationManager>();
       services.AddTransient<Settings.IConfigurationManager, Settings.ConfigurationManager>();

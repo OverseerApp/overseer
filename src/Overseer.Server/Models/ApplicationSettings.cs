@@ -42,7 +42,7 @@
     /// <summary>
     /// If true AI based monitoring is enabled.
     /// </summary>
-    public bool EnabledAiMonitoring { get; set; } = false;
+    public bool EnableAiMonitoring { get; set; } = false;
 
     /// <summary>
     /// Interval in minutes between AI monitoring scans.
