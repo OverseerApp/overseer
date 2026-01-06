@@ -12,7 +12,9 @@
       <div class="mb-3">
         <label for="webCamUrl" class="form-label">{{ 'webCamUrl' | i18next }}</label>
         <select id="webCamUrl" class="form-select" formControlName="webCamUrl">
-          <option *ngFor="let option of machine.availableWebCams | keyvalue" [ngValue]="option.value">{{ option.key }}</option>
+          @for (option of machine.availableWebCams | keyvalue; track option) {
+            <option [ngValue]="option.value">{{ option.key }}</option>
+          }
         </select>
       </div>
       <div class="mb-3">
