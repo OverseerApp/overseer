@@ -86,6 +86,7 @@ namespace Overseer.Server
       services.AddSingleton<IRestartMonitoringChannel, RestartMonitoringChannel>();
       services.AddSingleton<ICertificateExceptionChannel, CertificateExceptionChannel>();
       services.AddSingleton<INotificationChannel, NotificationChannel>();
+      services.AddSingleton<IJobFailureChannel, JobFailureChannel>();
 
       services.AddHostedService<MachineStatusUpdateService>();
       services.AddHostedService<CertificateExceptionService>();
