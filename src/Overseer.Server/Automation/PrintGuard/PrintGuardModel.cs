@@ -1,9 +1,9 @@
 using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
 
-namespace Overseer.Server.Automation;
+namespace Overseer.Server.Automation.PrintGuard;
 
-public class PrintGuardFailureDetectionModel : IFailureDetectionModel, IDisposable
+public class PrintGuardModel : IDisposable
 {
   private const string ModelUrl = "https://huggingface.co/oliverbravery/PrintGuard/resolve/main/model.onnx";
   private const string ModelFileName = "model.onnx";
@@ -13,7 +13,7 @@ public class PrintGuardFailureDetectionModel : IFailureDetectionModel, IDisposab
   private readonly Lazy<InferenceSession> _lazySession;
   private string? _inputName;
 
-  public PrintGuardFailureDetectionModel(IHttpClientFactory httpClientFactory)
+  public PrintGuardModel(IHttpClientFactory httpClientFactory)
   {
     _httpClientFactory = httpClientFactory;
     _lazySession = new Lazy<InferenceSession>(InitializeSession, LazyThreadSafetyMode.ExecutionAndPublication);

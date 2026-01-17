@@ -3,6 +3,7 @@ using System.Reflection;
 using log4net;
 using Microsoft.AspNetCore.Diagnostics;
 using Overseer.Server.Automation;
+using Overseer.Server.Automation.PrintGuard;
 using Overseer.Server.Channels;
 using Overseer.Server.Data;
 using Overseer.Server.Machines;
@@ -64,11 +65,10 @@ namespace Overseer.Server
       services.AddSingleton<Func<Machine, MachineJob, JobSentinel>>(provider =>
         (machine, job) =>
         {
-          var cameraStreamer = provider.GetRequiredService<ICameraStreamer>();
-          var failureDetectionModel = provider.GetRequiredService<IFailureDetectionModel>();
+          var failureDetectionAnalyzer = provider.GetRequiredService<IFailureDetectionAnalyzer>();
           var jobFailureChannel = provider.GetRequiredService<IJobFailureChannel>();
           var configurationManager = provider.GetRequiredService<Settings.IConfigurationManager>();
-          return new JobSentinel(machine, job, cameraStreamer, failureDetectionModel, configurationManager, jobFailureChannel);
+          return new JobSentinel(machine, job, failureDetectionAnalyzer, configurationManager, jobFailureChannel);
         }
       );
       services.AddTransient<IAuthenticationManager, Users.AuthenticationManager>();
@@ -77,9 +77,9 @@ namespace Overseer.Server
       services.AddTransient<IUserManager, UserManager>();
       services.AddTransient<IMachineManager, MachineManager>();
       services.AddTransient<IControlManager, ControlManager>();
-      services.AddTransient<ICameraStreamer, CameraStreamer>();
+      services.AddTransient<IPrintGuardCameraStreamer, PrintGuardCameraStreamer>();
 
-      services.AddSingleton<IFailureDetectionModel, PrintGuardFailureDetectionModel>();
+      services.AddSingleton<PrintGuardModel>();
       services.AddSingleton<IMonitoringService, MonitoringService>();
       services.AddSingleton<MachineProviderManager>();
       services.AddSingleton<IMachineStatusChannel, MachineStatusChannel>();

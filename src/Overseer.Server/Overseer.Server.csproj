@@ -26,6 +26,6 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\prototypes.json" />
+    <EmbeddedResource Include="Resources\print_guard_prototypes.json" />
   </ItemGroup>
 </Project>

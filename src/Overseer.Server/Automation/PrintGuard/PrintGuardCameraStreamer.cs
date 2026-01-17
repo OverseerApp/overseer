@@ -5,13 +5,13 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 
-namespace Overseer.Server.Automation;
+namespace Overseer.Server.Automation.PrintGuard;
 
-public class CameraStreamer : ICameraStreamer
+public class PrintGuardCameraStreamer : IPrintGuardCameraStreamer, IDisposable
 {
   private VideoCapture? _capture;
   private Mat _latestFrame = new();
-  private readonly object _frameLock = new();
+  private readonly Lock _frameLock = new();
   private bool _disposed;
 
   public void Start(string url)
@@ -80,33 +80,47 @@ public class CameraStreamer : ICameraStreamer
     // 1. Define ImageNet constants
     float[] mean = [0.485f, 0.456f, 0.406f];
     float[] std = [0.229f, 0.224f, 0.225f];
-    int width = 224;
-    int height = 224;
+    int targetSize = 256; // Resize to 256 first
+    int cropSize = 224; // Then center crop to 224
 
-    // 2. Convert Mat to ImageSharp Image and Resize
+    // 2. Convert Mat to ImageSharp Image, convert to Grayscale, and Resize
     using var buffer = new VectorOfByte();
     CvInvoke.Imencode(".png", frame, buffer);
     using var ms = new MemoryStream(buffer.ToArray());
     using var image = Image.Load<Rgb24>(ms);
-    image.Mutate(x => x.Resize(new ResizeOptions { Size = new Size(width, height), Mode = ResizeMode.Max }));
+
+    // Convert to grayscale (matching PrintGuard's preprocessing)
+    image.Mutate(x => x.Grayscale());
+
+    // Resize to 256
+    image.Mutate(x => x.Resize(new ResizeOptions { Size = new Size(targetSize, targetSize), Mode = ResizeMode.Crop }));
+
+    // Center crop to 224x224
+    int cropX = (targetSize - cropSize) / 2;
+    int cropY = (targetSize - cropSize) / 2;
+    image.Mutate(x => x.Crop(new Rectangle(cropX, cropY, cropSize, cropSize)));
 
     // 3. Prepare the flat array (CHW format: RRR... GGG... BBB...)
-    float[] normalizedData = new float[3 * width * height];
+    // Even though grayscale, we replicate across 3 channels (as PrintGuard does)
+    float[] normalizedData = new float[3 * cropSize * cropSize];
 
     image.ProcessPixelRows(accessor =>
     {
-      for (int y = 0; y < height; y++)
+      for (int y = 0; y < cropSize; y++)
       {
         var row = accessor.GetRowSpan(y);
-        for (int x = 0; x < width; x++)
+        for (int x = 0; x < cropSize; x++)
         {
-          // Normalize and assign to specific channel offsets
+          // Grayscale image - all RGB channels have the same value
+          // Normalize the grayscale value and replicate across all 3 channels
+          float grayValue = row[x].R / 255.0f;
+
           // Red Channel
-          normalizedData[0 * width * height + y * width + x] = ((row[x].R / 255.0f) - mean[0]) / std[0];
+          normalizedData[0 * cropSize * cropSize + y * cropSize + x] = (grayValue - mean[0]) / std[0];
           // Green Channel
-          normalizedData[1 * width * height + y * width + x] = ((row[x].G / 255.0f) - mean[1]) / std[1];
+          normalizedData[1 * cropSize * cropSize + y * cropSize + x] = (grayValue - mean[1]) / std[1];
           // Blue Channel
-          normalizedData[2 * width * height + y * width + x] = ((row[x].B / 255.0f) - mean[2]) / std[2];
+          normalizedData[2 * cropSize * cropSize + y * cropSize + x] = (grayValue - mean[2]) / std[2];
         }
       }
     });

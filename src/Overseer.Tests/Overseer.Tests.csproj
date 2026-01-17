@@ -30,5 +30,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\prefail.png" />
     <EmbeddedResource Include="Resources\postfail.png" />
+    <EmbeddedResource Include="Resources\fail.jpg" />
+    <EmbeddedResource Include="Resources\pass.jpg" />
   </ItemGroup>
 </Project>

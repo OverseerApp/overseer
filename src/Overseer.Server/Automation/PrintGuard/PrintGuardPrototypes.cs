@@ -1,13 +1,13 @@
 using System.Reflection;
 using System.Text.Json;
 
-namespace Overseer.Server.Automation;
+namespace Overseer.Server.Automation.PrintGuard;
 
-public static class Prototypes
+public static class PrintGuardPrototypes
 {
   private static readonly Lazy<Dictionary<string, float[]>> _prototypes = new(() =>
   {
-    var prototypesJson = LoadEmbeddedResource("Overseer.Server.Resources.prototypes.json");
+    var prototypesJson = LoadEmbeddedResource("Overseer.Server.Resources.print_guard_prototypes.json");
     var prototypesDict = JsonSerializer.Deserialize<Dictionary<string, float[]>>(prototypesJson);
     return prototypesDict ?? [];
   });
