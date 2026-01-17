@@ -3,14 +3,16 @@ using System.Text.Json;
 
 namespace Overseer.Server.Automation;
 
-public static class PrototypeLoader
+public static class Prototypes
 {
-  public static Dictionary<string, float[]> Load()
+  private static readonly Lazy<Dictionary<string, float[]>> _prototypes = new(() =>
   {
     var prototypesJson = LoadEmbeddedResource("Overseer.Server.Resources.prototypes.json");
     var prototypesDict = JsonSerializer.Deserialize<Dictionary<string, float[]>>(prototypesJson);
     return prototypesDict ?? [];
-  }
+  });
+
+  public static Dictionary<string, float[]> Get() => _prototypes.Value;
 
   private static byte[] LoadEmbeddedResource(string resourceName)
   {

@@ -22,8 +22,6 @@ public class JobSentinel(
   private readonly double _threshold = 0.7;
   private readonly Queue<JobFailureAnalysisResult> _history = new();
 
-  private readonly Dictionary<string, float[]> _prototypes = PrototypeLoader.Load();
-
   public void StartMonitoring(CancellationToken externalCancellationToken)
   {
     ObjectDisposedException.ThrowIf(_disposed, this);
@@ -130,7 +128,7 @@ public class JobSentinel(
   /// <summary>
   /// Calculates the Euclidean Distance between two vectors.
   /// </summary>
-  public double CalculateDistance(float[] vectorA, float[] vectorB)
+  private static double CalculateDistance(float[] vectorA, float[] vectorB)
   {
     if (vectorA.Length != vectorB.Length)
       throw new ArgumentException("Vectors must be the same length.");
@@ -154,7 +152,7 @@ public class JobSentinel(
     string bestLabel = "Unknown";
     double shortestDistance = double.MaxValue;
 
-    foreach (var proto in _prototypes)
+    foreach (var proto in Prototypes.Get())
     {
       double dist = CalculateDistance(currentEmbedding, proto.Value);
       if (dist < shortestDistance)
@@ -164,10 +162,9 @@ public class JobSentinel(
       }
     }
 
-    // Return both the specific type and a boolean flag for "Is this bad?"
-    // Assuming any label that isn't "success" or "good" is a failure.
-    bool isFailure = bestLabel.ToLower() != "success" && bestLabel.ToLower() != "good";
-    var confidenceScore = 1.0 - (shortestDistance / 10.0); // Normalize distance to [0,1] for confidence
+    bool isFailure = !bestLabel.Equals("success", StringComparison.CurrentCultureIgnoreCase);
+    // Normalize distance to [0,1] for confidence
+    var confidenceScore = Math.Clamp(1.0 - (shortestDistance / 10.0), 0.0, 1.0);
     var result = new JobFailureAnalysisResult
     {
       JobId = job.Id,

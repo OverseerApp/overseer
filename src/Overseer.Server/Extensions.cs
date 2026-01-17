@@ -78,11 +78,10 @@ namespace Overseer.Server
       services.AddTransient<IMachineManager, MachineManager>();
       services.AddTransient<IControlManager, ControlManager>();
       services.AddTransient<ICameraStreamer, CameraStreamer>();
-      services.AddTransient<IFailureDetectionModel, PrintGuardFailureDetectionModel>();
 
+      services.AddSingleton<IFailureDetectionModel, PrintGuardFailureDetectionModel>();
       services.AddSingleton<IMonitoringService, MonitoringService>();
       services.AddSingleton<MachineProviderManager>();
-
       services.AddSingleton<IMachineStatusChannel, MachineStatusChannel>();
       services.AddSingleton<IRestartMonitoringChannel, RestartMonitoringChannel>();
       services.AddSingleton<ICertificateExceptionChannel, CertificateExceptionChannel>();

@@ -9,18 +9,26 @@ public class PrintGuardFailureDetectionModel : IFailureDetectionModel, IDisposab
   private const string ModelFileName = "model.onnx";
   private const string OverseerDirectoryName = "overseer";
 
-  private readonly InferenceSession _session;
-  private readonly string _inputName;
+  private readonly IHttpClientFactory _httpClientFactory;
+  private readonly Lazy<InferenceSession> _lazySession;
+  private string? _inputName;
 
   public PrintGuardFailureDetectionModel(IHttpClientFactory httpClientFactory)
   {
+    _httpClientFactory = httpClientFactory;
+    _lazySession = new Lazy<InferenceSession>(InitializeSession, LazyThreadSafetyMode.ExecutionAndPublication);
+  }
+
+  private InferenceSession InitializeSession()
+  {
     var modelPath = GetModelPath();
-    EnsureModelDownloaded(modelPath, httpClientFactory).GetAwaiter().GetResult();
+    EnsureModelDownloaded(modelPath, _httpClientFactory).GetAwaiter().GetResult();
 
     var options = new Microsoft.ML.OnnxRuntime.SessionOptions();
     // TODO: Configure options as needed (e.g., GPU, optimization level)
-    _session = new InferenceSession(modelPath, options);
-    _inputName = _session.InputMetadata.Keys.First();
+    var session = new InferenceSession(modelPath, options);
+    _inputName = session.InputMetadata.Keys.First();
+    return session;
   }
 
   private static string GetModelPath()
@@ -59,7 +67,7 @@ public class PrintGuardFailureDetectionModel : IFailureDetectionModel, IDisposab
     var inputs = new List<NamedOnnxValue> { NamedOnnxValue.CreateFromTensor(_inputName, inputTensor) };
 
     // 3. Run Inference
-    using IDisposableReadOnlyCollection<DisposableNamedOnnxValue> results = _session.Run(inputs);
+    using IDisposableReadOnlyCollection<DisposableNamedOnnxValue> results = _lazySession.Value.Run(inputs);
 
     // 4. Extract the embedding as an array
     // We take the first output as a float array
@@ -68,7 +76,8 @@ public class PrintGuardFailureDetectionModel : IFailureDetectionModel, IDisposab
 
   public void Dispose()
   {
-    _session?.Dispose();
+    if (_lazySession.IsValueCreated)
+      _lazySession.Value.Dispose();
     GC.SuppressFinalize(this);
   }
 }

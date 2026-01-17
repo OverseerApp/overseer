@@ -16,13 +16,8 @@ public class CameraStreamer : ICameraStreamer
 
   public void Start(string url)
   {
-    // For RTSP/MJPEG, use the URL provided by your printer (OctoPrint/Mainsail)
     _capture = new VideoCapture(url);
-
-    // Optimization: Use MJPG if supported to reduce bandwidth
     _capture.Set(CapProp.FourCC, VideoWriter.Fourcc('M', 'J', 'P', 'G'));
-
-    // Hook into the ImageGrabbed event (Runs on a background thread)
     _capture.ImageGrabbed += (s, e) =>
     {
       lock (_frameLock)
