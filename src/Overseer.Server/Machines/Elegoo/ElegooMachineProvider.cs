@@ -88,7 +88,7 @@ public class ElegooMachineProvider(ElegooMachine machine, IMachineStatusChannel 
   protected override async Task OnConnected()
   {
     await SendCommand(PING_COMMAND);
-    await SendCommand(ENABLE_CAMERA_COMMAND, new { Enabled = 1 });
+    await SendCommand(ENABLE_CAMERA_COMMAND, new { Enable = 1 });
   }
 
   protected override async Task HandleIncomingMessage(string messageText)
@@ -181,12 +181,16 @@ public class ElegooMachineProvider(ElegooMachine machine, IMachineStatusChannel 
   {
     var message = new
     {
-      Cmd = command,
-      Data = new { },
-      RequestID = Guid.NewGuid().ToString("N"),
-      MainboardID = "",
-      Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
-      From = "1",
+      Id = string.Empty,
+      Data = new
+      {
+        Cmd = command,
+        Data = new object[] { },
+        RequestID = Guid.NewGuid().ToString("N"),
+        MainboardID = string.Empty,
+        TimeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+        From = 1,
+      },
     };
     return SendMessage(message);
   }
@@ -201,9 +205,9 @@ public class ElegooMachineProvider(ElegooMachine machine, IMachineStatusChannel 
         Cmd = command,
         Data = data,
         RequestID = Guid.NewGuid().ToString("N"),
-        Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
-        MainboardID = "",
-        From = "1",
+        MainboardID = string.Empty,
+        TimeStamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+        From = 1,
       },
     };
     return SendMessage(message);
