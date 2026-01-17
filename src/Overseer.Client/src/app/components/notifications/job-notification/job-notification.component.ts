@@ -1,6 +1,6 @@
 import { NgClass } from '@angular/common';
 import { Component, computed, inject } from '@angular/core';
-import { I18NextPipe, I18NextService } from 'angular-i18next';
+import { I18NextPipe } from 'angular-i18next';
 import { filter } from 'rxjs';
 import { JobNotification } from '../../../models/notifications.model';
 import { RelativeDatePipe } from '../../../pipes/relative-date.pipe';
@@ -19,7 +19,6 @@ export class JobNotificationComponent extends NotificationBaseComponent {
   private machinesService = inject(MachinesService);
   private controlService = inject(ControlService);
   private dialogService = inject(DialogService);
-  private i18NextService = inject(I18NextService);
 
   protected jobNotification = computed(() => this.notification() as JobNotification);
 

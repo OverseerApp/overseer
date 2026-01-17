@@ -24,6 +24,9 @@ export class SettingsComponent {
     hideDisabledMachines: FormControl<boolean>;
     hideIdleMachines: FormControl<boolean>;
     sortByTimeRemaining: FormControl<boolean>;
+    enableAiMonitoring: FormControl<boolean>;
+    aiMonitoringFrameCaptureRate: FormControl<number>;
+    aiMonitoringFailureAction: FormControl<'AlertOnly' | 'PauseJob' | 'CancelJob'>;
   }>;
 
   constructor() {
@@ -33,11 +36,17 @@ export class SettingsComponent {
         hideDisabledMachines: settings.hideDisabledMachines ?? false,
         hideIdleMachines: settings.hideIdleMachines ?? false,
         sortByTimeRemaining: settings.sortByTimeRemaining ?? false,
+        enableAiMonitoring: settings.enableAiMonitoring ?? false,
+        aiMonitoringFrameCaptureRate: settings.aiMonitoringFrameCaptureRate ?? 5,
+        aiMonitoringFailureAction: settings.aiMonitoringFailureAction ?? 'AlertOnly',
       });
 
       this.form.valueChanges.subscribe(() => {
+        this.updateAiMonitoringState();
         this.settingsService.updateSettings(this.form!.getRawValue() as ApplicationSettings).subscribe(() => this.updateComplete());
       });
+
+      this.updateAiMonitoringState();
     });
   }
 
@@ -47,6 +56,18 @@ export class SettingsComponent {
       type: 'success',
       message: 'savedChanges',
     });
+  }
+
+  updateAiMonitoringState(): void {
+    if (!this.form) return;
+    const enableAiMonitoring = this.form.get('enableAiMonitoring')?.value;
+    if (enableAiMonitoring) {
+      this.form.get('aiMonitoringFrameCaptureRate')?.enable({ emitEvent: false });
+      this.form.get('aiMonitoringFailureAction')?.enable({ emitEvent: false });
+    } else {
+      this.form.get('aiMonitoringFrameCaptureRate')?.disable({ emitEvent: false });
+      this.form.get('aiMonitoringFailureAction')?.disable({ emitEvent: false });
+    }
   }
 
   handleSchemeChange(scheme: string): void {

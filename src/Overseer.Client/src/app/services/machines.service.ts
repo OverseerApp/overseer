@@ -1,17 +1,25 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { mergeMap, NEVER, Observable, tap } from 'rxjs';
+import { mergeMap, NEVER, Observable, of, tap } from 'rxjs';
 import { Machine, MachineType } from '../models/machine.model';
+import { AuthenticationService } from './authentication.service';
 import { endpointFactory } from './endpoint-factory';
 
 @Injectable({ providedIn: 'root' })
 export class MachinesService {
+  private authenticationService = inject(AuthenticationService);
   private getEndpoint = endpointFactory('/api/machines');
   private http = inject(HttpClient);
 
   machines = rxResource({
-    stream: () => this.getMachines(),
+    params: this.authenticationService.activeUser,
+    stream: ({ params: activeUser }) => {
+      if (!activeUser) {
+        return of([]);
+      }
+      return this.getMachines();
+    },
   });
 
   getMachines(): Observable<Machine[]> {

@@ -1,4 +1,4 @@
-export type NotificationType = 'Job' | 'Simple';
+export type NotificationType = 'Job' | 'Simple' | 'JobFailure';
 
 export type NotificationBase = {
   notificationType: NotificationType;
@@ -21,4 +21,24 @@ export type JobNotification = {
   machineJobId: string;
 };
 
-export type Notification = JobNotification | SimpleNotification;
+export type JobFailureAnalysisResult = {
+  confidenceScore: number;
+  failureReason: string | null;
+  details: string | null;
+};
+
+export type JobFailureNotification = {
+  notificationType: 'JobFailure';
+  id: number;
+  timestamp: number;
+  message: string;
+  isRead: boolean;
+  type: 'JobError';
+  machineId: number;
+  machineJobId: string;
+  jobPaused: boolean;
+  jobCancelled: boolean;
+  analysisResult: JobFailureAnalysisResult;
+};
+
+export type Notification = JobNotification | SimpleNotification | JobFailureNotification;

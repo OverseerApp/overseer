@@ -1,4 +1,6 @@
-﻿namespace Overseer.Server.Models
+﻿using System.Text.Json.Serialization;
+
+namespace Overseer.Server.Models
 {
   public enum AIMonitoringFailureAction
   {
@@ -52,6 +54,7 @@
     /// <summary>
     /// Action to take when AI monitoring detects a failure.
     /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public AIMonitoringFailureAction AiMonitoringFailureAction { get; set; } = AIMonitoringFailureAction.AlertOnly;
   }
 }

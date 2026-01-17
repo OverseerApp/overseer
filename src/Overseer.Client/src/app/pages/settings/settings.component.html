@@ -28,5 +28,28 @@
       <input class="form-check-input" type="checkbox" role="switch" id="sortByTimeRemaining" formControlName="sortByTimeRemaining" />
       <label class="form-check-label" for="sortByTimeRemaining">{{ 'sortByTimeRemaining' | i18next }}</label>
     </div>
+
+    <hr class="my-4" />
+    <h5 class="mb-3">{{ 'aiMonitoring' | i18next }}</h5>
+
+    <div class="form-check form-switch mb-3">
+      <input class="form-check-input" type="checkbox" role="switch" id="enableAiMonitoring" formControlName="enableAiMonitoring" />
+      <label class="form-check-label" for="enableAiMonitoring">{{ 'enableAiMonitoring' | i18next }}</label>
+    </div>
+
+    <div class="mb-3">
+      <label for="aiMonitoringFrameCaptureRate" class="form-label">{{ 'aiMonitoringFrameCaptureRate' | i18next }}</label>
+      <input type="number" class="form-control" id="aiMonitoringFrameCaptureRate" formControlName="aiMonitoringFrameCaptureRate" min="1" max="60" />
+      <div class="form-text">{{ 'aiMonitoringFrameCaptureRateHelp' | i18next }}</div>
+    </div>
+
+    <div class="mb-3">
+      <label for="aiMonitoringFailureAction" class="form-label">{{ 'aiMonitoringFailureAction' | i18next }}</label>
+      <select id="aiMonitoringFailureAction" class="form-select" formControlName="aiMonitoringFailureAction">
+        <option value="AlertOnly">{{ 'aiMonitoringFailureActionAlertOnly' | i18next }}</option>
+        <option value="PauseJob">{{ 'aiMonitoringFailureActionPauseJob' | i18next }}</option>
+        <option value="CancelJob">{{ 'aiMonitoringFailureActionCancelJob' | i18next }}</option>
+      </select>
+    </div>
   </form>
 }

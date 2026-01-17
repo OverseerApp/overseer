@@ -1,5 +1,6 @@
 import { Component, ComponentRef, effect, inject, input, output, OutputRefSubscription, ViewContainerRef } from '@angular/core';
 import { Notification, NotificationType } from '../../models/notifications.model';
+import { JobFailureNotificationComponent } from './job-failure-notification/job-failutre-notification.component';
 import { JobNotificationComponent } from './job-notification/job-notification.component';
 import { NotificationBaseComponent } from './notification-base.component';
 import { SimpleNotificationComponent } from './simple-notification/simple-notification.component';
@@ -16,6 +17,7 @@ export class NotificationHostComponent {
   private notificationTypeMap: Record<NotificationType, typeof NotificationBaseComponent> = {
     Job: JobNotificationComponent,
     Simple: SimpleNotificationComponent,
+    JobFailure: JobFailureNotificationComponent,
   };
 
   notification = input.required<Notification>();

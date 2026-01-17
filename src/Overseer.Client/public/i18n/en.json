@@ -36,6 +36,14 @@
   "hideDisabledMachines": "Hide Disabled Machines",
   "hideIdleMachines": "Hide Idle Machines",
   "sortByTimeRemaining": "Sort By Estimated Time Remaining",
+  "aiMonitoring": "AI Monitoring",
+  "enableAiMonitoring": "Enable AI Monitoring",
+  "aiMonitoringFrameCaptureRate": "Frame Capture Rate (seconds)",
+  "aiMonitoringFrameCaptureRateHelp": "How often to capture and analyze frames from the webcam",
+  "aiMonitoringFailureAction": "Failure Detection Action",
+  "aiMonitoringFailureActionAlertOnly": "Alert Only",
+  "aiMonitoringFailureActionPauseJob": "Pause Job",
+  "aiMonitoringFailureActionCancelJob": "Cancel Job",
   "name": "Name",
   "machineType": "Machine Type",
   "monitoringDisabled": "Monitoring Disabled",
@@ -218,10 +226,18 @@
     "JobPaused": "Job Paused",
     "JobResumed": "Job Resumed",
     "JobError": "Job Error",
+    "JobFailure": "Print Failure Detected",
     "JobStartedMessage": "Job #{{jobNumber}} has started on {{machineName}}.",
     "JobCompletedMessage": "Job #{{jobNumber}} on {{machineName}} has ended.",
     "JobPausedMessage": "Job #{{jobNumber}} on {{machineName}} has been paused.",
     "JobResumedMessage": "Job #{{jobNumber}} on {{machineName}} has resumed.",
-    "JobErrorMessage": "An error occurred during job #{{jobNumber}} on {{machineName}}."
-  }
+    "JobErrorMessage": "An error occurred during job #{{jobNumber}} on {{machineName}}.",
+    "JobFailureMessage": "AI monitoring detected a potential failure during job #{{jobNumber}} on {{machineName}}."
+  },
+  "aiAnalysis": "AI Analysis",
+  "confidenceScore": "Confidence Score",
+  "failureReason": "Failure Reason",
+  "details": "Details",
+  "jobCancelled": "Job Cancelled",
+  "jobPaused": "Job Paused"
 }

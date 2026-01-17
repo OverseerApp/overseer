@@ -42,7 +42,7 @@ public class JobNotification : Notification
   public override NotificationType NotificationType => NotificationType.Job;
 
   [JsonConverter(typeof(JsonStringEnumConverter))]
-  public JobNotificationType Type { get; set; }
+  public virtual JobNotificationType Type { get; set; }
 
   public int MachineId { get; set; }
 
@@ -59,4 +59,7 @@ public class JobFailureNotification : JobNotification
   public bool JobPaused { get; set; }
 
   public bool JobCancelled { get; set; }
+
+  [JsonConverter(typeof(JsonStringEnumConverter))]
+  public override JobNotificationType Type => JobNotificationType.JobError;
 }

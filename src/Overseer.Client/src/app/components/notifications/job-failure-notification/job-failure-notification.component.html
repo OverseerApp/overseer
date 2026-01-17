@@ -1,0 +1,96 @@
+@let notification = this.jobFailureNotification();
+@let machine = this.machine();
+
+@if (notification && machine) {
+  <div
+    class="p-3 mb-2 d-flex align-items-start p-3 border-start border-3 rounded-2 shadow-sm position-relative"
+    [ngClass]="{
+      'border-secondary': notification.isRead,
+      'border-danger': !notification.isRead,
+    }"
+  >
+    <div
+      class="me-3 fs-3"
+      [ngClass]="{
+        'text-secondary': notification.isRead,
+        'text-danger': !notification.isRead,
+      }"
+    >
+      <i class="bi bi-exclamation-triangle-fill"></i>
+    </div>
+    <div class="flex-grow-1">
+      <h5 class="fw-bold text-white mb-0 d-flex">
+        <div
+          class="flex-grow-1"
+          [ngClass]="{
+            'fw-normal': notification.isRead,
+            'fw-bold': !notification.isRead,
+            'text-secondary': notification.isRead,
+            'text-white': !notification.isRead,
+          }"
+        >
+          {{ 'jobNotifications.JobFailure' | i18next }}
+        </div>
+        <button type="button" class="btn-close btn btn-sm" [attr.aria-label]="'clear' | i18next" (click)="handleDismiss()"></button>
+      </h5>
+      <p class="text-secondary small mb-0">
+        {{ 'jobNotifications.JobFailureMessage' | i18next: { jobNumber: notification.machineJobId, machineName: machine.name } }}
+      </p>
+
+      @if (notification.jobCancelled || notification.jobPaused) {
+        <div class="mt-2">
+          @if (notification.jobCancelled) {
+            <span class="badge bg-danger"> <i class="bi bi-x-circle me-1"></i>{{ 'jobCancelled' | i18next }} </span>
+          }
+          @if (notification.jobPaused) {
+            <span class="badge bg-warning"> <i class="bi bi-pause-circle me-1"></i>{{ 'jobPaused' | i18next }} </span>
+          }
+        </div>
+      }
+
+      @if (notification.analysisResult) {
+        <div class="mt-2 p-2 bg-dark rounded">
+          <div class="d-flex align-items-center mb-2">
+            <i class="bi bi-cpu me-2 text-info"></i>
+            <strong class="text-info">{{ 'aiAnalysis' | i18next }}</strong>
+          </div>
+
+          <div class="small">
+            <div class="mb-2">
+              <span class="text-muted">{{ 'confidenceScore' | i18next }}:</span>
+              <span
+                class="ms-2 fw-bold"
+                [ngClass]="{
+                  'text-success': notification.analysisResult.confidenceScore >= 0.8,
+                  'text-warning': notification.analysisResult.confidenceScore >= 0.5 && notification.analysisResult.confidenceScore < 0.8,
+                  'text-danger': notification.analysisResult.confidenceScore < 0.5,
+                }"
+              >
+                {{ notification.analysisResult.confidenceScore * 100 | number: '1.0-1' }}%
+              </span>
+            </div>
+
+            @if (notification.analysisResult.details) {
+              <div class="mb-2">
+                <span class="text-muted">{{ 'details' | i18next }}:</span>
+                <div class="ms-2 text-white-50 mt-1">{{ notification.analysisResult.details }}</div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      @if (!notification.isRead) {
+        @if (!notification.jobCancelled && !notification.jobPaused) {
+          <button class="btn btn-sm btn-warning my-2 me-2" (click)="pause()">{{ 'pause' | i18next }}</button>
+          <button class="btn btn-sm btn-outline-danger my-2 me-2" (click)="cancel()">{{ 'stop' | i18next }}</button>
+        } @else if (notification.jobPaused && !notification.jobCancelled) {
+          <button class="btn btn-sm btn-success my-2 me-2" (click)="resume()">{{ 'continue' | i18next }}</button>
+          <button class="btn btn-sm btn-outline-danger my-2 me-2" (click)="cancel()">{{ 'stop' | i18next }}</button>
+        }
+      }
+
+      <small class="text-muted d-block mt-1">{{ notification.timestamp | relativeDate }}</small>
+    </div>
+  </div>
+}
