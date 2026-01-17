@@ -25,7 +25,7 @@ public class JobFailureService(
       try
       {
         var analysisResult = await jobFailureChannel.ReadAsync(_subscriberId, stoppingToken);
-        if (analysisResult is null || !analysisResult.IsFailureDetected)
+        if (analysisResult is null)
           continue;
 
         var job = jobs.GetById(analysisResult.JobId);

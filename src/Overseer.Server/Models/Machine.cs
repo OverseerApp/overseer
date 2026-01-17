@@ -34,8 +34,6 @@ namespace Overseer.Server.Models
 
     public string? WebCamUrl { get; set; }
 
-    public string? SnapshotUrl { get; set; }
-
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public WebCamOrientation WebCamOrientation { get; set; }
 

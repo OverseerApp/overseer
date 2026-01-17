@@ -8,18 +8,21 @@ namespace Overseer.Server.Machines;
 public class JobSentinel(
   Machine machine,
   MachineJob job,
-  IHttpClientFactory httpClientFactory,
+  ICameraStreamer cameraStreamer,
+  IFailureDetectionModel failureDetectionModel,
   Settings.IConfigurationManager configurationManager,
-  IJobFailureDetectionService failureDetectionService,
   IJobFailureChannel jobFailureChannel
 ) : IDisposable
 {
   private static readonly ILog log = LogManager.GetLogger(typeof(JobSentinel));
   private readonly CancellationTokenSource _cancellationTokenSource = new();
-  private readonly HttpClient _httpClient = httpClientFactory.CreateClient();
   private Task? _monitoringTask;
   private bool _disposed;
-  private byte[]? _lastCapturedImage;
+  private readonly int _windowSize = 20;
+  private readonly double _threshold = 0.7;
+  private readonly Queue<JobFailureAnalysisResult> _history = new();
+
+  private readonly Dictionary<string, float[]> _prototypes = PrototypeLoader.Load();
 
   public void StartMonitoring(CancellationToken externalCancellationToken)
   {
@@ -28,6 +31,7 @@ public class JobSentinel(
     if (_monitoringTask != null)
       return;
 
+    cameraStreamer.Start(machine.WebCamUrl!);
     _monitoringTask = MonitorJob(externalCancellationToken);
   }
 
@@ -37,6 +41,7 @@ public class JobSentinel(
       return;
 
     await _cancellationTokenSource.CancelAsync();
+    cameraStreamer.Stop();
     if (_monitoringTask != null)
     {
       await _monitoringTask;
@@ -58,7 +63,6 @@ public class JobSentinel(
     {
       _cancellationTokenSource.Cancel();
       _cancellationTokenSource.Dispose();
-      _httpClient.Dispose();
     }
 
     _disposed = true;
@@ -69,26 +73,41 @@ public class JobSentinel(
     const int initialBackoffSeconds = 30;
     const int maxConsecutiveFailures = 3;
     var consecutiveFailures = 0;
+
     using var linkedTokens = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, _cancellationTokenSource.Token);
     var combinedToken = linkedTokens.Token;
+
     while (!combinedToken.IsCancellationRequested)
     {
       try
       {
         var settings = configurationManager.GetApplicationSettings();
-        var captureInterval = TimeSpan.FromMinutes(settings.AiMonitoringScanInterval);
+        var captureInterval = TimeSpan.FromMilliseconds(1000.0 / settings.AiMonitoringFrameCaptureRate);
         await Task.Delay(captureInterval, combinedToken);
 
-        if (combinedToken.IsCancellationRequested)
-          break;
+        var frame = cameraStreamer.GetProcessedFrame();
+        if (frame == null || frame.Length == 0)
+          continue;
 
-        await CaptureAndAnalyzeImage(combinedToken);
-        consecutiveFailures = 0; // Reset on success
-      }
-      catch (OperationCanceledException) when (combinedToken.IsCancellationRequested)
-      {
-        // Normal shutdown, no need to log as error
-        break;
+        var result = AnalyzeFrame(frame);
+        if (result is not null)
+        {
+          await jobFailureChannel.WriteAsync(result, stoppingToken);
+
+          if (settings.AiMonitoringFailureAction != AIMonitoringFailureAction.CancelJob)
+          {
+            // if the print job doesn't get cancelled monitoring will continue after a delay
+            // but that might get annoying if their is a partial failure and the user wants to
+            // continue the job.
+            // TODO: determine if this should support the user cancelling
+            // monitoring but leaving the job running.
+            _history.Clear();
+            await Task.Delay(TimeSpan.FromMinutes(1), combinedToken);
+            continue;
+          }
+
+          break;
+        }
       }
       catch (Exception ex)
       {
@@ -108,53 +127,77 @@ public class JobSentinel(
     }
   }
 
-  private async Task CaptureAndAnalyzeImage(CancellationToken cancellationToken)
+  /// <summary>
+  /// Calculates the Euclidean Distance between two vectors.
+  /// </summary>
+  public double CalculateDistance(float[] vectorA, float[] vectorB)
   {
-    var currentImage = await CaptureWebcamImage(cancellationToken);
-    if (currentImage == null)
+    if (vectorA.Length != vectorB.Length)
+      throw new ArgumentException("Vectors must be the same length.");
+
+    double sum = 0;
+    for (int i = 0; i < vectorA.Length; i++)
     {
-      log.Warn($"Failed to capture webcam image for machine {machine.Name}");
-      return;
+      double diff = vectorA[i] - vectorB[i];
+      sum += diff * diff;
     }
 
-    if (_lastCapturedImage is null)
-    {
-      _lastCapturedImage = currentImage;
-      return;
-    }
-
-    // Analyze the images for job failure
-    var analysisResult = await failureDetectionService.AnalyzeForJobFailureAsync(job.Id, _lastCapturedImage, currentImage);
-    if (analysisResult.IsFailureDetected)
-    {
-      await jobFailureChannel.WriteAsync(analysisResult, cancellationToken);
-    }
-    _lastCapturedImage = currentImage;
+    return Math.Sqrt(sum);
   }
 
-  private async Task<byte[]?> CaptureWebcamImage(CancellationToken cancellationToken)
+  /// <summary>
+  /// Determines if the current frame is a success or failure.
+  /// </summary>
+  private JobFailureAnalysisResult? AnalyzeFrame(float[] frame)
   {
-    try
-    {
-      if (string.IsNullOrEmpty(machine.SnapshotUrl))
-      {
-        log.Warn($"No SnapshotUrl configured for machine {machine.Name}");
-        return null;
-      }
+    var currentEmbedding = failureDetectionModel.GetEmbedding(frame);
+    string bestLabel = "Unknown";
+    double shortestDistance = double.MaxValue;
 
-      using var response = await _httpClient.GetAsync(machine.SnapshotUrl, cancellationToken);
-      if (response.IsSuccessStatusCode)
-      {
-        return await response.Content.ReadAsByteArrayAsync(cancellationToken);
-      }
-
-      log.Warn($"Failed to capture webcam image. Status: {response.StatusCode}");
-      return null;
-    }
-    catch (Exception ex)
+    foreach (var proto in _prototypes)
     {
-      log.Error($"Error capturing webcam image from {machine.SnapshotUrl}", ex);
-      return null;
+      double dist = CalculateDistance(currentEmbedding, proto.Value);
+      if (dist < shortestDistance)
+      {
+        shortestDistance = dist;
+        bestLabel = proto.Key;
+      }
     }
+
+    // Return both the specific type and a boolean flag for "Is this bad?"
+    // Assuming any label that isn't "success" or "good" is a failure.
+    bool isFailure = bestLabel.ToLower() != "success" && bestLabel.ToLower() != "good";
+    var confidenceScore = 1.0 - (shortestDistance / 10.0); // Normalize distance to [0,1] for confidence
+    var result = new JobFailureAnalysisResult
+    {
+      JobId = job.Id,
+      IsFailureDetected = isFailure,
+      ConfidenceScore = confidenceScore,
+      FailureReason = isFailure ? bestLabel : "None",
+      Details = $"Detected {bestLabel} with confidence of: {confidenceScore:F4}",
+    };
+
+    _history.Enqueue(result);
+
+    if (_history.Count > _windowSize)
+      _history.Dequeue();
+
+    if (_history.Count < _windowSize)
+      return null;
+
+    int failureCount = _history.Count(x => x.IsFailureDetected);
+    if ((double)failureCount / _history.Count >= _threshold)
+    {
+      var topFailure = _history
+        .Where(x => x.IsFailureDetected)
+        .GroupBy(x => x.FailureReason)
+        .OrderByDescending(g => g.Count())
+        .Select(g => g.FirstOrDefault())
+        .FirstOrDefault();
+
+      return topFailure;
+    }
+
+    return null;
   }
 }

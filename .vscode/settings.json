@@ -5,12 +5,15 @@
     "Bambu",
     "Curren",
     "Elegoo",
+    "Emgu",
     "Filepos",
     "Gcode",
+    "Imencode",
     "Klipper",
     "Mainboard",
     "Newtonsoft",
     "Octoprint",
+    "Onnx",
     "Preauthenticated",
     "Preauthentication",
     "reprapfirmware",
@@ -23,21 +26,21 @@
   "editor.tabSize": 2,
   "[typescript]": {
     "editor.codeActionsOnSave": {
-      "source.addMissingImports.ts": "explicit",      
+      "source.addMissingImports.ts": "explicit",
       "source.fixAll.eslint": "always",
-      "source.organizeImports": "always", 
+      "source.organizeImports": "always",
       "source.removeUnusedImports": "always"
     }
   },
   "[csharp]": {
-    "editor.codeActionsOnSave": [ "source.organizeImports" ],
-    "editor.defaultFormatter": "csharpier.csharpier-vscode", 
+    "editor.codeActionsOnSave": ["source.organizeImports"],
+    "editor.defaultFormatter": "csharpier.csharpier-vscode",
     "editor.detectIndentation": false,
     "editor.insertSpaces": true,
     "editor.tabSize": 2
-  },  
+  },
   "[xml]": {
     "editor.defaultFormatter": "csharpier.csharpier-vscode"
   },
-  "csharpOrganizeUsings.splitGroups": false,
+  "csharpOrganizeUsings.splitGroups": false
 }

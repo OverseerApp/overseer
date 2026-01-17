@@ -45,9 +45,9 @@
     public bool EnableAiMonitoring { get; set; } = false;
 
     /// <summary>
-    /// Interval in minutes between AI monitoring scans.
+    /// Frame captures per second. Default 5 fps
     /// </summary>
-    public int AiMonitoringScanInterval { get; set; } = 1;
+    public int AiMonitoringFrameCaptureRate { get; set; } = 5;
 
     /// <summary>
     /// Action to take when AI monitoring detects a failure.

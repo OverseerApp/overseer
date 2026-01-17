@@ -99,7 +99,7 @@ public sealed class JobSentinelService(
   {
     var machineRepository = dataContext.Repository<Machine>();
     var machine = machineRepository.GetById(job.MachineId);
-    if (string.IsNullOrEmpty(machine?.SnapshotUrl))
+    if (string.IsNullOrEmpty(machine?.WebCamUrl))
     {
       log.Warn($"Machine {machine?.Name} does not have a valid Webcam URL. Sentinel not created for job {job.Id}");
       return;

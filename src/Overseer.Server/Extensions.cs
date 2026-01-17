@@ -64,11 +64,11 @@ namespace Overseer.Server
       services.AddSingleton<Func<Machine, MachineJob, JobSentinel>>(provider =>
         (machine, job) =>
         {
-          var httpClientFactory = provider.GetRequiredService<IHttpClientFactory>();
-          var failureDetectionService = provider.GetRequiredService<IJobFailureDetectionService>();
+          var cameraStreamer = provider.GetRequiredService<ICameraStreamer>();
+          var failureDetectionModel = provider.GetRequiredService<IFailureDetectionModel>();
           var jobFailureChannel = provider.GetRequiredService<IJobFailureChannel>();
           var configurationManager = provider.GetRequiredService<Settings.IConfigurationManager>();
-          return new JobSentinel(machine, job, httpClientFactory, configurationManager, failureDetectionService, jobFailureChannel);
+          return new JobSentinel(machine, job, cameraStreamer, failureDetectionModel, configurationManager, jobFailureChannel);
         }
       );
       services.AddTransient<IAuthenticationManager, Users.AuthenticationManager>();
@@ -77,7 +77,8 @@ namespace Overseer.Server
       services.AddTransient<IUserManager, UserManager>();
       services.AddTransient<IMachineManager, MachineManager>();
       services.AddTransient<IControlManager, ControlManager>();
-      services.AddTransient<IJobFailureDetectionService, OllamaJobFailureDetectionService>();
+      services.AddTransient<ICameraStreamer, CameraStreamer>();
+      services.AddTransient<IFailureDetectionModel, PrintGuardFailureDetectionModel>();
 
       services.AddSingleton<IMonitoringService, MonitoringService>();
       services.AddSingleton<MachineProviderManager>();
