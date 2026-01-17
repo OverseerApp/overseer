@@ -1,6 +1,6 @@
 namespace Overseer.Server.Models;
 
-public class JobFailureAnalysisResult
+public record JobFailureAnalysisResult
 {
   public int JobId { get; set; }
   public bool IsFailureDetected { get; set; }

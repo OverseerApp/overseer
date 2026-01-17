@@ -83,7 +83,7 @@ public class JobSentinel(
         if (result is null || !result.IsFailureDetected)
           continue;
 
-        await jobFailureChannel.WriteAsync(result, stoppingToken);
+        await jobFailureChannel.WriteAsync(result with { JobId = job.Id }, combinedToken);
 
         if (settings.AiMonitoringFailureAction != AIMonitoringFailureAction.CancelJob)
         {
