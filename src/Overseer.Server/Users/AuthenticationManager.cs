@@ -123,7 +123,6 @@ namespace Overseer.Server.Users
         return null;
       }
 
-      user.Token = null;
       user.TokenHash = null;
       user.TokenExpiration = null;
       _users.Update(user);
@@ -133,16 +132,12 @@ namespace Overseer.Server.Users
 
     UserDisplay AuthenticateUser(User user)
     {
-      if (!user.IsTokenExpired())
-      {
-        return user.ToDisplay(includeToken: true);
-      }
-
+      // Always generate a new token on login since we only store the hash
+      // and cannot return the previous plain token
       var tokenBytes = RandomNumberGenerator.GetBytes(32);
       var plainToken = Convert.ToBase64String(tokenBytes);
 
-      // Store the hash of the token, not the plain token
-      user.Token = plainToken; // Kept temporarily for ToDisplay, cleared after
+      // Store only the hash of the token, never the plain token
       user.TokenHash = HashToken(plainToken);
 
       if (user.SessionLifetime.HasValue)
@@ -159,10 +154,8 @@ namespace Overseer.Server.Users
 
       _users.Update(user);
 
-      // Return display with token, then clear plain token from storage
-      var display = user.ToDisplay(includeToken: true);
-      user.Token = null;
-      _users.Update(user);
+      var display = user.ToDisplay();
+      display.Token = plainToken;
 
       return display;
     }

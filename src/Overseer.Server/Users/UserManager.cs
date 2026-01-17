@@ -61,7 +61,6 @@ public class UserManager(IDataContext context) : IUserManager
     }
 
     //forces a new login if the session lifetime changes
-    user.Token = null;
     user.TokenHash = null;
     user.TokenExpiration = null;
     user.SessionLifetime = userModel.SessionLifetime;
@@ -84,7 +83,6 @@ public class UserManager(IDataContext context) : IUserManager
     var user = _users.GetById(userModel.Id);
     user.PasswordSalt = salt;
     user.PasswordHash = hash;
-    user.Token = null;
     user.TokenHash = null;
     user.TokenExpiration = null;
     _users.Update(user);

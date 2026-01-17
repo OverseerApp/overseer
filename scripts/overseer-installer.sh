@@ -20,8 +20,30 @@ apt-get update
 
 if [ ! -f "$dotnetPath" ]
 then
-    echo ".NET is not installed. Installing .NET..."        
-    apt-get install libc6 libgcc1 libgssapi-krb5-2 libicu70 libssl3 libstdc++6 zlib1g
+    echo ".NET is not installed. Installing .NET..."
+    # Install .NET runtime dependencies
+    apt-get install -y libc6 libgcc-s1 libgssapi-krb5-2 libstdc++6 zlib1g
+    
+    # Install ICU libraries (try multiple versions for compatibility)
+    apt-get install -y libicu-dev || apt-get install -y libicu72 || apt-get install -y libicu70 || apt-get install -y libicu67
+    
+    # Install SSL libraries (try multiple versions for compatibility)
+    apt-get install -y libssl-dev || apt-get install -y libssl3 || apt-get install -y libssl1.1
+    
+    # Install dependencies for Emgu.CV (OpenCV)
+    echo "Installing Emgu.CV dependencies..."
+    apt-get install -y \
+        libopencv-dev \
+        libgdiplus \
+        libc6-dev
+    
+    # Install additional libraries that may be needed by OpenCV
+    apt-get install -y \
+        libgtk2.0-dev \
+        pkg-config \
+        libavcodec-dev \
+        libavformat-dev \
+        libswscale-dev
     
     wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh 
     chmod +x ./dotnet-install.sh 

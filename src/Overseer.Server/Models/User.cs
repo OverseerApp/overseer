@@ -47,8 +47,6 @@ namespace Overseer.Server.Models
 
     public string? PasswordSalt { get; set; }
 
-    public string? Token { get; set; }
-
     /// <summary>
     /// SHA256 hash of the token for secure storage and constant-time comparison
     /// </summary>
@@ -68,14 +66,13 @@ namespace Overseer.Server.Models
     /// <summary>
     /// Helper method to quickly convert a user to a user display object
     /// </summary>
-    public UserDisplay ToDisplay(bool includeToken = false)
+    public UserDisplay ToDisplay()
     {
       return new UserDisplay
       {
         Id = Id,
         Username = Username,
         SessionLifetime = SessionLifetime,
-        Token = includeToken ? Token : null,
         IsLoggedIn = !this.IsTokenExpired(),
         AccessLevel = AccessLevel,
       };

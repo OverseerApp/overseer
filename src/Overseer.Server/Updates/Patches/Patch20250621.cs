@@ -15,15 +15,23 @@ class Patch20250621 : IPatch
     var machines = machineCollection.FindAll().ToList();
     foreach (var machine in machines)
     {
-      var typeString = machine["_type"].AsString;
-      var updateTypeName = typeString switch
+      var machineTypeValue = machine[nameof(Machine.MachineType)].AsString;
+      if (!Enum.TryParse<MachineType>(machineTypeValue, ignoreCase: true, out var machineType))
+        continue;
+
+      var updateTypeName = machineType switch
       {
-        var s when s.Contains(nameof(RepRapFirmwareMachine)) => typeof(RepRapFirmwareMachine).FullName,
-        var s when s.Contains(nameof(OctoprintMachine)) => typeof(OctoprintMachine).FullName,
-        var s when s.Contains(nameof(ElegooMachine)) => typeof(ElegooMachine).FullName,
-        var s when s.Contains(nameof(BambuMachine)) => typeof(BambuMachine).FullName,
-        _ => machine["_type"].AsString,
+        MachineType.RepRapFirmware => typeof(RepRapFirmwareMachine).FullName,
+        MachineType.Octoprint => typeof(OctoprintMachine).FullName,
+        MachineType.Elegoo => typeof(ElegooMachine).FullName,
+        MachineType.Bambu => typeof(BambuMachine).FullName,
+        MachineType.Moonraker => typeof(MoonrakerMachine).FullName,
+        MachineType.DuetSoftwareFramework => typeof(DuetSoftwareFrameworkMachine).FullName,
+        _ => null,
       };
+
+      if (updateTypeName == null)
+        continue;
 
       machine["_type"] = $"{updateTypeName}, {assemblyName}";
       machineCollection.Update(machine);
