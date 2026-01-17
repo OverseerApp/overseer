@@ -28,7 +28,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v2
         with:
-          dotnet-version: '8.x'
+          dotnet-version: '10.x'
 
       - name: Set version in shell script
         run: sed -i "s/overseerVersion='.*'/overseerVersion='${{ github.event.inputs.release_version }}'/" scripts/overseer-installer.sh
@@ -48,11 +48,11 @@ jobs:
         working-directory: src/Overseer.Server
 
       - name: Copy Angular project build to output
-        run: cp -r ./src/Overseer.Client/dist/overseer.client/* ./src/Overseer.Server/bin/Release/net8.0
+        run: cp -r ./src/Overseer.Client/dist/overseer.client/* ./src/Overseer.Server/bin/Release/net10.0
 
       - name: Create Server Build Artifacts
         run: zip -r overseer_server.zip *
-        working-directory: src/Overseer.Server/bin/Release/net8.0
+        working-directory: src/Overseer.Server/bin/Release/net10.0
 
       - name: Create GitHub Release
         id: create_release
@@ -71,7 +71,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: src/Overseer.Server/bin/Release/net8.0/overseer_server.zip
+          asset_path: src/Overseer.Server/bin/Release/net10.0/overseer_server.zip
           asset_name: overseer_server_${{ github.event.inputs.release_version }}.zip
           asset_content_type: application/zip
 

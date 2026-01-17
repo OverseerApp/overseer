@@ -17,12 +17,12 @@ using (var context = new LiteDataContext())
 {
   var values = context.ValueStore();
   var settings = values.GetOrPut(() => new ApplicationSettings());
-  var portOption = new Option<int?>(name: "--port", description: "The Overseer Server Port");
-  var intervalOption = new Option<int?>(name: "--interval", description: "How often Overseer will poll for updates.");
-  var options = new RootCommand("Overseer CLI Options...");
-  var parseResults = options.Parse(args);
-  settings.LocalPort = parseResults.GetValueForOption(portOption) ?? ApplicationSettings.DefaultPort;
-  settings.Interval = parseResults.GetValueForOption(intervalOption) ?? ApplicationSettings.DefaultInterval;
+  var portOption = new Option<int?>("--port") { Description = "The local port Overseer will listen on." };
+  var intervalOption = new Option<int?>("--interval") { Description = "How often Overseer will poll for updates." };
+  var command = new RootCommand("Overseer CLI Options...");
+  var parseResults = command.Parse(args);
+  settings.LocalPort = parseResults.GetValue(portOption) ?? ApplicationSettings.DefaultPort;
+  settings.Interval = parseResults.GetValue(intervalOption) ?? ApplicationSettings.DefaultInterval;
 
   var builder = WebApplication.CreateBuilder(args);
   builder.Services.AddEndpointsApiExplorer();
