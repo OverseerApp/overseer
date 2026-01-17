@@ -20,10 +20,14 @@ public class AuthorizationManager(IDataContext context, IAuthenticationManager a
     if (user == null)
       return null;
 
-    var identity = new ClaimsIdentity(user.Username);
-    identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()));
-    identity.AddClaim(new Claim(ClaimTypes.Role, user.AccessLevel.ToString()));
+    var claims = new[]
+    {
+      new Claim(ClaimTypes.Name, user.Username ?? string.Empty),
+      new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+      new Claim(ClaimTypes.Role, user.AccessLevel.ToString()),
+    };
 
-    return identity;
+    // The second parameter (authenticationType) is required for IsAuthenticated to return true
+    return new ClaimsIdentity(claims, "Bearer");
   }
 }

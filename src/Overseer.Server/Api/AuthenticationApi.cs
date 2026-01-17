@@ -2,6 +2,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Overseer.Server.Models;
+using Overseer.Server.Services;
 using Overseer.Server.Users;
 
 namespace Overseer.Server.Api
@@ -36,7 +37,35 @@ namespace Overseer.Server.Api
 
       group.MapPost(
         "/login",
-        (UserDisplay user, IAuthenticationManager authenticationManager) => Results.Ok(authenticationManager.AuthenticateUser(user))
+        (UserDisplay user, HttpContext httpContext, IAuthenticationManager authenticationManager, IRateLimitingService rateLimiter) =>
+        {
+          // Use IP address as the rate limit key
+          var clientIp = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+          var rateLimitKey = $"login:{clientIp}";
+
+          if (rateLimiter.IsRateLimited(rateLimitKey))
+          {
+            return Results.Problem(
+              title: "Too Many Requests",
+              detail: "Too many failed login attempts. Please try again later.",
+              statusCode: (int)HttpStatusCode.TooManyRequests
+            );
+          }
+
+          try
+          {
+            var result = authenticationManager.AuthenticateUser(user);
+            // Reset rate limit on successful login
+            rateLimiter.Reset(rateLimitKey);
+            return Results.Ok(result);
+          }
+          catch (OverseerException)
+          {
+            // Record failed attempt
+            rateLimiter.RecordAttempt(rateLimitKey);
+            throw;
+          }
+        }
       );
 
       group
@@ -51,7 +80,7 @@ namespace Overseer.Server.Api
         .RequireAuthorization();
 
       group
-        .MapPost("/logout{id}", (int id, IAuthenticationManager authenticationManager) => Results.Ok(authenticationManager.DeauthenticateUser(id)))
+        .MapPost("/logout/{id}", (int id, IAuthenticationManager authenticationManager) => Results.Ok(authenticationManager.DeauthenticateUser(id)))
         .RequireAuthorization(AccessLevel.Administrator.ToString());
 
       group

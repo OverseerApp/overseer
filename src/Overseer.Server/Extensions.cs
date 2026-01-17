@@ -73,6 +73,7 @@ namespace Overseer.Server
       );
       services.AddTransient<IAuthenticationManager, Users.AuthenticationManager>();
       services.AddTransient<IAuthorizationManager, AuthorizationManager>();
+      services.AddSingleton<IRateLimitingService, RateLimitingService>();
       services.AddTransient<Settings.IConfigurationManager, Settings.ConfigurationManager>();
       services.AddTransient<IUserManager, UserManager>();
       services.AddTransient<IMachineManager, MachineManager>();
