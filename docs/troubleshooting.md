@@ -1,3 +1,9 @@
+# Troubleshooting Guide
+
+## Linux Service Troubleshooting
+
+Useful commands for troubleshooting the service failing to start.
+
 View all logs for the overseer service
 
 `journalctl -u overseer`
