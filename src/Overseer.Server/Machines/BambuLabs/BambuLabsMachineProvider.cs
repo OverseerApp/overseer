@@ -25,10 +25,12 @@ public class BambuMachineProvider(BambuMachine machine, IMachineStatusChannel ma
   Timer? _timer;
   DateTime? _lastStatusUpdate;
 
-  private readonly object _lockObject = new();
+  private readonly Lock _lockObject = new();
   private volatile bool _isConnecting = false;
   private int _connectionAttempts = 0;
   private readonly int _maxConnectionAttempts = 5;
+  private DateTime? _lastConnectionAttempt;
+  private readonly TimeSpan _backoffResetTime = TimeSpan.FromMinutes(5);
 
   public override BambuMachine Machine
   {
@@ -98,7 +100,9 @@ public class BambuMachineProvider(BambuMachine machine, IMachineStatusChannel ma
     // Machine.WebCamUrl = $"rtsps://{Machine.Url}:322/streaming/live/1";
 
     // not supporting ams in overseer
-    // all bambu printers have a single bed, hot end, and extruder
+    // ***all bambu printers have a single bed, hot end, and extruder ***
+    // the previous comment is no longer true, but I don't have any other bambu printers to test with
+    // and don't plan on getting any others, so this will have to do for now.
     Machine.Tools =
     [
       new(MachineToolType.Heater, BedHeaterIndex, BedToolName),
@@ -128,17 +132,7 @@ public class BambuMachineProvider(BambuMachine machine, IMachineStatusChannel ma
 
       if (shouldReconnect && !_isConnecting)
       {
-        lock (_lockObject)
-        {
-          if (_mqttClient != null)
-          {
-            Task.Run(async () =>
-            {
-              await _mqttClient.DisconnectAsync();
-              _mqttClient?.Dispose();
-            });
-          }
-        }
+        await DisconnectAndCleanup();
         await ConnectWithBackoff();
         return;
       }
@@ -180,12 +174,14 @@ public class BambuMachineProvider(BambuMachine machine, IMachineStatusChannel ma
       if (_mqttClient != null || _isConnecting)
         return;
       _isConnecting = true;
+      _lastConnectionAttempt = DateTime.UtcNow;
     }
 
+    IMqttClient? newClient = null;
     try
     {
       var mqttFactory = new MqttClientFactory();
-      var newClient = mqttFactory.CreateMqttClient();
+      newClient = mqttFactory.CreateMqttClient();
       var mqttClientOptions = new MqttClientOptionsBuilder()
         .WithProtocolVersion(MQTTnet.Formatter.MqttProtocolVersion.V311)
         .WithCredentials(MqttUsername, Machine.AccessCode)
@@ -193,9 +189,11 @@ public class BambuMachineProvider(BambuMachine machine, IMachineStatusChannel ma
           (options) => options.UseTls().WithCertificateValidationHandler((args) => args.Certificate.Issuer.Contains("BBL Technologies Co., Ltd"))
         )
         .WithTcpServer(Machine.Url, MqttPort)
+        .WithCleanSession()
         .Build();
 
       newClient.ApplicationMessageReceivedAsync += OnMessage;
+      newClient.DisconnectedAsync += OnDisconnected;
 
       var result = await newClient.ConnectAsync(mqttClientOptions);
       if (result.ResultCode != MqttClientConnectResultCode.Success)
@@ -212,10 +210,13 @@ public class BambuMachineProvider(BambuMachine machine, IMachineStatusChannel ma
         _mqttClient = newClient;
         _connectionAttempts = 0; // Reset on successful connection
       }
+
+      Log.Info("Successfully connected to Bambu Labs printer");
     }
     catch (Exception ex)
     {
       Log.Error("Error connecting to Bambu Labs printer", ex);
+      newClient?.Dispose();
     }
     finally
     {
@@ -228,11 +229,20 @@ public class BambuMachineProvider(BambuMachine machine, IMachineStatusChannel ma
 
   async Task ConnectWithBackoff()
   {
+    // Reset connection attempts if enough time has passed since last attempt
+    if (_lastConnectionAttempt.HasValue && DateTime.UtcNow - _lastConnectionAttempt.Value > _backoffResetTime)
+    {
+      Log.Info("Resetting connection attempts after backoff period");
+      _connectionAttempts = 0;
+    }
+
     if (_connectionAttempts >= _maxConnectionAttempts)
     {
       Log.Warn($"Max connection attempts ({_maxConnectionAttempts}) reached. Waiting before retry.");
-      await Task.Delay(TimeSpan.FromMinutes(2)); // Wait 2 minutes before resetting
-      _connectionAttempts = 0;
+      await Task.Delay(TimeSpan.FromMinutes(2));
+      _connectionAttempts = 0; // Reset after long wait
+      await Connect();
+      return;
     }
 
     var delay = Math.Min(1000 * Math.Pow(2, _connectionAttempts), 30000); // Exponential backoff, max 30 seconds
@@ -244,6 +254,12 @@ public class BambuMachineProvider(BambuMachine machine, IMachineStatusChannel ma
 
     _connectionAttempts++;
     await Connect();
+  }
+
+  async Task OnDisconnected(MqttClientDisconnectedEventArgs args)
+  {
+    Log.Warn($"MQTT client disconnected: {args.Reason}");
+    // The timer will handle reconnection
   }
 
   async Task OnMessage(MqttApplicationMessageReceivedEventArgs args)
@@ -317,30 +333,51 @@ public class BambuMachineProvider(BambuMachine machine, IMachineStatusChannel ma
     }
   }
 
+  async Task DisconnectAndCleanup()
+  {
+    IMqttClient? clientToDispose = null;
+    lock (_lockObject)
+    {
+      clientToDispose = _mqttClient;
+      _mqttClient = null;
+    }
+
+    if (clientToDispose != null)
+    {
+      try
+      {
+        if (clientToDispose.IsConnected)
+        {
+          await clientToDispose.DisconnectAsync();
+        }
+      }
+      catch (Exception ex)
+      {
+        Log.Warn("Error during MQTT disconnect", ex);
+      }
+      finally
+      {
+        try
+        {
+          clientToDispose.Dispose();
+        }
+        catch (Exception ex)
+        {
+          Log.Warn("Error disposing MQTT client", ex);
+        }
+      }
+    }
+  }
+
   public override void Stop()
   {
     _timer?.Stop();
     _timer?.Dispose();
     _timer = null;
 
-    Task.Run(() =>
+    Task.Run(async () =>
     {
-      lock (_lockObject)
-      {
-        if (_mqttClient != null && _mqttClient.IsConnected)
-        {
-          try
-          {
-            _mqttClient.DisconnectAsync().Wait(TimeSpan.FromSeconds(5));
-          }
-          catch (Exception ex)
-          {
-            Log.Warn("Error during MQTT disconnect", ex);
-          }
-        }
-        _mqttClient?.Dispose();
-        _mqttClient = null;
-      }
+      await DisconnectAndCleanup();
     });
   }
 
