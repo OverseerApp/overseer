@@ -5,10 +5,8 @@
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "dotnet: build",
-      "program": "${workspaceFolder}/src/Overseer.Server/bin/Debug/net8.0/Overseer.Server.exe",
-      "args": [
-        "--Environment=Development",
-      ]
+      "program": "${workspaceFolder}/src/Overseer.Server/bin/Debug/net10.0/Overseer.Server.exe",
+      "args": ["--Environment=Development"]
     }
   ]
 }

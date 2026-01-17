@@ -32,7 +32,7 @@ namespace Overseer.Server
       var authHeader = Context.Request.Headers.Authorization;
       if (string.IsNullOrEmpty(authHeader))
       {
-        authHeader = Context.Request.Query["api_key"];
+        authHeader = Context.Request.Query["access_token"];
       }
 
       if (string.IsNullOrEmpty(authHeader))

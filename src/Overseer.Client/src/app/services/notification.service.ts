@@ -5,13 +5,16 @@ import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
 import { Observable, Subject, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { Notification } from '../models/notifications.model';
+import { User } from '../models/user.model';
 import { endpointFactory } from './endpoint-factory';
+import { LocalStorageService } from './local-storage.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class NotificationService {
   private http = inject(HttpClient);
+  private localStorageService = inject(LocalStorageService);
 
   private endpointFactory = endpointFactory('/api/notifications');
   private notifications$ = new Subject<Notification>();
@@ -22,8 +25,10 @@ export class NotificationService {
   constructor() {
     this.hubConnection = new HubConnectionBuilder()
       .withUrl(`${environment.apiHost}/push/notifications`, {
-        withCredentials: environment.production,
-        accessTokenFactory: () => localStorage.getItem('access_token') ?? '',
+        accessTokenFactory: () => {
+          const activeUser = this.localStorageService.get<User>('activeUser');
+          return activeUser?.token ?? '';
+        },
       })
       .build();
 

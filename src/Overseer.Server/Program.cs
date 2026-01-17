@@ -28,6 +28,22 @@ using (var context = new LiteDataContext())
   builder.Services.AddEndpointsApiExplorer();
   builder.Services.AddSwaggerGen();
   builder.Services.AddSignalR();
+
+  var isDev = builder.Environment.IsDevelopment();
+  if (isDev)
+  {
+    builder.Services.AddCors(options =>
+    {
+      options.AddPolicy(
+        "DevCorsPolicy",
+        policy =>
+        {
+          policy.WithOrigins("http://localhost:4200").AllowAnyHeader().AllowAnyMethod().AllowCredentials();
+        }
+      );
+    });
+  }
+
   builder.Services.AddOverseerDependencies(context);
   builder.Services.AddAuthentication(OverseerAuthenticationOptions.Setup).UseOverseerAuthentication();
 
@@ -39,16 +55,19 @@ using (var context = new LiteDataContext())
   var app = builder.Build();
 
   XmlConfigurator.Configure(new FileInfo(Path.Combine(app.Environment.ContentRootPath, "log4net.config")));
-  var isDev = app.Environment.IsDevelopment();
+
+  app.UseWebSockets();
 
   if (isDev)
   {
+    app.UseCors("DevCorsPolicy");
     app.UseSwagger();
     app.UseSwaggerUI();
-    app.UseCors((builder) => builder.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin().SetIsOriginAllowedToAllowWildcardSubdomains());
   }
 
   app.HandleOverseerExceptions();
+  app.UseAuthentication();
+  app.UseAuthorization();
   app.MapOverseerApi();
   app.MapHub<StatusHub>("/push/status").RequireAuthorization();
   app.MapHub<NotificationHub>("/push/notifications").RequireAuthorization();
