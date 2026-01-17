@@ -65,18 +65,28 @@ While this implementation is inspired by Oliver Bravery's PrintGuard, it has bee
 The PrintGuard analyzer is instantiated with a model and camera streamer, then called periodically to analyze frames:
 
 ```csharp
-var model = new PrintGuardModel(httpClientFactory);
-var cameraStreamer = new PrintGuardCameraStreamer();
-cameraStreamer.Start("http://camera-url/stream");
+// Initialize
+var model = new PrintGuardModel(httpClientFactory); // DI: singleton
+var streamer = new PrintGuardCameraStreamer(); // DI: transient
+var analyzer = new PrintGuardFailureDetectionAnalyzer(model, streamer); // DI: transient
 
-var analyzer = new PrintGuardFailureDetectionAnalyzer(model, cameraStreamer);
-var result = analyzer.Analyze();
+// analyzer
+analyzer.Start("http://camera-url/stream");
 
-if (result.IsFailureDetected)
+while (true)
 {
-    Console.WriteLine($"Failure detected: {result.FailureReason}");
-    Console.WriteLine($"Confidence: {result.ConfidenceScore:P}");
+  // Analyze frames
+  var result = analyzer.Analyze();
+
+  if (result.IsFailureDetected)
+  {
+      Console.WriteLine($"Failure detected: {result.FailureReason}");
+      Console.WriteLine($"Confidence: {result.ConfidenceScore:P}");
+      break;
+  }
 }
+
+analyzer.Stop();
 ```
 
 ## Configuration
