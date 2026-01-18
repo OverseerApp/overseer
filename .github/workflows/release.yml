@@ -13,6 +13,7 @@ jobs:
   build:
     permissions:
       contents: write
+      packages: write
 
     runs-on: ubuntu-latest
 
@@ -99,6 +100,12 @@ jobs:
             sudo systemctl start overseer
             ```
 
+            ### Docker
+            ```bash
+            docker pull ghcr.io/michaelfdeberry/overseer:${{ github.event.inputs.release_version }}
+            docker run -d -p 9000:9000 -v overseer-data:/app/data ghcr.io/michaelfdeberry/overseer:${{ github.event.inputs.release_version }}
+            ```
+
             ### Requirements
             - Linux with systemd (for auto-update support)
             - .NET 10.0 ASP.NET Core Runtime (installed automatically by the script)
@@ -122,3 +129,34 @@ jobs:
           asset_path: scripts/overseer.sh
           asset_name: overseer-${{ github.event.inputs.release_version }}.sh
           asset_content_type: application/x-sh
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=raw,value=${{ github.event.inputs.release_version }}
+            type=raw,value=latest,enable=${{ steps.check_prerelease.outputs.is_prerelease == 'false' }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            VERSION=${{ github.event.inputs.release_version }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
