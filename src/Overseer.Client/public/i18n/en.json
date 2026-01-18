@@ -239,5 +239,19 @@
   "failureReason": "Failure Reason",
   "details": "Details",
   "jobCancelled": "Job Cancelled",
-  "jobPaused": "Job Paused"
+  "jobPaused": "Job Paused",
+  "updates": {
+    "checking": "Checking for updates...",
+    "available": "Update Available",
+    "newVersionAvailable": "Version {{version}} is available for download.",
+    "preRelease": "Pre-release",
+    "installUpdate": "Install Update",
+    "viewRelease": "View Release Notes",
+    "manualUpdateRequired": "Auto-update is not available on this platform. Please update manually by downloading the latest release.",
+    "upToDate": "You are running the latest version.",
+    "checkAgain": "Check for updates",
+    "installing": "Installing update...",
+    "installSuccess": "Update installed successfully. The application will restart.",
+    "installFailed": "Failed to install update."
+  }
 }

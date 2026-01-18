@@ -9,6 +9,7 @@ using Overseer.Server.Data;
 using Overseer.Server.Machines;
 using Overseer.Server.Models;
 using Overseer.Server.Services;
+using Overseer.Server.Updates;
 using Overseer.Server.Users;
 
 namespace Overseer.Server
@@ -79,6 +80,7 @@ namespace Overseer.Server
       services.AddTransient<IMachineManager, MachineManager>();
       services.AddTransient<IControlManager, ControlManager>();
       services.AddTransient<IPrintGuardCameraStreamer, PrintGuardCameraStreamer>();
+      services.AddTransient<IUpdateService, UpdateService>();
 
       services.AddSingleton<PrintGuardModel>();
       services.AddSingleton<IMonitoringService, MonitoringService>();

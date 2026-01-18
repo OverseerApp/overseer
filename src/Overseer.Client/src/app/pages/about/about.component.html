@@ -7,13 +7,70 @@
   <table class="table mx-auto text-start" style="max-width: 320px">
     <tbody>
       @for (infoItem of applicationInfo(); track $index) {
-      <tr>
-        <th>{{ 'about.info.' + infoItem.label | i18next }}</th>
-        <td>{{ infoItem.value }}</td>
-      </tr>
+        <tr>
+          <th>{{ 'about.info.' + infoItem.label | i18next }}</th>
+          <td>{{ infoItem.value }}</td>
+        </tr>
       }
     </tbody>
   </table>
+
+  <!-- Update Section -->
+  <div class="py-3">
+    @if (isCheckingForUpdates()) {
+      <div class="d-flex align-items-center justify-content-center">
+        <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+        <span>{{ 'updates.checking' | i18next }}</span>
+      </div>
+    } @else if (updateInfo()) {
+      @if (updateInfo()?.updateAvailable) {
+        <div class="alert alert-info" role="alert">
+          <h5 class="alert-heading">
+            <i class="bi bi-arrow-up-circle me-2"></i>
+            {{ 'updates.available' | i18next }}
+          </h5>
+          <p class="mb-2">
+            {{ 'updates.newVersionAvailable' | i18next: { version: updateInfo()?.latestVersion } }}
+          </p>
+          @if (updateInfo()?.isPreRelease) {
+            <span class="badge bg-warning text-dark me-2">{{ 'updates.preRelease' | i18next }}</span>
+          }
+          <div class="mt-3">
+            @if (updateInfo()?.canAutoUpdate) {
+              <button class="btn btn-primary me-2" (click)="installUpdate()" [disabled]="isUpdating()">
+                @if (isUpdating()) {
+                  <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                }
+                {{ 'updates.installUpdate' | i18next }}
+              </button>
+            }
+            <button class="btn btn-outline-primary" (click)="openReleaseUrl()">
+              {{ 'updates.viewRelease' | i18next }}
+            </button>
+          </div>
+          @if (!updateInfo()?.canAutoUpdate) {
+            <p class="mt-2 text-muted small">
+              {{ 'updates.manualUpdateRequired' | i18next }}
+            </p>
+          }
+        </div>
+      } @else {
+        <div class="text-success">
+          <i class="bi bi-check-circle me-2"></i>
+          {{ 'updates.upToDate' | i18next }}
+        </div>
+      }
+      <button class="btn btn-link btn-sm" (click)="checkForUpdates()" [disabled]="isCheckingForUpdates()">
+        {{ 'updates.checkAgain' | i18next }}
+      </button>
+    }
+    @if (updateError()) {
+      <div class="alert alert-warning mt-2" role="alert">
+        {{ updateError() }}
+      </div>
+    }
+  </div>
+
   <div class="py-3">
     <button class="btn btn-primary btn-block" (click)="downloadLog()">Download Log</button>
   </div>
