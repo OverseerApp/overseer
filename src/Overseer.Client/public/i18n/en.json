@@ -152,16 +152,23 @@
   "about": {
     "title": "Overseer is a utility that allows you to monitor multiple automated machines, such as 3D Printers, from a single web interface.",
     "helpDescription": "Have a suggestion, a request, or just need some help? Please create an item in the",
-    "issueTracker": "Overseer issue tracker",
+    "issueTracker": "Get Support (Issue Tracker)",
     "openSourceNotice": "Overseer is open source software released under the",
     "license": "GNU Affero General Public License v3.0",
     "appSystemDetails": "Application and System Information",
+    "maintenanceSupport": "Maintenance & Support",
+    "downloadLog": "Download Log",
     "info": {
+      "applicationInfo": "Application Info",
+      "systemInfo": "System Info",
       "platform": "Platform Type",
       "operatingSystem": "Operating System",
       "machineName": "Device Name",
-      "version": "Application Version",
-      "runtime": "Runtime Version"
+      "appVersion": "Application Version",
+      "runtimeVersion": "Runtime Version",
+      "healthStatus": "Health Status",
+      "healthy": "Healthy",
+      "unavailable": "Unavailable"
     }
   },
   "themes": {

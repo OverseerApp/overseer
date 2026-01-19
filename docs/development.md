@@ -53,7 +53,7 @@ cd src/Overseer.Server
 Run the application with the development configuration using `dotnet watch`:
 
 ```bash
-dotnet watch --configuration Development
+dotnet watch --Environment=Development
 ```
 
 This will:
@@ -70,7 +70,7 @@ The API will typically be available at `http://localhost:9000/`.
 If you don't need automatic rebuilding, you can run directly:
 
 ```bash
-dotnet run --configuration Development
+dotnet run --Environment=Development
 ```
 
 #### Building the Solution

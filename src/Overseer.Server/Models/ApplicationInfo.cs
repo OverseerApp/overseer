@@ -16,7 +16,8 @@ namespace Overseer.Server.Models
       if (assembly != null)
       {
         var version = FileVersionInfo.GetVersionInfo(assembly.Location).ProductVersion;
-        Version = version?[..version.LastIndexOf('+')];
+        var plusIndex = version?.LastIndexOf('+') ?? -1;
+        Version = plusIndex > 0 ? version?[..plusIndex] : version;
       }
       Platform = Environment.OSVersion.Platform.ToString();
       OperatingSystem = Environment.OSVersion.VersionString;

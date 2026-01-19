@@ -1,86 +1,122 @@
-<div class="text-center">
-  <h4>{{ 'about.appSystemDetails' | i18next }}</h4>
-  <p>
-    <span class="me-1">{{ 'about.helpDescription' | i18next }}</span>
-    <a class="link" target="_blank" href="https://github.com/michaelfdeberry/overseer/issues">{{ 'about.issueTracker' | i18next }}</a>
-  </p>
-  <table class="table mx-auto text-start" style="max-width: 320px">
-    <tbody>
-      @for (infoItem of applicationInfo(); track $index) {
-        <tr>
-          <th>{{ 'about.info.' + infoItem.label | i18next }}</th>
-          <td>{{ infoItem.value }}</td>
-        </tr>
-      }
-    </tbody>
-  </table>
-
-  <!-- Update Section -->
-  <div class="py-3">
-    @if (isCheckingForUpdates()) {
-      <div class="d-flex align-items-center justify-content-center">
-        <span class="spinner-border spinner-border-sm me-2" role="status"></span>
-        <span>{{ 'updates.checking' | i18next }}</span>
+<div class="container-fluid p-4">
+  @let appInfo = this.applicationInfo.value();
+  @let updateInfo = this.updateInfo.value();
+  @if (updateInfo?.updateAvailable && !updatedDismissed()) {
+    <div class="alert alert-info d-flex align-items-center justify-content-between shadow-sm" role="alert">
+      <div class="d-flex align-items-center">
+        <i class="bi bi-info-circle fs-4 me-3"></i>
+        <div class="d-flex flex-row align-items-center gap-1">
+          <strong>{{ 'updates.available' | i18next }}</strong>
+          <span class="small">{{ 'updates.newVersionAvailable' | i18next: { version: updateInfo?.latestVersion } }}</span>
+        </div>
       </div>
-    } @else if (updateInfo()) {
-      @if (updateInfo()?.updateAvailable) {
-        <div class="alert alert-info" role="alert">
-          <h5 class="alert-heading">
-            <i class="bi bi-arrow-up-circle me-2"></i>
-            {{ 'updates.available' | i18next }}
-          </h5>
-          <p class="mb-2">
-            {{ 'updates.newVersionAvailable' | i18next: { version: updateInfo()?.latestVersion } }}
-          </p>
-          @if (updateInfo()?.isPreRelease) {
-            <span class="badge bg-warning text-dark me-2">{{ 'updates.preRelease' | i18next }}</span>
-          }
-          <div class="mt-3">
-            @if (updateInfo()?.canAutoUpdate) {
-              <button class="btn btn-primary me-2" (click)="installUpdate()" [disabled]="isUpdating()">
-                @if (isUpdating()) {
-                  <span class="spinner-border spinner-border-sm me-2" role="status"></span>
-                }
-                {{ 'updates.installUpdate' | i18next }}
-              </button>
+      <div class="d-flex align-items-center gap-2">
+        <button class="btn btn-outline-secondary btn-sm" (click)="openReleaseUrl()">{{ 'updates.viewRelease' | i18next }}</button>
+        @if (updateInfo?.canAutoUpdate) {
+          <button class="btn btn-primary btn-sm" (click)="installUpdate()" [disabled]="isUpdating()">
+            @if (isUpdating()) {
+              <span class="spinner-border spinner-border-sm me-2" role="status"></span>
             }
-            <button class="btn btn-outline-primary" (click)="openReleaseUrl()">
-              {{ 'updates.viewRelease' | i18next }}
-            </button>
-          </div>
-          @if (!updateInfo()?.canAutoUpdate) {
-            <p class="mt-2 text-muted small">
-              {{ 'updates.manualUpdateRequired' | i18next }}
-            </p>
-          }
-        </div>
-      } @else {
-        <div class="text-success">
-          <i class="bi bi-check-circle me-2"></i>
-          {{ 'updates.upToDate' | i18next }}
-        </div>
-      }
-      <button class="btn btn-link btn-sm" (click)="checkForUpdates()" [disabled]="isCheckingForUpdates()">
-        {{ 'updates.checkAgain' | i18next }}
-      </button>
-    }
-    @if (updateError()) {
-      <div class="alert alert-warning mt-2" role="alert">
-        {{ updateError() }}
+            {{ 'updates.installUpdate' | i18next }}
+          </button>
+        }
+        <button type="button" class="btn-close ms-2" aria-label="Close" (click)="updatedDismissed.set(true)"></button>
       </div>
-    }
+    </div>
+  }
+  <div class="row g-4 mb-4">
+    <div class="col-md-6">
+      <div class="card h-100 shadow-sm border-secondary bg-dark text-light overflow-hidden">
+        <div class="card-header border-bottom border-secondary bg-transparent">
+          <h5 class="mb-0"><i class="fas fa-cube me-2 text-success"></i>{{ 'about.info.applicationInfo' | i18next }}</h5>
+        </div>
+        <div class="card-body p-0">
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item bg-dark text-light d-flex justify-content-between align-items-center border-secondary">
+              <span>{{ 'about.info.appVersion' | i18next }}</span>
+              <div class="d-flex align-items-center">
+                <span class="font-monospace">{{ appInfo?.version }}</span>
+                <button class="btn btn-link btn-sm text-secondary ms-2 p-0" (click)="copyToClipboard(appInfo?.version)">
+                  <i class="bi bi-clipboard"></i>
+                </button>
+              </div>
+            </li>
+            <li class="list-group-item bg-dark text-light d-flex justify-content-between align-items-center border-secondary">
+              <span>{{ 'about.info.runtimeVersion' | i18next }}</span>
+              <div class="d-flex align-items-center">
+                <span class="font-monospace">{{ appInfo?.runtime }}</span>
+                <button class="btn btn-link btn-sm text-secondary ms-2 p-0" (click)="copyToClipboard(appInfo?.runtime)">
+                  <i class="bi bi-clipboard"></i>
+                </button>
+              </div>
+            </li>
+            <li class="list-group-item bg-dark text-light d-flex justify-content-between align-items-center border-0">
+              <span>{{ 'about.info.healthStatus' | i18next }}</span>
+              @if (appInfo) {
+                <span class="text-success"><i class="fas fa-check-circle me-1"></i>{{ 'about.info.healthy' | i18next }}</span>
+              } @else {
+                <span class="text-warning"><i class="fas fa-exclamation-circle me-1"></i>{{ 'about.info.unavailable' | i18next }}</span>
+              }
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card h-100 shadow-sm border-secondary bg-dark text-light overflow-hidden">
+        <div class="card-header border-bottom border-secondary bg-transparent">
+          <h5 class="mb-0"><i class="fas fa-desktop me-2 text-success"></i>{{ 'about.info.systemInfo' | i18next }}</h5>
+        </div>
+        <div class="card-body p-0">
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item bg-dark text-light d-flex justify-content-between align-items-center border-secondary">
+              <span>{{ 'about.info.platform' | i18next }}</span>
+              <span>{{ appInfo?.platform }}</span>
+            </li>
+            <li class="list-group-item bg-dark text-light d-flex justify-content-between align-items-center border-secondary">
+              <span>{{ 'about.info.operatingSystem' | i18next }}</span>
+              <div class="d-flex align-items-center">
+                <span class="text-truncate" style="max-width: 200px" title="{{ appInfo?.operatingSystem }}">{{ appInfo?.operatingSystem }}</span>
+                <button class="btn btn-link btn-sm text-secondary ms-2 p-0" (click)="copyToClipboard(appInfo?.operatingSystem)">
+                  <i class="bi bi-clipboard"></i>
+                </button>
+              </div>
+            </li>
+            <li class="list-group-item bg-dark text-light d-flex justify-content-between align-items-center border-0">
+              <span>{{ 'about.info.machineName' | i18next }}</span>
+              <div class="d-flex align-items-center">
+                <span class="font-monospace">{{ appInfo?.machineName }}</span>
+                <button class="btn btn-link btn-sm text-secondary ms-2 p-0" (click)="copyToClipboard(appInfo?.machineName)">
+                  <i class="bi bi-clipboard"></i>
+                </button>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div class="py-3">
-    <button class="btn btn-primary btn-block" (click)="downloadLog()">Download Log</button>
-  </div>
-  <div class="py-3">
-    <div class="copy">&copy;{{ currentYear() }} Overseer</div>
-    <div>
-      {{ 'about.openSourceNotice' | i18next }}
-      <a href="https://en.wikipedia.org/wiki/GNU_Affero_General_Public_License" target="_blank">
-        {{ 'about.license' | i18next }}
-      </a>
+  <div class="card shadow-sm border-secondary bg-dark text-light mb-4">
+    <div class="card-header border-bottom border-secondary bg-transparent">
+      <h5 class="mb-0"><i class="fas fa-tools me-2 text-success"></i>{{ 'about.maintenanceSupport' | i18next }}</h5>
     </div>
+    <div class="card-body">
+      <div class="d-flex gap-2">
+        <button class="btn btn-outline-light" (click)="downloadLog()"><i class="fas fa-download me-2"></i>{{ 'about.downloadLog' | i18next }}</button>
+        <a class="btn btn-outline-light" target="_blank" href="https://github.com/michaelfdeberry/overseer/issues">
+          <i class="fas fa-life-ring me-2"></i>{{ 'about.issueTracker' | i18next }}
+        </a>
+      </div>
+    </div>
+  </div>
+  <hr class="border-secondary my-4" />
+  <div class="text-center text-muted">
+    <span>&copy; {{ currentYear() }} Overseer.</span>
+    {{ 'about.openSourceNotice' | i18next }}
+    <a href="https://en.wikipedia.org/wiki/GNU_Affero_General_Public_License" target="_blank" class="text-success">
+      {{ 'about.license' | i18next }}
+    </a>
   </div>
 </div>

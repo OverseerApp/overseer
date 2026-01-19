@@ -1,7 +1,6 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
 import { I18NextPipe } from 'angular-i18next';
-import { ApplicationInfo } from '../../models/application-info.model';
-import { UpdateInfo } from '../../models/update-info.model';
 import { LoggingService } from '../../services/logging.service';
 import { SettingsService } from '../../services/settings.service';
 import { UpdateService } from '../../services/update.service';
@@ -11,45 +10,26 @@ import { UpdateService } from '../../services/update.service';
   templateUrl: './about.component.html',
   imports: [I18NextPipe],
 })
-export class AboutComponent implements OnInit {
+export class AboutComponent {
   private settingsService = inject(SettingsService);
   private loggingService = inject(LoggingService);
   private updateService = inject(UpdateService);
 
-  applicationInfo = signal<{ label: string; value?: string }[] | undefined>(undefined);
   currentYear = signal(new Date().getFullYear());
-  updateInfo = signal<UpdateInfo | undefined>(undefined);
-  isCheckingForUpdates = signal(false);
   isUpdating = signal(false);
   updateError = signal<string | undefined>(undefined);
+  updatedDismissed = signal(false);
 
-  ngOnInit() {
-    this.settingsService.getApplicationInfo().subscribe((applicationInfo) => {
-      this.applicationInfo.set(Object.keys(applicationInfo).map((key) => ({ label: key, value: applicationInfo[key as keyof ApplicationInfo] })));
-    });
+  applicationInfo = rxResource({
+    stream: () => this.settingsService.getApplicationInfo(),
+  });
 
-    this.checkForUpdates();
-  }
-
-  checkForUpdates() {
-    this.isCheckingForUpdates.set(true);
-    this.updateError.set(undefined);
-
-    this.updateService.checkForUpdates().subscribe({
-      next: (updateInfo) => {
-        this.updateInfo.set(updateInfo);
-        this.isCheckingForUpdates.set(false);
-      },
-      error: (error) => {
-        console.error('Failed to check for updates:', error);
-        this.isCheckingForUpdates.set(false);
-        this.updateError.set('Failed to check for updates');
-      },
-    });
-  }
+  updateInfo = rxResource({
+    stream: () => this.updateService.checkForUpdates(),
+  });
 
   installUpdate() {
-    const updateInfo = this.updateInfo();
+    const updateInfo = this.updateInfo.value();
     if (!updateInfo?.latestVersion) {
       return;
     }
@@ -76,7 +56,7 @@ export class AboutComponent implements OnInit {
   }
 
   openReleaseUrl() {
-    const updateInfo = this.updateInfo();
+    const updateInfo = this.updateInfo.value();
     if (updateInfo?.releaseUrl) {
       window.open(updateInfo.releaseUrl, '_blank');
     }
@@ -92,5 +72,25 @@ export class AboutComponent implements OnInit {
 
       URL.revokeObjectURL(link.href);
     });
+  }
+
+  // UI States for Clipboard feedback
+  copyStates: { [key: string]: boolean } = {};
+  async copyToClipboard(text?: string): Promise<void> {
+    if (!text) return;
+
+    try {
+      await navigator.clipboard.writeText(text);
+
+      // Trigger visual feedback (e.g. change icon to checkmark)
+      this.copyStates[text] = true;
+
+      // Reset after 2 seconds
+      setTimeout(() => {
+        this.copyStates[text] = false;
+      }, 2000);
+    } catch (err) {
+      console.error('Failed to copy: ', err);
+    }
   }
 }

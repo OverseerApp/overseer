@@ -1,26 +1,32 @@
 # Overseer Docker Image
 # Multi-stage build for optimized image size
 
+# Accept version as build argument (defaults to dev version for local builds)
+ARG VERSION=2.0.0-dev
+
 # Build stage for Angular client
 FROM node:20-alpine AS client-build
+ARG VERSION=2.0.0-dev
 WORKDIR /src/client
 COPY src/Overseer.Client/package*.json ./
-RUN npm ci
+RUN npm ci --legacy-peer-deps
 COPY src/Overseer.Client/ ./
+# Update version in package.json and Angular environment file
+RUN npm version ${VERSION} --no-git-tag-version 
+RUN sed -i "s/appVersion: '.*'/appVersion: '${VERSION}'/" src/environments/versions.ts
 RUN npm run build
 
 # Build stage for .NET server
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS server-build
+ARG VERSION=2.0.0-dev
 WORKDIR /src
 COPY src/Overseer.Server/*.csproj ./Overseer.Server/
-COPY src/Overseer/*.csproj ./Overseer/
 WORKDIR /src/Overseer.Server
-RUN dotnet restore
+RUN dotnet restore Overseer.Server.csproj
 WORKDIR /src
-COPY src/Overseer.Server/ ./Overseer.Server/
-COPY src/Overseer/ ./Overseer/
+COPY src/Overseer.Server/ ./Overseer.Server/ 
 WORKDIR /src/Overseer.Server
-RUN dotnet publish -c Release -o /app/publish --no-restore
+RUN dotnet build Overseer.Server.csproj -c Release -o /app/publish --no-restore /p:Version=${VERSION}
 
 # Final runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
@@ -37,7 +43,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY --from=server-build /app/publish .
 
 # Copy Angular build output
-COPY --from=client-build /src/client/dist/overseer.client ./wwwroot
+COPY --from=client-build /src/client/dist/overseer.client .
 
 # Create data directory for LiteDB
 RUN mkdir -p /app/data
