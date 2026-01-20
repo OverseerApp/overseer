@@ -42,6 +42,7 @@ export class AboutComponent {
         if (result.success) {
           // The application will restart, show a message
           this.updateError.set(result.message);
+          this.updatedDismissed.set(true);
         } else {
           this.updateError.set(result.message || 'Update failed');
         }

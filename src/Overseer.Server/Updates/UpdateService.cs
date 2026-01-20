@@ -156,23 +156,31 @@ namespace Overseer.Server.Updates
 
         // Launch the updater script in the background
         // The updater will stop this service, perform the update, and restart
+        // Use bash -c with nohup and & to fully detach the process from the parent
+        // Redirect output to log file to prevent blocking
+        var command = $"nohup /bin/bash {updaterPath} update {version} \"{overseerDirectory}\" \"{dotnetPath}\" >> /var/log/overseer.log 2>&1 &";
+
         var processInfo = new ProcessStartInfo
         {
           FileName = "/bin/bash",
-          Arguments = $"{updaterPath} update {version} \"{overseerDirectory}\" \"{dotnetPath}\"",
+          Arguments = $"-c \"{command}\"",
           UseShellExecute = false,
           CreateNoWindow = true,
-          RedirectStandardOutput = false,
-          RedirectStandardError = false,
+          RedirectStandardOutput = true,
+          RedirectStandardError = true,
         };
 
-        Log.Info($"Launching updater: {processInfo.FileName} {processInfo.Arguments}");
+        Log.Info($"Launching updater with command: {command}");
 
-        // Use nohup to ensure the script continues after this process exits
-        processInfo.FileName = "/usr/bin/nohup";
-        processInfo.Arguments = $"/bin/bash {updaterPath} update {version} \"{overseerDirectory}\" \"{dotnetPath}\"";
+        var process = Process.Start(processInfo);
 
-        Process.Start(processInfo);
+        // Don't wait for the process - let it run independently
+        if (process != null)
+        {
+          // Read any immediate output (there shouldn't be much due to background execution)
+          _ = process.StandardOutput.ReadToEndAsync();
+          _ = process.StandardError.ReadToEndAsync();
+        }
 
         return new UpdateResult
         {
@@ -215,8 +223,14 @@ namespace Overseer.Server.Updates
       // Look for the updater script in several locations
       var searchPaths = new[]
       {
+        // Docker installation: /opt/overseer/overseer.sh
+        Path.Combine(_environment.ContentRootPath, "..", UpdaterScriptName),
+        // Manual installation (scripts folder adjacent to app): ./scripts/overseer.sh
         Path.Combine(_environment.ContentRootPath, "scripts", UpdaterScriptName),
         Path.Combine(_environment.ContentRootPath, "..", "scripts", UpdaterScriptName),
+        // Absolute path for Docker: /opt/overseer/overseer.sh
+        Path.Combine("/opt/overseer", UpdaterScriptName),
+        // Legacy path (keeping for backward compatibility)
         Path.Combine("/opt/overseer/scripts", UpdaterScriptName),
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "overseer/scripts", UpdaterScriptName),
       };
@@ -237,8 +251,14 @@ namespace Overseer.Server.Updates
       // Try to determine the .NET path
       var possiblePaths = new[]
       {
+        // Docker installation: /opt/overseer/.dotnet
+        Path.Combine(_environment.ContentRootPath, "..", ".dotnet"),
+        // Manual installation relative to current directory
         Path.Combine(Directory.GetCurrentDirectory(), ".dotnet"),
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".dotnet"),
+        // Absolute path for Docker
+        "/opt/overseer/.dotnet",
+        // System-wide installations
         "/usr/share/dotnet",
         "/opt/.dotnet",
       };

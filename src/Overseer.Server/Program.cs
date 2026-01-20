@@ -25,6 +25,11 @@ using (var context = new LiteDataContext())
   settings.Interval = parseResults.GetValue(intervalOption) ?? ApplicationSettings.DefaultInterval;
 
   var builder = WebApplication.CreateBuilder(args);
+
+  // Configure logging to output to console for Docker
+  builder.Logging.ClearProviders();
+  builder.Logging.AddConsole();
+
   builder.Services.AddEndpointsApiExplorer();
   builder.Services.AddSwaggerGen();
   builder.Services.AddSignalR();
