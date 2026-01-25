@@ -6,6 +6,7 @@ using Overseer.Server.Api;
 using Overseer.Server.Data;
 using Overseer.Server.Hubs;
 using Overseer.Server.Models;
+using Overseer.Server.Plugins;
 using Overseer.Server.Updates;
 
 if (!UpdateManager.Update())
@@ -91,6 +92,8 @@ using (var context = new LiteDataContext())
       };
     });
   }
+
+  var pluginManager = app.Services.GetRequiredService<IPluginManager>();
 
   app.Run(url);
 }

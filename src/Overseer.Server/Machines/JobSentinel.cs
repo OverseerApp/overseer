@@ -1,6 +1,6 @@
 using log4net;
-using Overseer.Server.Automation;
 using Overseer.Server.Channels;
+using Overseer.Server.Integration.Automation;
 using Overseer.Server.Models;
 
 namespace Overseer.Server.Machines;
@@ -83,7 +83,8 @@ public class JobSentinel(
         if (result is null || !result.IsFailureDetected)
           continue;
 
-        await jobFailureChannel.WriteAsync(result with { JobId = job.Id }, combinedToken);
+        var jobFailureResult = new JobFailureAnalysisResult(result) { JobId = job.Id };
+        await jobFailureChannel.WriteAsync(jobFailureResult, combinedToken);
 
         if (settings.AiMonitoringFailureAction != AIMonitoringFailureAction.CancelJob)
         {

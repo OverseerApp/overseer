@@ -2,11 +2,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72D-47B6-A68D-7590B98EB39B}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Overseer.Server", "Overseer.Server.csproj", "{29F9CE33-4C8D-62A2-A306-9103D2006923}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Overseer.Tests", "..\Overseer.Tests\Overseer.Tests.csproj", "{A1B2C3D4-5E6F-7890-A1B2-C3D4E5F67890}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,10 +21,6 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{29F9CE33-4C8D-62A2-A306-9103D2006923} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
-		{A1B2C3D4-5E6F-7890-A1B2-C3D4E5F67890} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {754A2ADB-C6AE-4A2C-8BE4-261C42FE0722}

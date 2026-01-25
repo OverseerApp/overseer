@@ -700,6 +700,10 @@ main() {
             shift
             do_configure "$@"
             ;;
+        restart)
+            log "Restarting Overseer service..."
+            systemctl restart $SERVICE_NAME
+            ;;
         -h|--help|help)
             show_usage
             ;;

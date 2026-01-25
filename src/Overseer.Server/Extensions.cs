@@ -2,15 +2,17 @@
 using System.Reflection;
 using log4net;
 using Microsoft.AspNetCore.Diagnostics;
-using Overseer.Server.Automation;
-using Overseer.Server.Automation.PrintGuard;
+using Octokit;
 using Overseer.Server.Channels;
 using Overseer.Server.Data;
+using Overseer.Server.Integration.Automation;
 using Overseer.Server.Machines;
 using Overseer.Server.Models;
+using Overseer.Server.Plugins;
 using Overseer.Server.Services;
 using Overseer.Server.Updates;
 using Overseer.Server.Users;
+using Machine = Overseer.Server.Models.Machine;
 
 namespace Overseer.Server
 {
@@ -66,6 +68,8 @@ namespace Overseer.Server
       services.AddSingleton<Func<Machine, MachineJob, JobSentinel>>(provider =>
         (machine, job) =>
         {
+          // This will need to change because it could be possible that the user has multiple failure detection analyzer
+          // plugins installed, if that is the case, then we  need to create multiple sentinels per job.
           var failureDetectionAnalyzer = provider.GetRequiredService<IFailureDetectionAnalyzer>();
           var jobFailureChannel = provider.GetRequiredService<IJobFailureChannel>();
           var configurationManager = provider.GetRequiredService<Settings.IConfigurationManager>();
@@ -79,10 +83,10 @@ namespace Overseer.Server
       services.AddTransient<IUserManager, UserManager>();
       services.AddTransient<IMachineManager, MachineManager>();
       services.AddTransient<IControlManager, ControlManager>();
-      services.AddTransient<IPrintGuardCameraStreamer, PrintGuardCameraStreamer>();
       services.AddTransient<IUpdateService, UpdateService>();
+      services.AddTransient<IGitHubClient>((_) => new GitHubClient(new ProductHeaderValue("OverseerApp")));
+      services.AddTransient<IPluginManager, PluginManager>();
 
-      services.AddSingleton<PrintGuardModel>();
       services.AddSingleton<IMonitoringService, MonitoringService>();
       services.AddSingleton<MachineProviderManager>();
       services.AddSingleton<IMachineStatusChannel, MachineStatusChannel>();
@@ -99,7 +103,11 @@ namespace Overseer.Server
       services.AddHostedService<JobSentinelService>();
       services.AddHostedService<JobFailureService>();
 
-      services.AddCors();
+      var pluginConfigurations = PluginDiscoveryService.DiscoverPlugins();
+      foreach (var pluginConfiguration in pluginConfigurations)
+      {
+        pluginConfiguration.ConfigureServices(services);
+      }
 
       return services;
     }
