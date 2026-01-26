@@ -1,28 +1,80 @@
 @if (form()) {
-  <form class="flex-fill" [formGroup]="form()!">
+  <form
+    class="flex-fill"
+    [formGroup]="form()!"
+  >
     <div class="mb-3">
-      <label for="accessLevel" class="form-label">{{ 'accessLevel' | i18next }}</label>
-      <select id="accessLevel" class="form-select" formControlName="accessLevel">
+      <label
+        for="accessLevel"
+        class="form-label small fw-bold"
+        >{{ 'accessLevel' | i18next }}</label
+      >
+      <select
+        id="accessLevel"
+        class="form-select"
+        formControlName="accessLevel"
+      >
         @for (option of accessLevels; track $index) {
           <option [ngValue]="option.value">{{ option.translationKey | i18next }}</option>
         }
       </select>
     </div>
     <div class="mb-3">
-      <label for="username" class="form-label">{{ 'username' | i18next }}</label>
-      <input required id="username" type="text" class="form-control" autocomplete="username" formControlName="username" />
+      <label
+        for="username"
+        class="form-label small fw-bold"
+        >{{ 'username' | i18next }}</label
+      >
+      <input
+        required
+        id="username"
+        type="text"
+        class="form-control"
+        autocomplete="username"
+        formControlName="username"
+      />
     </div>
     <div class="mb-3">
-      <label for="password" class="form-label">{{ 'password' | i18next }}</label>
-      <input required id="password" type="password" class="form-control" autocomplete="new-password" formControlName="password" />
+      <label
+        for="password"
+        class="form-label small fw-bold"
+        >{{ 'password' | i18next }}</label
+      >
+      <input
+        required
+        id="password"
+        type="password"
+        class="form-control"
+        autocomplete="new-password"
+        formControlName="password"
+      />
     </div>
     <div class="mb-3">
-      <label for="confirmPassword" class="form-label">{{ 'confirmPassword' | i18next }}</label>
-      <input required id="confirmPassword" type="password" class="form-control" autocomplete="new-password" formControlName="confirmPassword" />
+      <label
+        for="confirmPassword"
+        class="form-label small fw-bold"
+        >{{ 'confirmPassword' | i18next }}</label
+      >
+      <input
+        required
+        id="confirmPassword"
+        type="password"
+        class="form-control"
+        autocomplete="new-password"
+        formControlName="confirmPassword"
+      />
     </div>
     <div class="mb-3">
-      <label for="sessionLifetime" class="form-label">{{ 'sessionLifetime' | i18next }}</label>
-      <select id="sessionLifetime" class="form-select" formControlName="sessionLifetime">
+      <label
+        for="sessionLifetime"
+        class="form-label small fw-bold"
+        >{{ 'sessionLifetime' | i18next }}</label
+      >
+      <select
+        id="sessionLifetime"
+        class="form-select"
+        formControlName="sessionLifetime"
+      >
         @for (option of lifetimes; track $index) {
           <option [ngValue]="option.value">{{ option.value }} {{ option.translationKey | i18next }}</option>
         }

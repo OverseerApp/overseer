@@ -1,0 +1,62 @@
+<div class="card border-secondary shadow-sm">
+  <div class="card-header border-secondary py-2 d-flex justify-content-between align-items-center">
+    <h6 class="mb-0 text-uppercase fw-bold text-primary d-flex align-items-center gap-2">
+      <i class="bi bi-puzzle-fill fs-4"></i>
+      {{ 'plugins' | i18next }}
+    </h6>
+    <button class="btn btn-primary d-flex align-items-center gap-2 btn-sm" (click)="plugins.reload()">
+      <i class="bi bi-person-plus"></i>
+      {{ 'refresh' | i18next }}
+    </button>
+  </div>
+  <div class="list-group px-3">
+    <div>
+      @for (plugin of plugins.value(); track $index) {
+        <div class="list-group-item border-secondary p-3 my-3 rounded shadow-sm">
+          <div class="row align-items-end flex-column flex-sm-row">
+            <div class="col w-100">
+              <div class="d-flex align-items-center gap-2 flex-wrap">
+                <h5 class="mb-0">{{ plugin.name }}</h5>
+                <span class="badge rounded-pill bg-secondary">{{ plugin.version }}</span>
+
+                @if (plugin.isUpdateAvailable) {
+                  <span class="badge rounded-pill bg-warning text-dark">{{ 'updates.available' | i18next }}</span>
+                }
+              </div>
+
+              <p class="text-muted small mb-1 mt-1">{{ plugin.description }}</p>
+
+              <div class="d-flex gap-3 small text-secondary flex-wrap">
+                <span><i class="bi bi-person"></i> {{ plugin.author }}</span>
+                <span><i class="bi bi-shield-check"></i> {{ plugin.license }}</span>
+                @if (plugin.isInstalled) {
+                  <span class="text-success"> Installed: {{ plugin.installedVersion }} </span>
+                }
+              </div>
+            </div>
+
+            <div class="col-auto d-flex gap-2 mt-3 mt-sm-0">
+              <a [href]="plugin.githubRepository" target="_blank" class="btn btn-outline-secondary btn-sm px-3">
+                <i class="bi bi-github"></i>
+                {{ 'repository' | i18next }}
+              </a>
+
+              @if (!plugin.isInstalled) {
+                <button class="btn btn-primary btn-sm px-3">{{ 'install' | i18next }}</button>
+              }
+
+              @if (plugin.isUpdateAvailable) {
+                <button class="btn btn-warning btn-sm px-3">{{ 'update' | i18next }}</button>
+              }
+
+              @if (plugin.isInstalled) {
+                <button class="btn btn-outline-danger btn-sm px-3">{{ 'uninstall' | i18next }}</button>
+              }
+            </div>
+          </div>
+        </div>
+        <span></span>
+      }
+    </div>
+  </div>
+</div>

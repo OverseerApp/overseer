@@ -1,0 +1,21 @@
+/* Custom navigation styling to move away from "folder tabs" */
+.nav-container .nav-link {
+  transition: all 0.2s ease-in-out;
+  border-radius: 6px; /* Slightly softer corners */
+}
+
+/* Optional: Add a subtle transition to the content area */
+.fade-in-content {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -103,7 +103,7 @@ public class MoonrakerMachineProvider(MoonrakerMachine machine, IMachineStatusCh
       {
         client_name = "Overseer",
         version = GetType().Assembly.GetName().Version?.ToString() ?? "2.0.0",
-        url = "https://github.com/michaelfdeberry/overseer",
+        url = "https://github.com/overseerapp/overseer",
         type = "other",
       }
     );

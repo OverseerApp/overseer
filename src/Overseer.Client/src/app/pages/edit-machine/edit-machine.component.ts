@@ -42,7 +42,6 @@ export class EditMachineComponent {
         this.form = this.formBuilder.nonNullable.group({}, { updateOn: 'change' });
         this.form.addControl('id', new FormControl(machine?.id));
         this.form.addControl('machineType', new FormControl(null));
-        this.form.addControl('disabled', new FormControl(machine?.disabled));
       });
   }
 
@@ -55,6 +54,16 @@ export class EditMachineComponent {
 
   save() {
     this.handleNetworkAction(this.machinesService.updateMachine({ ...this.machine(), ...this.form!.getRawValue() } as Machine));
+  }
+
+  updateMonitoring(disabled: boolean): void {
+    var update = { ...this.machine(), disabled } as Machine;
+    this.machinesService.updateMachine(update).subscribe({
+      complete: () => {
+        this.form?.patchValue({ disabled: false });
+        this.machine.set(update);
+      },
+    });
   }
 
   private handleNetworkAction(observable: Observable<any>) {

@@ -14,6 +14,7 @@
     "Newtonsoft",
     "Octoprint",
     "Onnx",
+    "overseerapp",
     "Preauthenticated",
     "Preauthentication",
     "reprapfirmware",
@@ -23,6 +24,7 @@
   "editor.formatOnPaste": true,
   "editor.rulers": [150],
   "prettier.configPath": "src/Overseer.Client/prettierrc.json",
+  "prettier.singleAttributePerLine": true,
   "editor.tabSize": 2,
   "[typescript]": {
     "editor.codeActionsOnSave": {
@@ -41,6 +43,9 @@
   },
   "[xml]": {
     "editor.defaultFormatter": "csharpier.csharpier-vscode"
+  },
+  "[html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "csharpOrganizeUsings.splitGroups": false
 }

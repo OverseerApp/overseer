@@ -1,15 +1,24 @@
-@if(form()?.controls?.machineType) {
-<div class="flex-fill">
-  <div [formGroup]="form()!">
-    <div class="mb-3">
-      <label for="machineType" class="form-label">{{ 'machineType' | i18next }}</label>
-      <select id="machineType" class="form-select" required formControlName="machineType">
-        @for (option of machineTypes; track $index) {
-        <option [ngValue]="option.value">{{ option.translationKey | i18next }}</option>
-        }
-      </select>
+@if (form()?.controls?.machineType) {
+  <div class="flex-fill">
+    <div [formGroup]="form()!">
+      <div class="mb-3">
+        <label
+          for="machineType"
+          class="form-label small fw-bold"
+          >{{ 'machineType' | i18next }}</label
+        >
+        <select
+          id="machineType"
+          class="form-select"
+          required
+          formControlName="machineType"
+        >
+          @for (option of machineTypes; track $index) {
+            <option [ngValue]="option.value">{{ option.translationKey | i18next }}</option>
+          }
+        </select>
+      </div>
     </div>
+    <app-machine [form]="form()"></app-machine>
   </div>
-  <app-machine [form]="form()"></app-machine>
-</div>
 }

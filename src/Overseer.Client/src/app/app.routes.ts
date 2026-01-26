@@ -63,6 +63,11 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/edit-user/edit-user.component').then((m) => m.EditUserComponent),
       },
       {
+        path: 'plugins',
+        canActivate: [authenticationGuard(), authorizationGuard()],
+        loadComponent: () => import('./pages/plugins/plugins.component').then((m) => m.PluginsComponent),
+      },
+      {
         path: 'about',
         canActivate: [authenticationGuard(), authorizationGuard()],
         loadComponent: () => import('./pages/about/about.component').then((m) => m.AboutComponent),

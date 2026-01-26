@@ -12,7 +12,8 @@
         .MapMachineApi()
         .MapUsersApi()
         .MapNotificationApi()
-        .MapUpdateApi();
+        .MapUpdateApi()
+        .MapPluginsApi();
 
       return app;
     }

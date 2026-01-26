@@ -83,7 +83,7 @@ jobs:
             ### Fresh Install (Linux with systemd)
             ```bash
             # Download and run the installer
-            wget https://github.com/michaelfdeberry/overseer/releases/download/${{ github.event.inputs.release_version }}/overseer-${{ github.event.inputs.release_version }}.sh
+            wget https://github.com/overseerapp/overseer/releases/download/${{ github.event.inputs.release_version }}/overseer-${{ github.event.inputs.release_version }}.sh
             chmod +x overseer-${{ github.event.inputs.release_version }}.sh
             sudo ./overseer-${{ github.event.inputs.release_version }}.sh install
             ```
@@ -92,7 +92,7 @@ jobs:
             Updates can be performed automatically from the About page in the application, or manually:
             ```bash
             # Download the server package
-            wget https://github.com/michaelfdeberry/overseer/releases/download/${{ github.event.inputs.release_version }}/overseer_server_${{ github.event.inputs.release_version }}.zip
+            wget https://github.com/overseerapp/overseer/releases/download/${{ github.event.inputs.release_version }}/overseer_server_${{ github.event.inputs.release_version }}.zip
 
             # Stop the service, extract, and restart
             sudo systemctl stop overseer
@@ -102,8 +102,8 @@ jobs:
 
             ### Docker
             ```bash
-            docker pull ghcr.io/michaelfdeberry/overseer:${{ github.event.inputs.release_version }}
-            docker run -d -p 9000:9000 -v overseer-data:/app/data ghcr.io/michaelfdeberry/overseer:${{ github.event.inputs.release_version }}
+            docker pull ghcr.io/overseerapp/overseer:${{ github.event.inputs.release_version }}
+            docker run -d -p 9000:9000 -v overseer-data:/app/data ghcr.io/overseerapp/overseer:${{ github.event.inputs.release_version }}
             ```
 
             ### Requirements

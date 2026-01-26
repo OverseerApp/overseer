@@ -1,55 +1,140 @@
 @if (form) {
   <form [formGroup]="form">
-    <div class="mb-3">
-      <label for="scheme" class="form-label">{{ 'themes.scheme' | i18next }}</label>
-      <select #schemeSelect id="scheme" class="form-select" [value]="themeService.scheme()" (change)="handleSchemeChange(schemeSelect.value)">
-        <option value="auto">{{ 'themes.auto' | i18next }}</option>
-        <option value="light">{{ 'themes.light' | i18next }}</option>
-        <option value="dark">{{ 'themes.dark' | i18next }}</option>
-      </select>
-    </div>
-    <div class="mb-4">
-      <label for="interval" class="form-label">{{ 'pollInterval' | i18next }}</label>
-      <select id="interval" class="form-select" formControlName="interval">
-        @for (option of intervals; track $index) {
-          <option [ngValue]="option.value">{{ option.value / 1000 }} {{ option.translationKey | i18next }}</option>
-        }
-      </select>
-    </div>
-    <div class="form-check form-switch mb-3">
-      <input class="form-check-input" type="checkbox" role="switch" id="hideDisabledMachines" formControlName="hideDisabledMachines" />
-      <label class="form-check-label" for="hideDisabledMachines">{{ 'hideDisabledMachines' | i18next }}</label>
-    </div>
-    <div class="form-check form-switch mb-3">
-      <input class="form-check-input" type="checkbox" role="switch" id="hideIdleMachines" formControlName="hideIdleMachines" />
-      <label class="form-check-label" for="hideIdleMachines">{{ 'hideIdleMachines' | i18next }}</label>
-    </div>
-    <div class="form-check form-switch mb-3">
-      <input class="form-check-input" type="checkbox" role="switch" id="sortByTimeRemaining" formControlName="sortByTimeRemaining" />
-      <label class="form-check-label" for="sortByTimeRemaining">{{ 'sortByTimeRemaining' | i18next }}</label>
-    </div>
+    <div class="container-fluid p-0">
+      <div class="card border-secondary mb-4 shadow-sm">
+        <div
+          class="card-header border-secondary d-flex align-items-center"
+          style="height: 54px"
+        >
+          <h6 class="mb-0 text-uppercase fw-bold text-primary">
+            <i class="bi bi-sliders2-vertical me-2"></i>
+            {{ 'generalConfiguration' | i18next }}
+          </h6>
+        </div>
+        <div class="card-body">
+          <div class="row g-4">
+            <div class="col-md-6">
+              <label class="form-label small fw-bold">{{ 'themes.scheme' | i18next }}</label>
+              <select
+                #schemeSelect
+                id="scheme"
+                class="form-select border-secondary"
+                [value]="themeService.scheme()"
+                (change)="handleSchemeChange(schemeSelect.value)"
+              >
+                <option value="auto">{{ 'themes.auto' | i18next }}</option>
+                <option value="light">{{ 'themes.light' | i18next }}</option>
+                <option value="dark">{{ 'themes.dark' | i18next }}</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-bold">{{ 'pollInterval' | i18next }}</label>
+              <select
+                class="form-select border-secondary"
+                formControlName="interval"
+              >
+                @for (option of intervals; track $index) {
+                  <option [ngValue]="option.value">{{ option.value / 1000 }} {{ option.translationKey | i18next }}</option>
+                }
+              </select>
+            </div>
 
-    <hr class="my-4" />
-    <h5 class="mb-3">{{ 'aiMonitoring' | i18next }}</h5>
+            <div class="col-12">
+              <div class="d-flex flex-column gap-3 mt-2">
+                <div class="form-check form-switch">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    role="switch"
+                    id="hideDisabledMachines"
+                    formControlName="hideDisabledMachines"
+                  />
+                  <label
+                    class="form-check-label fw-bold"
+                    for="hideDisabledMachines"
+                    >{{ 'hideDisabledMachines' | i18next }}</label
+                  >
+                </div>
+                <div class="form-check form-switch">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    role="switch"
+                    id="hideIdleMachines"
+                    formControlName="hideIdleMachines"
+                  />
+                  <label
+                    class="form-check-label fw-bold"
+                    for="hideIdleMachines"
+                    >{{ 'hideIdleMachines' | i18next }}</label
+                  >
+                </div>
+                <div class="form-check form-switch">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    role="switch"
+                    id="sortByTimeRemaining"
+                    formControlName="sortByTimeRemaining"
+                  />
+                  <label
+                    class="form-check-label fw-bold"
+                    for="sortByTimeRemaining"
+                    >{{ 'sortByTimeRemaining' | i18next }}</label
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-    <div class="form-check form-switch mb-3">
-      <input class="form-check-input" type="checkbox" role="switch" id="enableAiMonitoring" formControlName="enableAiMonitoring" />
-      <label class="form-check-label" for="enableAiMonitoring">{{ 'enableAiMonitoring' | i18next }}</label>
-    </div>
+      <div class="card border-secondary shadow-sm">
+        <div
+          class="card-header border-secondary d-flex align-items-center"
+          style="height: 54px"
+        >
+          <h6 class="mb-0 text-uppercase fw-bold text-primary"><i class="bi bi-robot me-2"></i>{{ 'aiMonitoring' | i18next }}</h6>
+        </div>
+        <div class="card-body">
+          <div class="form-check form-switch mb-4">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="enableAI"
+              checked
+            />
+            <label
+              class="form-check-label fw-bold"
+              for="enableAI"
+              >{{ 'enableAiMonitoring' | i18next }}</label
+            >
+          </div>
 
-    <div class="mb-3">
-      <label for="aiMonitoringFrameCaptureRate" class="form-label">{{ 'aiMonitoringFrameCaptureRate' | i18next }}</label>
-      <input type="number" class="form-control" id="aiMonitoringFrameCaptureRate" formControlName="aiMonitoringFrameCaptureRate" min="1" max="60" />
-      <div class="form-text">{{ 'aiMonitoringFrameCaptureRateHelp' | i18next }}</div>
-    </div>
-
-    <div class="mb-3">
-      <label for="aiMonitoringFailureAction" class="form-label">{{ 'aiMonitoringFailureAction' | i18next }}</label>
-      <select id="aiMonitoringFailureAction" class="form-select" formControlName="aiMonitoringFailureAction">
-        <option value="AlertOnly">{{ 'aiMonitoringFailureActionAlertOnly' | i18next }}</option>
-        <option value="PauseJob">{{ 'aiMonitoringFailureActionPauseJob' | i18next }}</option>
-        <option value="CancelJob">{{ 'aiMonitoringFailureActionCancelJob' | i18next }}</option>
-      </select>
+          <div class="row g-4">
+            <div class="col-md-6">
+              <label class="form-label small fw-bold">{{ 'aiMonitoringFrameCaptureRate' | i18next }}</label>
+              <input
+                type="number"
+                class="form-control border-secondary"
+                formControlName="aiMonitoringFrameCaptureRate"
+              />
+              <div class="form-text text-muted">{{ 'aiMonitoringFrameCaptureRateHelp' | i18next }}</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-bold">{{ 'aiMonitoringFailureAction' | i18next }}</label>
+              <select
+                class="form-select border-secondary"
+                formControlName="aiMonitoringFailureAction"
+              >
+                <option value="AlertOnly">{{ 'aiMonitoringFailureActionAlertOnly' | i18next }}</option>
+                <option value="PauseJob">{{ 'aiMonitoringFailureActionPauseJob' | i18next }}</option>
+                <option value="CancelJob">{{ 'aiMonitoringFailureActionCancelJob' | i18next }}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </form>
 }

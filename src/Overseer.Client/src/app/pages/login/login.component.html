@@ -1,15 +1,44 @@
 <app-unauthenticated message="{{ 'pages.login.message' | i18next }}">
   <div class="d-flex flex-row align-items-center">
-    <form class="flex-fill" [formGroup]="form" (submit)="login()">
+    <form
+      class="flex-fill"
+      [formGroup]="form"
+      (submit)="login()"
+    >
       <div class="mb-3">
-        <label for="username" class="form-label">{{ 'username' | i18next }}</label>
-        <input id="username" type="text" class="form-control" autocomplete="username" formControlName="username" />
+        <label
+          for="username"
+          class="form-label small fw-bold"
+          >{{ 'username' | i18next }}</label
+        >
+        <input
+          id="username"
+          type="text"
+          class="form-control"
+          autocomplete="username"
+          formControlName="username"
+        />
       </div>
       <div class="mb-3">
-        <label for="password" class="form-label">{{ 'password' | i18next }}</label>
-        <input id="password" type="password" class="form-control" autocomplete="current-password" formControlName="password" />
+        <label
+          for="password"
+          class="form-label small fw-bold"
+          >{{ 'password' | i18next }}</label
+        >
+        <input
+          id="password"
+          type="password"
+          class="form-control"
+          autocomplete="current-password"
+          formControlName="password"
+        />
       </div>
-      <button type="submit" class="btn btn-primary">{{ 'login' | i18next }}</button>
+      <button
+        type="submit"
+        class="btn btn-primary"
+      >
+        {{ 'login' | i18next }}
+      </button>
     </form>
   </div>
 </app-unauthenticated>

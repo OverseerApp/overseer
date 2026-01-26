@@ -6,8 +6,9 @@ public record PluginRegistryItem(
   string Description,
   string GithubRepository,
   string License,
-  string Version,
-  string DownloadUrl,
-  bool IsInstalled,
-  bool IsUpdateAvailable
+  string? Version,
+  string? DownloadUrl,
+  bool? IsInstalled,
+  string? InstalledVersion,
+  bool? IsUpdateAvailable
 );

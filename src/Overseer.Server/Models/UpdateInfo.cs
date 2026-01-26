@@ -52,32 +52,6 @@ namespace Overseer.Server.Models
   }
 
   /// <summary>
-  /// Represents a GitHub release response
-  /// </summary>
-  public class GitHubRelease
-  {
-    public string? TagName { get; set; }
-    public string? Name { get; set; }
-    public string? Body { get; set; }
-    public string? HtmlUrl { get; set; }
-    public bool Prerelease { get; set; }
-    public bool Draft { get; set; }
-    public DateTime? PublishedAt { get; set; }
-    public List<GitHubReleaseAsset>? Assets { get; set; }
-  }
-
-  /// <summary>
-  /// Represents an asset attached to a GitHub release
-  /// </summary>
-  public class GitHubReleaseAsset
-  {
-    public string? Name { get; set; }
-    public string? BrowserDownloadUrl { get; set; }
-    public string? ContentType { get; set; }
-    public long Size { get; set; }
-  }
-
-  /// <summary>
   /// Represents the result of an update operation
   /// </summary>
   public class UpdateResult

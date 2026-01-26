@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using log4net;
+using Octokit;
 using Overseer.Server.Models;
 
 namespace Overseer.Server.Updates
@@ -10,18 +11,16 @@ namespace Overseer.Server.Updates
   {
     static readonly ILog Log = LogManager.GetLogger(typeof(UpdateService));
 
-    const string GitHubReleasesApiUrl = "https://api.github.com/repos/michaelfdeberry/overseer/releases";
-    const string GitHubReleasesUrl = "https://github.com/michaelfdeberry/overseer/releases";
     const string UpdaterScriptName = "overseer.sh";
 
-    readonly IHttpClientFactory _httpClientFactory;
     readonly IWebHostEnvironment _environment;
+    readonly IGitHubClient _gitHubClient;
     readonly JsonSerializerOptions _jsonOptions;
 
-    public UpdateService(IHttpClientFactory httpClientFactory, IWebHostEnvironment environment)
+    public UpdateService(IWebHostEnvironment environment, IGitHubClient gitHubClient)
     {
-      _httpClientFactory = httpClientFactory;
       _environment = environment;
+      _gitHubClient = gitHubClient;
       _jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true, PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower };
     }
 
@@ -37,34 +36,8 @@ namespace Overseer.Server.Updates
 
       try
       {
-        var client = _httpClientFactory.CreateClient();
-        client.DefaultRequestHeaders.Add("User-Agent", "Overseer-UpdateChecker");
-        client.DefaultRequestHeaders.Add("Accept", "application/vnd.github.v3+json");
-
-        var response = await client.GetAsync(GitHubReleasesApiUrl);
-
-        if (!response.IsSuccessStatusCode)
-        {
-          Log.Warn($"Failed to check for updates. Status: {response.StatusCode}");
-          return updateInfo;
-        }
-
-        var content = await response.Content.ReadAsStringAsync();
-        var releases = JsonSerializer.Deserialize<List<GitHubRelease>>(content, _jsonOptions);
-
-        if (releases == null || releases.Count == 0)
-        {
-          Log.Info("No releases found");
-          return updateInfo;
-        }
-
         // Find the latest applicable release
-        var latestRelease = releases
-          .Where(r => !r.Draft)
-          .Where(r => includePreRelease || !r.Prerelease)
-          .OrderByDescending(r => r.PublishedAt)
-          .FirstOrDefault();
-
+        var latestRelease = await _gitHubClient.Repository.Release.GetLatest("OverseerApp", "overseer");
         if (latestRelease == null)
         {
           Log.Info("No applicable releases found");
@@ -75,9 +48,9 @@ namespace Overseer.Server.Updates
         var currentVersionNormalized = NormalizeVersion(currentVersion);
 
         updateInfo.LatestVersion = latestRelease.TagName;
-        updateInfo.ReleaseUrl = latestRelease.HtmlUrl ?? $"{GitHubReleasesUrl}/tag/{latestRelease.TagName}";
+        updateInfo.ReleaseUrl = latestRelease.HtmlUrl;
         updateInfo.ReleaseNotes = latestRelease.Body;
-        updateInfo.PublishedAt = latestRelease.PublishedAt;
+        updateInfo.PublishedAt = latestRelease.PublishedAt?.UtcDateTime;
         updateInfo.IsPreRelease = latestRelease.Prerelease;
 
         // Find the download URL for the server package

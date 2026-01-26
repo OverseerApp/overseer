@@ -1,51 +1,158 @@
-<p>
-  <i class="bi bi-person-fill-gear me-1"></i>
-  <span>{{ 'editingUser' | i18next }} {{ user()?.username }}</span>
-</p>
-<fieldset>
-  <legend>{{ 'changePassword' | i18next }}</legend>
-  <form [formGroup]="passwordForm" (submit)="changePassword()">
-    <div class="mb-3">
-      <label for="password" class="form-label">{{ 'password' | i18next }}</label>
-      <input required id="password" type="password" class="form-control" autocomplete="new-password" formControlName="password" />
+<div class="container-fluid p-0">
+  <div class="d-flex align-items-center mb-4">
+    <a
+      routerLink="/settings/users"
+      class="btn btn-link text-secondary p-0 me-3"
+    >
+      <i class="bi bi-arrow-left fs-4"></i>
+    </a>
+    <h4 class="mb-0">
+      <i class="bi bi-person-fill-gear text-primary me-2"></i>
+      {{ 'editingUser' | i18next }} <span class="text-info font-monospace">{{ user()?.username }}</span>
+    </h4>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-6">
+      <div class="card border-secondary shadow-sm h-100">
+        <div class="card-header border-secondary bg-opacity-25 py-3">
+          <h6 class="mb-0 text-uppercase fw-bold text-primary"><i class="bi bi-shield-lock me-2"></i>{{ 'changePassword' | i18next }}</h6>
+        </div>
+        <div class="card-body">
+          <form
+            [formGroup]="passwordForm"
+            (submit)="changePassword()"
+          >
+            <div class="mb-3">
+              <label
+                for="password"
+                class="form-label small fw-bold"
+                >{{ 'password' | i18next }}</label
+              >
+              <input
+                required
+                id="password"
+                type="password"
+                class="form-control border-secondary"
+                autocomplete="new-password"
+                formControlName="password"
+              />
+            </div>
+            <div class="mb-4">
+              <label
+                for="confirmPassword"
+                class="form-label small fw-bold"
+                >{{ 'confirmPassword' | i18next }}</label
+              >
+              <input
+                required
+                id="confirmPassword"
+                type="password"
+                class="form-control border-secondary"
+                autocomplete="new-password"
+                formControlName="confirmPassword"
+              />
+            </div>
+            <button
+              type="submit"
+              class="btn btn-primary w-100 w-sm-auto"
+              [disabled]="passwordForm.pristine || passwordForm.invalid || passwordForm.disabled"
+            >
+              <i class="bi bi-key me-2"></i>{{ 'changePassword' | i18next }}
+            </button>
+          </form>
+        </div>
+      </div>
     </div>
-    <div class="mb-3">
-      <label for="confirmPassword" class="form-label">{{ 'confirmPassword' | i18next }}</label>
-      <input required id="confirmPassword" type="password" class="form-control" autocomplete="new-password" formControlName="confirmPassword" />
+
+    <div class="col-lg-6">
+      <div class="card border-secondary shadow-sm h-100">
+        <div class="card-header border-secondary bg-opacity-25 py-3">
+          <h6 class="mb-0 text-uppercase fw-bold text-primary"><i class="bi bi-person-badge me-2"></i>{{ 'userSettings' | i18next }}</h6>
+        </div>
+        <div class="card-body">
+          <form
+            [formGroup]="updateForm"
+            (submit)="save()"
+          >
+            <div class="mb-3">
+              <label
+                for="accessLevel"
+                class="form-label small fw-bold"
+                >{{ 'accessLevel' | i18next }}</label
+              >
+              <select
+                id="accessLevel"
+                class="form-select border-secondary"
+                formControlName="accessLevel"
+              >
+                @for (option of accessLevels(); track option.value) {
+                  <option [ngValue]="option.value">{{ option.translationKey | i18next }}</option>
+                }
+              </select>
+            </div>
+            <div class="mb-4">
+              <label
+                for="sessionLifetime"
+                class="form-label small fw-bold"
+                >{{ 'sessionLifetime' | i18next }}</label
+              >
+              <select
+                required
+                id="sessionLifetime"
+                class="form-select border-secondary"
+                formControlName="sessionLifetime"
+              >
+                @for (option of lifetimes(); track option.value) {
+                  <option [ngValue]="option.value">{{ option.value }} {{ option.translationKey | i18next }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2 justify-content-end">
+              <a
+                class="btn btn-outline-secondary"
+                routerLink="/settings/users"
+                >{{ 'cancel' | i18next }}</a
+              >
+              <button
+                type="submit"
+                class="btn btn-primary px-4"
+                [disabled]="updateForm.pristine || updateForm.invalid || updateForm.disabled"
+              >
+                <i class="bi bi-check-lg me-2"></i>{{ 'save' | i18next }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
-    <div class="d-grid gap-2 d-sm-block">
-      <button type="submit" class="btn btn-primary" [disabled]="passwordForm.pristine || passwordForm.invalid || passwordForm.disabled">
-        {{ 'changePassword' | i18next }}
-      </button>
+
+    <div class="col-12 mt-4">
+      <div class="card border-danger bg-opacity-25 shadow-sm">
+        <div class="card-body d-flex flex-wrap align-items-center justify-content-between gap-3">
+          <div>
+            <h6 class="mb-1 fw-bold text-danger"><i class="bi bi-exclamation-octagon me-2"></i>{{ 'dangerZone' | i18next }}</h6>
+            <p class="text-muted small mb-0">{{ 'userDangerZoneDescription' | i18next }}</p>
+          </div>
+          <div class="d-flex gap-2">
+            <button
+              type="button"
+              class="btn btn-outline-warning btn-sm"
+              (click)="signOut()"
+            >
+              <i class="bi bi-box-arrow-right me-2"></i>{{ 'logout' | i18next }}
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline-danger btn-sm"
+              (click)="deleteUser()"
+            >
+              <i class="bi bi-trash3 me-2"></i>{{ 'delete' | i18next }}
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
-  </form>
-</fieldset>
-<fieldset class="mt-5">
-  <legend>{{ 'userSettings' | i18next }}</legend>
-  <form [formGroup]="updateForm" (submit)="save()">
-    <div class="mb-3">
-      <label for="accessLevel" class="form-label">{{ 'accessLevel' | i18next }}</label>
-      <select id="accessLevel" class="form-select" formControlName="accessLevel">
-        @for (option of accessLevels(); track option.value) {
-          <option [ngValue]="option.value">{{ option.translationKey | i18next }}</option>
-        }
-      </select>
-    </div>
-    <div class="mb-3">
-      <label for="sessionLifetime" class="form-label">{{ 'sessionLifetime' | i18next }}</label>
-      <select required id="sessionLifetime" class="form-select" formControlName="sessionLifetime">
-        @for (option of lifetimes(); track option.value) {
-          <option [ngValue]="option.value">{{ option.value }} {{ option.translationKey | i18next }}</option>
-        }
-      </select>
-    </div>
-    <div class="d-grid gap-2 d-sm-block">
-      <button type="submit" class="btn btn-primary" [disabled]="updateForm.pristine || updateForm.invalid || updateForm.disabled">
-        {{ 'save' | i18next }}
-      </button>
-      <a class="btn btn-secondary ms-sm-2" routerLink="/settings/users" routerLinkActive="router-link-active">{{ 'cancel' | i18next }}</a>
-      <button type="button" class="btn btn-outline-secondary ms-sm-2" (click)="signOut()">{{ 'logout' | i18next }}</button>
-      <button type="button" class="btn btn-outline-danger ms-sm-2" (click)="deleteUser()">{{ 'delete' | i18next }}</button>
-    </div>
-  </form>
-</fieldset>
+  </div>
+</div>

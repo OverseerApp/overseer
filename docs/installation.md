@@ -18,15 +18,18 @@ This guide covers the different ways to install and run Overseer for monitoring 
 ## Requirements
 
 ### Supported Platforms
+
 - **Docker**: Any platform that supports Docker (Linux, Windows, macOS)
 - **Native**: Linux with systemd (Ubuntu, Debian, Raspberry Pi OS, etc.)
 
 ### Hardware Requirements
+
 - Minimum 1GB RAM (2GB recommended for AI monitoring features)
 - 500MB disk space for the application
 - Additional storage for logs and database
 
 ### Network Requirements
+
 - Port 9000 (default) for the web interface
 - Network access to your 3D printers
 
@@ -46,7 +49,7 @@ docker run -d \
   -p 9000:9000 \
   -v overseer-data:/app/data \
   --restart unless-stopped \
-  ghcr.io/michaelfdeberry/overseer:latest
+  ghcr.io/overseerapp/overseer:latest
 ```
 
 #### Docker Compose
@@ -58,10 +61,10 @@ version: '3.8'
 
 services:
   overseer:
-    image: ghcr.io/michaelfdeberry/overseer:latest
+    image: ghcr.io/overseerapp/overseer:latest
     container_name: overseer
     ports:
-      - "9000:9000"
+      - '9000:9000'
     volumes:
       - overseer-data:/app/data
     restart: unless-stopped
@@ -85,7 +88,7 @@ docker run -d \
   --name overseer \
   -p 8080:9000 \
   -v overseer-data:/app/data \
-  ghcr.io/michaelfdeberry/overseer:latest
+  ghcr.io/overseerapp/overseer:latest
 ```
 
 #### Accessing Printer Network
@@ -97,7 +100,7 @@ docker run -d \
   --name overseer \
   --network host \
   -v overseer-data:/app/data \
-  ghcr.io/michaelfdeberry/overseer:latest
+  ghcr.io/overseerapp/overseer:latest
 ```
 
 ---
@@ -112,7 +115,7 @@ Download and run the installer script:
 
 ```bash
 # Download the installer
-wget https://github.com/michaelfdeberry/overseer/releases/latest/download/overseer.sh
+wget https://github.com/overseerapp/overseer/releases/latest/download/overseer.sh
 
 # Make it executable
 chmod +x overseer.sh
@@ -122,6 +125,7 @@ sudo ./overseer.sh install
 ```
 
 The installer will:
+
 1. Install .NET runtime and dependencies
 2. Download and extract Overseer
 3. Create a systemd service
@@ -131,7 +135,7 @@ The installer will:
 #### Install a Specific Version
 
 ```bash
-sudo ./overseer.sh install 2.0.1
+sudo ./overseer.sh install 2.0.0
 ```
 
 #### Service Management
@@ -168,6 +172,7 @@ For advanced users who want full control over the installation.
 #### Prerequisites
 
 1. Install .NET 10.0 ASP.NET Core Runtime:
+
    ```bash
    # Ubuntu/Debian
    wget https://dot.net/v1/dotnet-install.sh
@@ -183,11 +188,13 @@ For advanced users who want full control over the installation.
 #### Installation Steps
 
 1. Download the latest release:
+
    ```bash
-   wget https://github.com/michaelfdeberry/overseer/releases/latest/download/overseer_server_VERSION.zip
+   wget https://github.com/overseerapp/overseer/releases/latest/download/overseer_server_VERSION.zip
    ```
 
 2. Extract to your desired location:
+
    ```bash
    mkdir -p /opt/overseer
    unzip overseer_server_VERSION.zip -d /opt/overseer
@@ -236,6 +243,7 @@ sudo systemctl start overseer
 ### Accessing the Web Interface
 
 After installation, access Overseer at:
+
 - **Default**: `http://localhost:9000`
 - **Network**: `http://<your-server-ip>:9000`
 
@@ -286,7 +294,7 @@ server {
 
 ```bash
 # Pull the latest image
-docker pull ghcr.io/michaelfdeberry/overseer:latest
+docker pull ghcr.io/overseerapp/overseer:latest
 
 # Restart the container
 docker-compose down
@@ -295,7 +303,7 @@ docker-compose up -d
 # Or without compose
 docker stop overseer
 docker rm overseer
-docker run -d --name overseer -p 9000:9000 -v overseer-data:/app/data ghcr.io/michaelfdeberry/overseer:latest
+docker run -d --name overseer -p 9000:9000 -v overseer-data:/app/data ghcr.io/overseerapp/overseer:latest
 ```
 
 ### Linux with systemd (Auto-Update)
@@ -310,7 +318,7 @@ Overseer supports automatic updates from the web interface:
 
 ```bash
 # Download the update script or new version
-wget https://github.com/michaelfdeberry/overseer/releases/download/VERSION/overseer_server_VERSION.zip
+wget https://github.com/overseerapp/overseer/releases/download/VERSION/overseer_server_VERSION.zip
 
 # Stop the service
 sudo systemctl stop overseer
@@ -332,15 +340,17 @@ sudo systemctl start overseer
 ### Application Won't Start
 
 1. Check the logs:
+
    ```bash
    # systemd
    sudo journalctl -u overseer -n 50
-   
+
    # Docker
    docker logs overseer
    ```
 
 2. Verify .NET is installed:
+
    ```bash
    dotnet --list-runtimes
    ```
@@ -353,6 +363,7 @@ sudo systemctl start overseer
 ### Can't Connect to Printers
 
 1. Verify network connectivity from the Overseer host:
+
    ```bash
    ping <printer-ip>
    curl http://<printer-ip>/api/version
@@ -388,5 +399,5 @@ sudo chown -R $USER:$USER /path/to/overseer
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/michaelfdeberry/overseer/issues)
-- **Documentation**: [docs/](https://github.com/michaelfdeberry/overseer/tree/main/docs)
+- **Issues**: [GitHub Issues](https://github.com/overseerapp/overseer/issues)
+- **Documentation**: [docs/](https://github.com/overseerapp/overseer/tree/main/docs)

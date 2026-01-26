@@ -1,4 +1,5 @@
 import { CdkDrag, CdkDragDrop, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
+import { NgClass } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { I18NextPipe } from 'angular-i18next';
@@ -9,7 +10,7 @@ import { MachinesService } from '../../services/machines.service';
   selector: 'app-list-machines',
   templateUrl: './list-machines.component.html',
   styleUrl: './list-machines.component.scss',
-  imports: [I18NextPipe, RouterLink, CdkDropList, CdkDrag],
+  imports: [I18NextPipe, RouterLink, CdkDropList, CdkDrag, NgClass],
 })
 export class ListMachinesComponent {
   private machinesService = inject(MachinesService);

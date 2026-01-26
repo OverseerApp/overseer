@@ -1,25 +1,62 @@
 @if (form) {
   <div [formGroup]="form">
     <div class="mb-3">
-      <label for="name" class="form-label">{{ 'name' | i18next }}</label>
-      <input type="text" class="form-control" id="name" required formControlName="name" />
+      <label
+        for="name"
+        class="form-label small fw-bold"
+        >{{ 'name' | i18next }}</label
+      >
+      <input
+        type="text"
+        class="form-control"
+        id="name"
+        required
+        formControlName="name"
+      />
     </div>
     <div class="mb-3">
-      <label for="ipAddress" class="form-label">{{ 'ipAddress' | i18next }}</label>
-      <input type="text" class="form-control" id="ipAddress" required formControlName="ipAddress" />
+      <label
+        for="ipAddress"
+        class="form-label small fw-bold"
+        >{{ 'ipAddress' | i18next }}</label
+      >
+      <input
+        type="text"
+        class="form-control"
+        id="ipAddress"
+        required
+        formControlName="ipAddress"
+      />
     </div>
     @if (machine) {
       <div class="mb-3">
-        <label for="webCamUrl" class="form-label">{{ 'webCamUrl' | i18next }}</label>
-        <select id="webCamUrl" class="form-select" formControlName="webCamUrl">
+        <label
+          for="webCamUrl"
+          class="form-label small fw-bold"
+          >{{ 'webCamUrl' | i18next }}</label
+        >
+        <select
+          id="webCamUrl"
+          class="form-select"
+          formControlName="webCamUrl"
+        >
           @for (option of machine.availableWebCams | keyvalue; track option) {
             <option [ngValue]="option.value">{{ option.key }}</option>
           }
         </select>
       </div>
       <div class="mb-3">
-        <label for="webCamOrientation" class="form-label">{{ 'webCamOrientation' | i18next }}</label>
-        <select id="webCamOrientation" class="form-select" required formControlName="webCamOrientation">
+        <label
+          for="webCamOrientation"
+          class="form-label small fw-bold"
+          >{{ 'webCamOrientation' | i18next }}</label
+        >
+        <select
+          id="webCamOrientation"
+          class="form-select"
+          required
+          formControlName="webCamOrientation"
+        >
           @for (option of webCamOrientations; track $index) {
             <option [ngValue]="option.value">{{ option.translationKey | i18next }}</option>
           }
@@ -28,8 +65,17 @@
     }
     <div class="card p-3 mb-3">
       <p>{{ 'advancedOptions' | i18next }}</p>
-      <label for="clientCertificate" class="form-label">{{ 'clientPem' | i18next }}</label>
-      <textarea rows="4" class="form-control" id="clientCertificate" formControlName="clientCertificate"></textarea>
+      <label
+        for="clientCertificate"
+        class="form-label small fw-bold"
+        >{{ 'clientPem' | i18next }}</label
+      >
+      <textarea
+        rows="4"
+        class="form-control"
+        id="clientCertificate"
+        formControlName="clientCertificate"
+      ></textarea>
     </div>
   </div>
 }

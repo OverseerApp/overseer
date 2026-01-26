@@ -17,7 +17,7 @@ DEFAULT_VERSION='2.0.0-alpha.1'
 OVERSEER_EXECUTABLE='Overseer.Server.dll'
 SERVICE_NAME='overseer'
 SERVICE_PATH='/lib/systemd/system/overseer.service'
-GITHUB_RELEASES_URL='https://github.com/michaelfdeberry/overseer/releases/download'
+GITHUB_RELEASES_URL='https://github.com/overseerapp/overseer/releases/download'
 LOG_FILE='/var/log/overseer.log'
 
 # =============================================================================

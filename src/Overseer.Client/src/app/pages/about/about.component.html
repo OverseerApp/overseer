@@ -1,66 +1,102 @@
-<div class="container-fluid p-4">
+<div>
   @let appInfo = this.applicationInfo.value();
   @let updateInfo = this.updateInfo.value();
+
   @if (updateInfo?.updateAvailable && !updatedDismissed()) {
-    <div class="alert alert-info d-flex align-items-center justify-content-between shadow-sm" role="alert">
-      <div class="d-flex align-items-center">
-        <i class="bi bi-info-circle fs-4 me-3"></i>
-        <div class="d-flex flex-row align-items-center gap-1">
-          <strong>{{ 'updates.available' | i18next }}</strong>
-          <span class="small">{{ 'updates.newVersionAvailable' | i18next: { version: updateInfo?.latestVersion } }}</span>
-        </div>
+    <div
+      class="alert alert-primary border-0 shadow-sm d-flex align-items-center mb-4 py-3"
+      role="alert"
+    >
+      <i class="bi bi-rocket-takeoff-fill fs-4 me-3 text-primary"></i>
+      <div class="flex-grow-1">
+        <h6 class="mb-0 fw-bold">{{ 'updates.available' | i18next }}</h6>
+        <span class="small opacity-75">{{ 'updates.newVersionAvailable' | i18next: { version: updateInfo?.latestVersion } }}</span>
       </div>
-      <div class="d-flex align-items-center gap-2">
-        <button class="btn btn-outline-secondary btn-sm" (click)="openReleaseUrl()">{{ 'updates.viewRelease' | i18next }}</button>
+      <div class="d-flex gap-2 ms-3">
+        <button
+          class="btn btn-sm btn-link text-decoration-none text-primary fw-bold"
+          (click)="openReleaseUrl()"
+        >
+          {{ 'updates.viewRelease' | i18next }}
+        </button>
         @if (updateInfo?.canAutoUpdate) {
-          <button class="btn btn-primary btn-sm" (click)="installUpdate()" [disabled]="isUpdating()">
+          <button
+            class="btn btn-primary btn-sm px-3 shadow-sm"
+            (click)="installUpdate()"
+            [disabled]="isUpdating()"
+          >
             @if (isUpdating()) {
-              <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+              <span class="spinner-border spinner-border-sm me-2"></span>
             }
-            {{ 'updates.installUpdate' | i18next }}
+            <i class="bi bi-download me-1"></i> {{ 'updates.installUpdate' | i18next }}
           </button>
         }
-        <button type="button" class="btn-close ms-2" aria-label="Close" (click)="updatedDismissed.set(true)"></button>
+        <button
+          type="button"
+          class="btn-close ms-2"
+          (click)="updatedDismissed.set(true)"
+        ></button>
       </div>
     </div>
   }
+
   @if (updateError()) {
-    <div class="alert alert-warning mt-2" role="alert">
-      {{ updateError() }}
+    <div
+      class="alert alert-danger border-0 mb-4 d-flex align-items-center"
+      role="alert"
+    >
+      <i class="bi bi-exclamation-octagon me-2"></i> {{ updateError() }}
     </div>
   }
-  <div class="row g-4 mb-4">
-    <div class="col-md-6">
-      <div class="card h-100 shadow-sm border-secondary bg-dark text-light overflow-hidden">
-        <div class="card-header border-bottom border-secondary bg-transparent">
-          <h5 class="mb-0"><i class="fas fa-cube me-2 text-success"></i>{{ 'about.info.applicationInfo' | i18next }}</h5>
+
+  <div class="row g-4">
+    <div class="col-md-12">
+      <div class="card border-secondary shadow-sm">
+        <div class="card-header border-secondary py-3">
+          <h6 class="mb-0 text-uppercase fw-bold text-primary">
+            <i class="bi bi-app-indicator me-2"></i>{{ 'about.info.applicationInfo' | i18next }}
+          </h6>
         </div>
         <div class="card-body p-0">
           <ul class="list-group list-group-flush">
-            <li class="list-group-item bg-dark text-light d-flex justify-content-between align-items-center border-secondary">
-              <span>{{ 'about.info.appVersion' | i18next }}</span>
-              <div class="d-flex align-items-center">
-                <span class="font-monospace">{{ appInfo?.version }}</span>
-                <button class="btn btn-link btn-sm text-secondary ms-2 p-0" (click)="copyToClipboard(appInfo?.version)">
+            <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center py-3 border-secondary">
+              <span class="text-secondary small fw-bold">{{ 'about.info.appVersion' | i18next }}</span>
+              <div class="d-flex align-items-center gap-2">
+                <code class="text-info bg-dark px-2 py-1 rounded small border border-secondary">{{ appInfo?.version }}</code>
+                <button
+                  class="btn btn-sm btn-outline-secondary border-0 p-1"
+                  (click)="copyToClipboard(appInfo?.version)"
+                  title="Copy"
+                >
                   <i class="bi bi-clipboard"></i>
                 </button>
               </div>
             </li>
-            <li class="list-group-item bg-dark text-light d-flex justify-content-between align-items-center border-secondary">
-              <span>{{ 'about.info.runtimeVersion' | i18next }}</span>
-              <div class="d-flex align-items-center">
-                <span class="font-monospace">{{ appInfo?.runtime }}</span>
-                <button class="btn btn-link btn-sm text-secondary ms-2 p-0" (click)="copyToClipboard(appInfo?.runtime)">
+
+            <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center py-3 border-secondary">
+              <span class="text-secondary small fw-bold">{{ 'about.info.runtimeVersion' | i18next }}</span>
+              <div class="d-flex align-items-center gap-2">
+                <span class="font-monospace small opacity-75">{{ appInfo?.runtime }}</span>
+                <button
+                  class="btn btn-sm btn-outline-secondary border-0 p-1"
+                  (click)="copyToClipboard(appInfo?.runtime)"
+                  title="Copy"
+                >
                   <i class="bi bi-clipboard"></i>
                 </button>
               </div>
             </li>
-            <li class="list-group-item bg-dark text-light d-flex justify-content-between align-items-center border-0">
-              <span>{{ 'about.info.healthStatus' | i18next }}</span>
+
+            <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center py-3 border-0">
+              <span class="text-secondary small fw-bold">{{ 'about.info.healthStatus' | i18next }}</span>
               @if (appInfo) {
-                <span class="text-success"><i class="fas fa-check-circle me-1"></i>{{ 'about.info.healthy' | i18next }}</span>
+                <span class="badge rounded-pill bg-success-subtle text-success border border-success px-3">
+                  <i class="bi bi-check2-circle me-1"></i> {{ 'about.info.healthy' | i18next }}
+                </span>
               } @else {
-                <span class="text-warning"><i class="fas fa-exclamation-circle me-1"></i>{{ 'about.info.unavailable' | i18next }}</span>
+                <span class="badge rounded-pill bg-warning-subtle text-warning border border-warning px-3">
+                  <i class="bi bi-dash-circle me-1"></i> {{ 'about.info.unavailable' | i18next }}
+                </span>
               }
             </li>
           </ul>
@@ -68,31 +104,44 @@
       </div>
     </div>
 
-    <div class="col-md-6">
-      <div class="card h-100 shadow-sm border-secondary bg-dark text-light overflow-hidden">
-        <div class="card-header border-bottom border-secondary bg-transparent">
-          <h5 class="mb-0"><i class="fas fa-desktop me-2 text-success"></i>{{ 'about.info.systemInfo' | i18next }}</h5>
+    <div class="col-md-12">
+      <div class="card border-secondary mb-4 shadow-sm">
+        <div class="card-header border-secondary py-3">
+          <h6 class="mb-0 text-uppercase fw-bold text-primary"><i class="bi bi-cpu me-2"></i>{{ 'about.info.systemInfo' | i18next }}</h6>
         </div>
         <div class="card-body p-0">
           <ul class="list-group list-group-flush">
-            <li class="list-group-item bg-dark text-light d-flex justify-content-between align-items-center border-secondary">
-              <span>{{ 'about.info.platform' | i18next }}</span>
-              <span>{{ appInfo?.platform }}</span>
+            <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center py-3 border-secondary">
+              <span class="text-secondary small fw-bold">{{ 'about.info.platform' | i18next }}</span>
+              <span class="badge bg-secondary border border-secondary">{{ appInfo?.platform }}</span>
             </li>
-            <li class="list-group-item bg-dark text-light d-flex justify-content-between align-items-center border-secondary">
-              <span>{{ 'about.info.operatingSystem' | i18next }}</span>
-              <div class="d-flex align-items-center">
-                <span class="text-truncate" style="max-width: 200px" title="{{ appInfo?.operatingSystem }}">{{ appInfo?.operatingSystem }}</span>
-                <button class="btn btn-link btn-sm text-secondary ms-2 p-0" (click)="copyToClipboard(appInfo?.operatingSystem)">
+
+            <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center py-3 border-secondary">
+              <span class="text-secondary small fw-bold">{{ 'about.info.operatingSystem' | i18next }}</span>
+              <div class="d-flex align-items-center gap-2">
+                <span
+                  class="text-truncate small opacity-75"
+                  title="{{ appInfo?.operatingSystem }}"
+                >
+                  {{ appInfo?.operatingSystem }}
+                </span>
+                <button
+                  class="btn btn-sm btn-outline-secondary border-0 p-1"
+                  (click)="copyToClipboard(appInfo?.operatingSystem)"
+                >
                   <i class="bi bi-clipboard"></i>
                 </button>
               </div>
             </li>
-            <li class="list-group-item bg-dark text-light d-flex justify-content-between align-items-center border-0">
-              <span>{{ 'about.info.machineName' | i18next }}</span>
-              <div class="d-flex align-items-center">
-                <span class="font-monospace">{{ appInfo?.machineName }}</span>
-                <button class="btn btn-link btn-sm text-secondary ms-2 p-0" (click)="copyToClipboard(appInfo?.machineName)">
+
+            <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center py-3 border-0">
+              <span class="text-secondary small fw-bold">{{ 'about.info.machineName' | i18next }}</span>
+              <div class="d-flex align-items-center gap-2">
+                <span class="font-monospace small opacity-75">{{ appInfo?.machineName }}</span>
+                <button
+                  class="btn btn-sm btn-outline-secondary border-0 p-1"
+                  (click)="copyToClipboard(appInfo?.machineName)"
+                >
                   <i class="bi bi-clipboard"></i>
                 </button>
               </div>
@@ -103,25 +152,41 @@
     </div>
   </div>
 
-  <div class="card shadow-sm border-secondary bg-dark text-light mb-4">
-    <div class="card-header border-bottom border-secondary bg-transparent">
-      <h5 class="mb-0"><i class="fas fa-tools me-2 text-success"></i>{{ 'about.maintenanceSupport' | i18next }}</h5>
-    </div>
-    <div class="card-body">
+  <div class="card border-secondary mb-4 shadow-sm">
+    <div class="card-body d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <div>
+        <h6 class="mb-1 fw-bold"><i class="bi bi-tools text-success me-2"></i>{{ 'about.maintenanceSupport' | i18next }}</h6>
+        <p class="text-muted small mb-0">{{ 'about.helpDescription' | i18next }}</p>
+      </div>
       <div class="d-flex gap-2">
-        <button class="btn btn-outline-light" (click)="downloadLog()"><i class="fas fa-download me-2"></i>{{ 'about.downloadLog' | i18next }}</button>
-        <a class="btn btn-outline-light" target="_blank" href="https://github.com/michaelfdeberry/overseer/issues">
-          <i class="fas fa-life-ring me-2"></i>{{ 'about.issueTracker' | i18next }}
+        <button
+          class="btn btn-outline-light btn-sm px-3"
+          (click)="downloadLog()"
+        >
+          <i class="bi bi-file-earmark-arrow-down me-2"></i>{{ 'about.downloadLog' | i18next }}
+        </button>
+        <a
+          class="btn btn-outline-light btn-sm px-3"
+          target="_blank"
+          href="https://github.com/overseerapp/overseer/issues"
+        >
+          <i class="bi bi-github me-2"></i>{{ 'about.issueTracker' | i18next }}
         </a>
       </div>
     </div>
   </div>
-  <hr class="border-secondary my-4" />
-  <div class="text-center text-muted">
-    <span>&copy; {{ currentYear() }} Overseer.</span>
-    {{ 'about.openSourceNotice' | i18next }}
-    <a href="https://en.wikipedia.org/wiki/GNU_Affero_General_Public_License" target="_blank" class="text-success">
-      {{ 'about.license' | i18next }}
-    </a>
-  </div>
+
+  <footer class="text-center py-4 mt-2">
+    <p class="text-muted small mb-1">&copy; {{ currentYear() }} Michael DeBerry.</p>
+    <p class="text-muted extra-small">
+      {{ 'about.openSourceNotice' | i18next }}
+      <a
+        href="https://en.wikipedia.org/wiki/GNU_Affero_General_Public_License"
+        target="_blank"
+        class="text-success text-decoration-none fw-bold"
+      >
+        {{ 'about.license' | i18next }} <i class="bi bi-box-arrow-up-right small"></i>
+      </a>
+    </p>
+  </footer>
 </div>

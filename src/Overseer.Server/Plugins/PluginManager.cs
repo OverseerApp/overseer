@@ -1,5 +1,6 @@
 using System.IO.Compression;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using log4net;
 using Octokit;
 using Overseer.Server.Plugins.Models;
@@ -9,6 +10,8 @@ namespace Overseer.Server.Plugins;
 
 public class PluginManager(IHttpClientFactory httpClientFactory, IGitHubClient gitHubClient) : IPluginManager
 {
+  static readonly JsonSerializerOptions JsonSerializerOptions = new() { PropertyNameCaseInsensitive = true };
+
   static readonly ILog Log = LogManager.GetLogger(typeof(PluginManager));
 
   private static readonly string RegistryUrl = "https://raw.githubusercontent.com/OverseerApp/overseer.plugin-registry/refs/heads/main/plugins.json";
@@ -27,7 +30,7 @@ public class PluginManager(IHttpClientFactory httpClientFactory, IGitHubClient g
       Log.Error($"Failed to fetch plugin registry from '{RegistryUrl}': {ex.Message}", ex);
       throw new Exception($"Failed to fetch plugin registry from '{RegistryUrl}'. See inner exception for details.", ex);
     }
-    var items = JsonSerializer.Deserialize<IEnumerable<PluginRegistryItem>>(response) ?? [];
+    var items = JsonSerializer.Deserialize<IEnumerable<PluginRegistryItem>>(response, JsonSerializerOptions) ?? [];
     var itemsWithLatestVersion = new List<PluginRegistryItem>();
     var installedPlugins = GetInstalledPlugins().ToDictionary(p => p.Name, p => p.Version);
 
@@ -51,7 +54,7 @@ public class PluginManager(IHttpClientFactory httpClientFactory, IGitHubClient g
     return itemsWithLatestVersion;
   }
 
-  private async Task<PluginRegistryItem?> GetPluginInfo(Dictionary<string, string> installedPlugins, PluginRegistryItem item)
+  private async Task<PluginRegistryItem?> GetPluginInfo(Dictionary<string, string?> installedPlugins, PluginRegistryItem item)
   {
     var (owner, repoName) = PluginUtilities.ParseGitHubUrl(item.GithubRepository);
     var latest = await gitHubClient.Repository.Release.GetLatest(owner, repoName);
@@ -83,6 +86,7 @@ public class PluginManager(IHttpClientFactory httpClientFactory, IGitHubClient g
       DownloadUrl = zipFile.BrowserDownloadUrl,
       IsInstalled = installedVersion != null,
       IsUpdateAvailable = installedVersion != null && installedVersion != latest.TagName,
+      InstalledVersion = installedVersion,
     };
   }
 
