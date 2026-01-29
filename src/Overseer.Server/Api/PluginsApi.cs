@@ -11,7 +11,7 @@ public static class PluginsApi
     var group = builder.MapGroup("plugins");
     group.RequireAuthorization(AccessLevel.Administrator.ToString());
 
-    group.MapGet("/", (IPluginManager pluginManager) => pluginManager.GetRegistryItems());
+    group.MapGet("/", (IPluginManager pluginManager) => pluginManager.GetRegistryItems()).CacheOutput("RefreshCache");
 
     group.MapPost("/", async (PluginRegistryItem item, IPluginManager pluginManager) => await pluginManager.InstallPlugin(item));
 

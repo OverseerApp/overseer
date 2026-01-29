@@ -9,8 +9,8 @@ export class PluginsService {
   private getEndpoint = endpointFactory('/api/plugins');
   private http = inject(HttpClient);
 
-  getPlugins(): Observable<PluginInfo[]> {
-    return this.http.get<PluginInfo[]>(this.getEndpoint());
+  getPlugins(refresh = false): Observable<PluginInfo[]> {
+    return this.http.get<PluginInfo[]>(this.getEndpoint(), { params: { refresh: refresh.toString() } });
   }
 
   installPlugin(pluginInfo: PluginInfo): Observable<boolean> {

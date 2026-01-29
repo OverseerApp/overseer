@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Reflection;
 using log4net;
 using Overseer.Server.Integration;
@@ -7,6 +8,8 @@ namespace Overseer.Server.Plugins;
 public class PluginDiscoveryService()
 {
   static readonly ILog Log = LogManager.GetLogger(typeof(PluginDiscoveryService));
+
+  static readonly ConcurrentDictionary<string, PluginLoadContext> PluginLoadContexts = new();
 
   public static IEnumerable<IPluginConfiguration> DiscoverPlugins()
   {
@@ -31,7 +34,7 @@ public class PluginDiscoveryService()
         return null;
       }
 
-      var dllFiles = Directory.GetFiles(pluginDirectoryPath, "Overseer.*.dll");
+      var dllFiles = Directory.GetFiles(pluginDirectoryPath, "Overseer.*.dll").Where(f => !f.EndsWith("Overseer.Server.Integration.dll")).ToArray();
 
       if (dllFiles.Length == 0)
       {
@@ -65,6 +68,7 @@ public class PluginDiscoveryService()
       if (Activator.CreateInstance(type) is IPluginConfiguration pluginConfig)
       {
         Log.Info($"Discovered plugin configuration: {type.FullName} in {mainDllPath}");
+        PluginLoadContexts.AddOrReplace(metadata.Name, loadContext);
         return pluginConfig;
       }
     }

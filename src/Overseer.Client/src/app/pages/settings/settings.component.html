@@ -88,53 +88,54 @@
           </div>
         </div>
       </div>
-
-      <div class="card border-secondary shadow-sm">
-        <div
-          class="card-header border-secondary d-flex align-items-center"
-          style="height: 54px"
-        >
-          <h6 class="mb-0 text-uppercase fw-bold text-primary"><i class="bi bi-robot me-2"></i>{{ 'aiMonitoring' | i18next }}</h6>
-        </div>
-        <div class="card-body">
-          <div class="form-check form-switch mb-4">
-            <input
-              class="form-check-input"
-              type="checkbox"
-              id="enableAI"
-              checked
-            />
-            <label
-              class="form-check-label fw-bold"
-              for="enableAI"
-              >{{ 'enableAiMonitoring' | i18next }}</label
-            >
+      @if (supportsAiMonitoring.value()) {
+        <div class="card border-secondary shadow-sm">
+          <div
+            class="card-header border-secondary d-flex align-items-center"
+            style="height: 54px"
+          >
+            <h6 class="mb-0 text-uppercase fw-bold text-primary"><i class="bi bi-robot me-2"></i>{{ 'aiMonitoring' | i18next }}</h6>
           </div>
-
-          <div class="row g-4">
-            <div class="col-md-6">
-              <label class="form-label small fw-bold">{{ 'aiMonitoringFrameCaptureRate' | i18next }}</label>
+          <div class="card-body">
+            <div class="form-check form-switch mb-4">
               <input
-                type="number"
-                class="form-control border-secondary"
-                formControlName="aiMonitoringFrameCaptureRate"
+                class="form-check-input"
+                type="checkbox"
+                id="enableAI"
+                checked
               />
-              <div class="form-text text-muted">{{ 'aiMonitoringFrameCaptureRateHelp' | i18next }}</div>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label small fw-bold">{{ 'aiMonitoringFailureAction' | i18next }}</label>
-              <select
-                class="form-select border-secondary"
-                formControlName="aiMonitoringFailureAction"
+              <label
+                class="form-check-label fw-bold"
+                for="enableAI"
+                >{{ 'enableAiMonitoring' | i18next }}</label
               >
-                <option value="AlertOnly">{{ 'aiMonitoringFailureActionAlertOnly' | i18next }}</option>
-                <option value="PauseJob">{{ 'aiMonitoringFailureActionPauseJob' | i18next }}</option>
-                <option value="CancelJob">{{ 'aiMonitoringFailureActionCancelJob' | i18next }}</option>
-              </select>
+            </div>
+
+            <div class="row g-4">
+              <div class="col-md-6">
+                <label class="form-label small fw-bold">{{ 'aiMonitoringFrameCaptureRate' | i18next }}</label>
+                <input
+                  type="number"
+                  class="form-control border-secondary"
+                  formControlName="aiMonitoringFrameCaptureRate"
+                />
+                <div class="form-text text-muted">{{ 'aiMonitoringFrameCaptureRateHelp' | i18next }}</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small fw-bold">{{ 'aiMonitoringFailureAction' | i18next }}</label>
+                <select
+                  class="form-select border-secondary"
+                  formControlName="aiMonitoringFailureAction"
+                >
+                  <option value="AlertOnly">{{ 'aiMonitoringFailureActionAlertOnly' | i18next }}</option>
+                  <option value="PauseJob">{{ 'aiMonitoringFailureActionPauseJob' | i18next }}</option>
+                  <option value="CancelJob">{{ 'aiMonitoringFailureActionCancelJob' | i18next }}</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      }
     </div>
   </form>
 }

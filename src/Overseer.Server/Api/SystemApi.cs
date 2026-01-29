@@ -5,13 +5,13 @@ namespace Overseer.Server.Api
 {
   public static class UpdateApi
   {
-    public static RouteGroupBuilder MapUpdateApi(this RouteGroupBuilder builder)
+    public static RouteGroupBuilder MapSystemApi(this RouteGroupBuilder builder)
     {
-      var group = builder.MapGroup("/updates");
+      var group = builder.MapGroup("/system");
       group.RequireAuthorization();
 
       group.MapGet(
-        "/check",
+        "/updates/check",
         async (IUpdateService updateService, bool? includePreRelease) =>
         {
           var updateInfo = await updateService.CheckForUpdatesAsync(includePreRelease ?? false);
@@ -21,7 +21,7 @@ namespace Overseer.Server.Api
 
       group
         .MapPost(
-          "/install",
+          "/updates/install",
           async (IUpdateService updateService, UpdateInstallRequest request) =>
           {
             if (string.IsNullOrEmpty(request.Version))
@@ -40,14 +40,6 @@ namespace Overseer.Server.Api
           }
         )
         .RequireAuthorization(AccessLevel.Administrator.ToString());
-
-      group.MapGet(
-        "/can-auto-update",
-        (IUpdateService updateService) =>
-        {
-          return Results.Ok(new { canAutoUpdate = updateService.CanAutoUpdate() });
-        }
-      );
 
       return builder;
     }

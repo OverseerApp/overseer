@@ -3,7 +3,7 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { I18NextPipe } from 'angular-i18next';
 import { LoggingService } from '../../services/logging.service';
 import { SettingsService } from '../../services/settings.service';
-import { UpdateService } from '../../services/update.service';
+import { SystemService } from '../../services/system.service';
 
 @Component({
   selector: 'app-about',
@@ -13,9 +13,8 @@ import { UpdateService } from '../../services/update.service';
 export class AboutComponent {
   private settingsService = inject(SettingsService);
   private loggingService = inject(LoggingService);
-  private updateService = inject(UpdateService);
+  private updateService = inject(SystemService);
 
-  currentYear = signal(new Date().getFullYear());
   isUpdating = signal(false);
   updateError = signal<string | undefined>(undefined);
   updatedDismissed = signal(false);

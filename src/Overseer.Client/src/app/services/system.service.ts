@@ -5,8 +5,8 @@ import { UpdateInfo, UpdateResult } from '../models/update-info.model';
 import { endpointFactory } from './endpoint-factory';
 
 @Injectable({ providedIn: 'root' })
-export class UpdateService {
-  private getUpdateEndpoint = endpointFactory('/api/updates');
+export class SystemService {
+  private getUpdateEndpoint = endpointFactory('/api/system');
   private http = inject(HttpClient);
 
   /**
@@ -14,7 +14,7 @@ export class UpdateService {
    * @param includePreRelease Whether to include pre-release versions
    */
   checkForUpdates(includePreRelease = false): Observable<UpdateInfo> {
-    return this.http.get<UpdateInfo>(this.getUpdateEndpoint('check'), {
+    return this.http.get<UpdateInfo>(this.getUpdateEndpoint('updates/check'), {
       params: { includePreRelease: includePreRelease.toString() },
     });
   }
@@ -24,13 +24,13 @@ export class UpdateService {
    * @param version The version to update to
    */
   installUpdate(version: string): Observable<UpdateResult> {
-    return this.http.post<UpdateResult>(this.getUpdateEndpoint('install'), { version });
+    return this.http.post<UpdateResult>(this.getUpdateEndpoint('updates/install'), { version });
   }
 
   /**
-   * Check if the current platform supports auto-update
+   * Restart the overseer application, if supported.
    */
-  canAutoUpdate(): Observable<{ canAutoUpdate: boolean }> {
-    return this.http.get<{ canAutoUpdate: boolean }>(this.getUpdateEndpoint('can-auto-update'));
+  restart(): Observable<void> {
+    return this.http.post<void>(this.getUpdateEndpoint('/restart'), {});
   }
 }

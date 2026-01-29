@@ -5,6 +5,7 @@ using Overseer.Server;
 using Overseer.Server.Api;
 using Overseer.Server.Data;
 using Overseer.Server.Hubs;
+using Overseer.Server.Infrastructure;
 using Overseer.Server.Models;
 using Overseer.Server.Plugins;
 using Overseer.Server.Updates;
@@ -30,6 +31,17 @@ using (var context = new LiteDataContext())
   // Configure logging to output to console for Docker
   builder.Logging.ClearProviders();
   builder.Logging.AddConsole();
+  builder.Services.AddOutputCache(options =>
+  {
+    options.AddPolicy(
+      "RefreshCache",
+      policy =>
+      {
+        policy.AddPolicy<RefreshCachePolicy>();
+        policy.Expire(TimeSpan.FromHours(1));
+      }
+    );
+  });
 
   builder.Services.AddEndpointsApiExplorer();
   builder.Services.AddSwaggerGen();
@@ -74,6 +86,7 @@ using (var context = new LiteDataContext())
   app.HandleOverseerExceptions();
   app.UseAuthentication();
   app.UseAuthorization();
+  app.UseOutputCache();
   app.MapOverseerApi();
   app.MapHub<StatusHub>("/push/status").RequireAuthorization();
   app.MapHub<NotificationHub>("/push/notifications").RequireAuthorization();

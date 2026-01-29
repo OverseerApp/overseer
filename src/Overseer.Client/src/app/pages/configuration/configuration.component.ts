@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { I18NextPipe } from 'angular-i18next';
 
@@ -7,5 +7,8 @@ import { I18NextPipe } from 'angular-i18next';
   templateUrl: './configuration.component.html',
   styleUrls: ['./configuration.component.scss'],
   imports: [I18NextPipe, RouterOutlet, RouterLink, RouterLinkActive],
+  host: { class: 'd-flex flex-1 flex-column' },
 })
-export class ConfigurationComponent {}
+export class ConfigurationComponent {
+  currentYear = signal(new Date().getFullYear());
+}

@@ -1,0 +1,49 @@
+<div class="modal-header">
+  <h4 class="modal-title">{{ 'restart.title' | i18next }}</h4>
+</div>
+<div class="modal-body">
+  @if (canAutoUpdate.isLoading()) {
+    <div class="d-flex align-items-center">
+      <span class="spinner-border spinner-border-sm me-2"></span>
+      <span>{{ 'restart.checking' | i18next }}</span>
+    </div>
+  } @else {
+    @if (canAutoUpdate.value()) {
+      @if (isRestarting()) {
+        <div class="d-flex align-items-center">
+          <span class="spinner-border spinner-border-sm me-2"></span>
+          <span>{{ 'restart.inProgress' | i18next }}</span>
+        </div>
+      } @else if (restartComplete()) {
+        <div class="d-flex align-items-center text-success">
+          <i class="bi bi-check-circle me-2"></i>
+          <span>{{ 'restart.complete' | i18next }}</span>
+        </div>
+      } @else if (restartFailed()) {
+        <div class="d-flex align-items-center text-danger">
+          <i class="bi bi-exclamation-triangle me-2"></i>
+          <span>{{ 'restart.failed' | i18next }}</span>
+        </div>
+      }
+    } @else {
+      <p>{{ 'restart.manualRequired' | i18next }}</p>
+    }
+  }
+</div>
+<div class="modal-footer">
+  @if (restartFailed()) {
+    <button
+      class="btn btn-secondary"
+      (click)="retryRestart()"
+    >
+      {{ 'restart.retry' | i18next }}
+    </button>
+  }
+  <button
+    class="btn btn-primary"
+    [disabled]="canAutoUpdate.isLoading() || isRestarting()"
+    (click)="activeModal.dismiss()"
+  >
+    {{ 'OK' | i18next }}
+  </button>
+</div>

@@ -1,0 +1,51 @@
+<div
+  class="list-group-item border-secondary p-3 my-3 rounded shadow-sm"
+  [class.bg-primary-subtle]="selected()"
+  [style.cursor]="selectable() ? 'pointer' : 'default'"
+  (click)="toggleSelection()"
+>
+  <div class="row align-items-start flex-column flex-sm-row">
+    <div class="col-auto d-flex align-items-center pe-3">
+      @if (selectable()) {
+        <input
+          type="checkbox"
+          class="form-check-input"
+          [checked]="selected()"
+          (click)="$event.stopPropagation()"
+          (change)="toggleSelection()"
+          style="cursor: pointer; width: 1.25rem; height: 1.25rem"
+        />
+      }
+    </div>
+
+    <div class="col w-100">
+      <div class="d-flex align-items-center gap-2 flex-wrap">
+        <h5 class="mb-0">{{ plugin().name }}</h5>
+        <span class="badge rounded-pill bg-secondary">{{ plugin().version }}</span>
+
+        @if (plugin().isUpdateAvailable) {
+          <span class="badge rounded-pill bg-warning text-dark">{{ 'updates.available' | i18next }}</span>
+        }
+      </div>
+      <p class="text-muted small mb-1 mt-1">{{ plugin().description }}</p>
+      <div class="d-flex gap-3 small text-secondary flex-wrap">
+        <span><i class="bi bi-person"></i> {{ plugin().author }}</span>
+        <span><i class="bi bi-shield-check"></i> {{ plugin().license }}</span>
+        @if (plugin().isInstalled) {
+          <span class="text-success"> {{ 'installed' | i18next }}: {{ plugin().installedVersion }} </span>
+        }
+      </div>
+    </div>
+    <div class="col-auto d-flex gap-2 mt-3 mt-sm-0">
+      <a
+        [href]="plugin().githubRepository"
+        target="_blank"
+        class="btn btn-outline-secondary btn-sm px-3"
+        (click)="$event.stopPropagation()"
+      >
+        <i class="bi bi-github"></i>
+        {{ 'repository' | i18next }}
+      </a>
+    </div>
+  </div>
+</div>

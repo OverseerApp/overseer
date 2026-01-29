@@ -164,10 +164,16 @@
   "refresh": "Refresh",
   "installed": "Installed",
   "author": "Author",
+  "available": "Available",
+  "selectAll": "Select All",
+  "deselectAll": "Deselect All",
+  "noAvailablePlugins": "No plugins available for installation",
+  "noInstalledPlugins": "No plugins currently installed",
   "session": "Session",
   "online": "Online",
   "offline": "Offline",
   "dangerZone": "Danger Zone",
+  "generalConfiguration": "General Configuration",
   "machineDangerZoneDescription": "Manage monitoring state or permanently remove this machine.",
   "userDangerZoneDescription": "Manage session status or permanently remove this user account.",
   "userDetails": "User Details",
@@ -284,5 +290,14 @@
     "installing": "Installing update...",
     "installSuccess": "Update installed successfully. The application will restart.",
     "installFailed": "Failed to install update."
+  },
+  "restart": {
+    "title": "Restart Required",
+    "checking": "Checking restart capability...",
+    "inProgress": "Restarting application, please wait...",
+    "complete": "Restart complete! The application is ready.",
+    "failed": "Failed to restart the application. Please restart manually.",
+    "manualRequired": "Auto-restart is not available on this platform. Please restart the application manually to apply changes.",
+    "retry": "Retry"
   }
 }

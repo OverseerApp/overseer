@@ -1,8 +1,10 @@
 import { Component, inject } from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { I18NextPipe } from 'angular-i18next';
 import { defaultPollInterval, pollIntervals } from '../../models/constants';
 import { ApplicationSettings } from '../../models/settings.model';
+import { FeaturesService } from '../../services/features.service';
 import { SettingsService } from '../../services/settings.service';
 import { ThemeService } from '../../services/theme.service';
 import { ToastsService } from '../../services/toast.service';
@@ -18,6 +20,9 @@ export class SettingsComponent {
   private formBuilder = inject(FormBuilder);
   private toastsService = inject(ToastsService);
   private settingsService = inject(SettingsService);
+  private featuresService = inject(FeaturesService);
+
+  protected supportsAiMonitoring = rxResource({ stream: () => this.featuresService.supportsAiMonitoring() });
 
   form?: FormGroup<{
     interval: FormControl<number>;

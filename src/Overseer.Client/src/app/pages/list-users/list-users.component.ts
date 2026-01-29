@@ -1,4 +1,4 @@
-import { NgClass, SlicePipe } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { I18NextPipe } from 'angular-i18next';
@@ -8,7 +8,7 @@ import { UsersService } from '../../services/users.service';
 @Component({
   selector: 'app-list-users',
   templateUrl: './list-users.component.html',
-  imports: [I18NextPipe, RouterLink, NgClass, SlicePipe],
+  imports: [I18NextPipe, RouterLink, NgClass],
 })
 export class ListUsersComponent {
   private usersService = inject(UsersService);

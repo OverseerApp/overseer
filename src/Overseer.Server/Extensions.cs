@@ -103,7 +103,7 @@ namespace Overseer.Server
       services.AddHostedService<JobSentinelService>();
       services.AddHostedService<JobFailureService>();
 
-      var pluginConfigurations = PluginDiscoveryService.DiscoverPlugins();
+      var pluginConfigurations = PluginDiscoveryService.DiscoverPlugins().ToList();
       foreach (var pluginConfiguration in pluginConfigurations)
       {
         pluginConfiguration.ConfigureServices(services);

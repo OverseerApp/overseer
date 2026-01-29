@@ -4,6 +4,7 @@
 @if (notification && machine) {
   <div
     class="p-3 mb-2 d-flex align-items-start p-3 border-start border-3 rounded-2 shadow-sm position-relative"
+    style="outline: 1px solid #444"
     [ngClass]="{
       'border-secondary': notification.isRead,
       'border-success': !notification.isRead && (notification.type === 'JobCompleted' || notification.type === 'JobStarted'),
@@ -33,19 +34,23 @@
       </i>
     </div>
     <div class="flex-grow-1">
-      <h5 class="fw-bold text-white mb-0 d-flex">
+      <h5 class="fw-bold mb-0 d-flex">
         <div
           class="flex-grow-1"
           [ngClass]="{
             'fw-normal': notification.isRead,
             'fw-bold': !notification.isRead,
             'text-secondary': notification.isRead,
-            'text-white': !notification.isRead,
           }"
         >
           {{ 'jobNotifications.' + notification.type | i18next }}
         </div>
-        <button type="button" class="btn-close btn btn-sm" [attr.aria-label]="'clear' | i18next" (click)="handleDismiss()"></button>
+        <button
+          type="button"
+          class="btn-close btn btn-sm"
+          [attr.aria-label]="'clear' | i18next"
+          (click)="handleDismiss()"
+        ></button>
       </h5>
       <p class="text-secondary small mb-0">
         {{ 'jobNotifications.' + notification.type + 'Message' | i18next: { jobNumber: notification.machineJobId, machineName: machine.name } }}
@@ -55,11 +60,26 @@
       }
       @if (!notification.isRead) {
         @if (notification.type === 'JobPaused') {
-          <button class="btn btn-sm btn-success my-2 me-2" (click)="resume()">{{ 'continue' | i18next }}</button>
+          <button
+            class="btn btn-sm btn-success my-2 me-2"
+            (click)="resume()"
+          >
+            {{ 'continue' | i18next }}
+          </button>
         } @else if (notification.type === 'JobError' && notification.message !== 'job.machineOffline') {
           <!-- There is no support for it yet, but if there is an error give the option to pause and cancel -->
-          <button class="btn btn-sm btn-warning my-2 me-2" (click)="pause()">{{ 'pause' | i18next }}</button>
-          <button class="btn btn-sm btn-outline-danger my-2 me-2" (click)="cancel()">{{ 'stop' | i18next }}</button>
+          <button
+            class="btn btn-sm btn-warning my-2 me-2"
+            (click)="pause()"
+          >
+            {{ 'pause' | i18next }}
+          </button>
+          <button
+            class="btn btn-sm btn-outline-danger my-2 me-2"
+            (click)="cancel()"
+          >
+            {{ 'stop' | i18next }}
+          </button>
         }
       }
       <small class="text-muted d-block mt-1">{{ notification.timestamp | relativeDate }}</small>
