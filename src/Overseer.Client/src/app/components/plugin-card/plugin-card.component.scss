@@ -1,8 +1,4 @@
-.draggable {
-  cursor: grab;
-}
-
-.machine-card {
+.plugin-card {
   transition: box-shadow 0.2s ease;
 
   &:hover {
@@ -10,43 +6,42 @@
   }
 }
 
-.machine-card-content {
+.plugin-card-content {
   gap: 1rem;
 
   @media (max-width: 768px) {
-    // Stack vertically on mobile
     flex-direction: column;
     gap: 0.5rem;
   }
 }
 
-.machine-controls {
+.plugin-checkbox {
   @media (max-width: 768px) {
-    // Hidden on mobile, shown on md and up
     flex-direction: row;
     border: none !important;
     padding: 0 !important;
     margin: 0 !important;
     gap: 0.5rem;
+    margin-bottom: 1rem !important;
   }
 }
 
-.machine-info {
+.plugin-info {
   flex-grow: 1;
-  min-width: 0; // Allow flex item to shrink below content size
+  min-width: 0;
 
-  .machine-name {
+  .plugin-name {
     font-size: 1.1rem;
     word-break: break-word;
   }
 
-  .machine-status {
+  .plugin-metadata {
     flex-wrap: wrap;
     font-size: 0.875rem;
   }
 }
 
-.machine-actions {
+.plugin-actions {
   @media (max-width: 768px) {
     width: 100%;
     flex-wrap: wrap;

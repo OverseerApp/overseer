@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { I18NextPipe } from 'angular-i18next';
 import { filter } from 'rxjs';
+import { CardSectionComponent } from '../../components/card-section/card-section.component';
 import { CreateMachineComponent } from '../../components/create-machine/create-machine.component';
 import { MachineForm } from '../../models/form.types';
 import { Machine } from '../../models/machine.model';
@@ -14,7 +15,7 @@ import { ToastsService } from '../../services/toast.service';
 @Component({
   selector: 'app-add-machine',
   templateUrl: './add-machine.component.html',
-  imports: [I18NextPipe, ReactiveFormsModule, RouterLink, CreateMachineComponent],
+  imports: [CardSectionComponent, I18NextPipe, ReactiveFormsModule, RouterLink, CreateMachineComponent],
   providers: [DialogService, CertificateErrorService],
 })
 export class AddMachineComponent {

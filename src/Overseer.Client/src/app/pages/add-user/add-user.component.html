@@ -18,14 +18,11 @@
         [formGroup]="form"
         (submit)="save()"
       >
-        <div class="card border-secondary shadow-sm mb-4">
-          <div class="card-header border-secondary bg-opacity-25 py-3">
-            <h6 class="mb-0 text-uppercase fw-bold text-primary">
-              <i class="bi bi-person-vcard me-2"></i>
-              {{ 'userDetails' | i18next }}
-            </h6>
-          </div>
-
+        <app-card-section
+          icon="bi-person-vcard"
+          [heading]="'userDetails' | i18next"
+          class="mb-4"
+        >
           <div class="card-body">
             <div class="user-form-container">
               <app-create-user [form]="form" />
@@ -55,7 +52,7 @@
               {{ 'save' | i18next }}
             </button>
           </div>
-        </div>
+        </app-card-section>
       </form>
     </div>
   </div>

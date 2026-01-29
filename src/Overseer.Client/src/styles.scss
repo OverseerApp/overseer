@@ -46,5 +46,15 @@ router-outlet {
 }
 
 .card-header {
-  height: 54px !important;
+  min-height: 54px !important;
+}
+
+// Responsive border utilities
+@media (min-width: 768px) {
+  .border-md-end {
+    border-right: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color) !important;
+  }
+  .border-md-bottom-0 {
+    border-bottom: 0 !important;
+  }
 }

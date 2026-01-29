@@ -1,12 +1,11 @@
 <div
-  class="list-group-item border-secondary p-3 my-3 rounded shadow-sm"
+  class="list-group-item border-secondary p-3 my-3 rounded shadow-sm plugin-card"
   [class.bg-primary-subtle]="selected()"
   [style.cursor]="selectable() ? 'pointer' : 'default'"
-  (click)="toggleSelection()"
 >
-  <div class="row align-items-start flex-column flex-sm-row">
-    <div class="col-auto d-flex align-items-center pe-3">
-      @if (selectable()) {
+  <div class="row align-items-start flex-row h-100 plugin-card-content">
+    @if (selectable()) {
+      <div class="col-auto d-flex align-items-center pe-3">
         <input
           type="checkbox"
           class="form-check-input"
@@ -15,20 +14,23 @@
           (change)="toggleSelection()"
           style="cursor: pointer; width: 1.25rem; height: 1.25rem"
         />
-      }
-    </div>
+      </div>
+    }
 
-    <div class="col w-100">
-      <div class="d-flex align-items-center gap-2 flex-wrap">
-        <h5 class="mb-0">{{ plugin().name }}</h5>
-        <span class="badge rounded-pill bg-secondary">{{ plugin().version }}</span>
+    <div
+      class="col w-100 d-flex flex-column plugin-info"
+      (click)="toggleSelection()"
+    >
+      <div class="d-flex flex-column flex-md-row align-items-start align-md-items-center gap-2 flex-wrap mb-2">
+        <h5 class="mb-0 plugin-name">{{ plugin().name }}</h5>
+        <span class="badge rounded-pill bg-secondary flex-shrink-0">{{ plugin().version }}</span>
 
         @if (plugin().isUpdateAvailable) {
-          <span class="badge rounded-pill bg-warning text-dark">{{ 'updates.available' | i18next }}</span>
+          <span class="badge rounded-pill bg-warning text-dark flex-shrink-0">{{ 'updates.available' | i18next }}</span>
         }
       </div>
-      <p class="text-muted small mb-1 mt-1">{{ plugin().description }}</p>
-      <div class="d-flex gap-3 small text-secondary flex-wrap">
+      <p class="text-muted small mb-1">{{ plugin().description }}</p>
+      <div class="d-flex gap-3 small text-secondary flex-wrap plugin-metadata">
         <span><i class="bi bi-person"></i> {{ plugin().author }}</span>
         <span><i class="bi bi-shield-check"></i> {{ plugin().license }}</span>
         @if (plugin().isInstalled) {
@@ -36,11 +38,11 @@
         }
       </div>
     </div>
-    <div class="col-auto d-flex gap-2 mt-3 mt-sm-0">
+    <div class="col-12 col-md-auto d-flex gap-2 mt-3 mt-md-0 align-self-start plugin-actions">
       <a
         [href]="plugin().githubRepository"
         target="_blank"
-        class="btn btn-outline-secondary btn-sm px-3"
+        class="btn btn-outline-secondary btn-sm px-3 flex-grow-1 flex-md-grow-0"
         (click)="$event.stopPropagation()"
       >
         <i class="bi bi-github"></i>

@@ -1,35 +1,38 @@
-<div class="card border-secondary shadow-sm">
-  <div class="card-header border-secondary py-2 d-flex justify-content-between align-items-center">
-    <h6 class="mb-0 text-uppercase fw-bold text-primary d-flex align-items-center gap-2">
-      <i class="bi bi-download me-2"></i>
-      {{ 'available' | i18next }} {{ 'plugins' | i18next }} ({{ availablePlugins().length }})
-    </h6>
-    <div class="d-flex gap-2">
-      @if (availablePlugins().length > 0) {
-        <button
-          class="btn btn-outline-secondary btn-sm"
-          (click)="selectAllAvailable()"
-          [disabled]="selectedAvailable().size === availablePlugins().length"
-        >
-          {{ 'selectAll' | i18next }}
-        </button>
-        <button
-          class="btn btn-outline-secondary btn-sm"
-          (click)="deselectAllAvailable()"
-          [disabled]="selectedAvailable().size === 0"
-        >
-          {{ 'deselectAll' | i18next }}
-        </button>
-        <button
-          class="btn btn-primary btn-sm"
-          (click)="installSelectedPlugins()"
-          [disabled]="selectedAvailable().size === 0 || busy()"
-        >
-          <i class="bi bi-download"></i>
-          {{ 'install' | i18next }} ({{ selectedAvailable().size }})
-        </button>
-      }
-    </div>
+<app-card-section
+  icon="bi-download"
+  [heading]="('available' | i18next) + ' ' + ('plugins' | i18next) + ' (' + availablePlugins().length + ')'"
+>
+  <div
+    card-actions
+    class="d-flex gap-2"
+  >
+    @if (availablePlugins().length > 0) {
+      <button
+        class="btn btn-outline-secondary btn-sm"
+        (click)="selectAllAvailable()"
+        [disabled]="selectedAvailable().size === availablePlugins().length"
+      >
+        {{ 'selectAll' | i18next }}
+      </button>
+      <button
+        class="btn btn-outline-secondary btn-sm"
+        (click)="deselectAllAvailable()"
+        [disabled]="selectedAvailable().size === 0"
+      >
+        {{ 'deselectAll' | i18next }}
+      </button>
+      <button
+        class="btn btn-primary btn-sm"
+        (click)="installSelectedPlugins()"
+        [disabled]="selectedAvailable().size === 0 || busy()"
+      >
+        <i class="bi bi-download"></i>
+        {{ 'install' | i18next }}
+        (
+        <span class="font-monospace">{{ selectedAvailable().size }}</span>
+        )
+      </button>
+    }
   </div>
 
   <div class="px-3">
@@ -57,40 +60,44 @@
       </div>
     }
   </div>
-</div>
+</app-card-section>
 
-<div class="card border-secondary shadow-sm mt-4">
-  <div class="card-header border-secondary py-2 d-flex justify-content-between align-items-center">
-    <h6 class="mb-0 text-uppercase fw-bold text-primary d-flex align-items-center gap-2">
-      <i class="bi bi-check-circle me-2"></i>
-      {{ 'installed' | i18next }} {{ 'plugins' | i18next }} ({{ installedPlugins().length }})
-    </h6>
-    <div class="d-flex gap-2">
-      @if (installedPlugins().length > 0) {
-        <button
-          class="btn btn-outline-secondary btn-sm"
-          (click)="selectAllInstalled()"
-          [disabled]="selectedInstalled().size === installedPlugins().length"
-        >
-          {{ 'selectAll' | i18next }}
-        </button>
-        <button
-          class="btn btn-outline-secondary btn-sm"
-          (click)="deselectAllInstalled()"
-          [disabled]="selectedInstalled().size === 0"
-        >
-          {{ 'deselectAll' | i18next }}
-        </button>
-        <button
-          class="btn btn-danger btn-sm"
-          (click)="uninstallSelectedPlugins()"
-          [disabled]="selectedInstalled().size === 0 || busy()"
-        >
-          <i class="bi bi-trash"></i>
-          {{ 'uninstall' | i18next }} ({{ selectedInstalled().size }})
-        </button>
-      }
-    </div>
+<app-card-section
+  icon="bi-check-circle"
+  [heading]="('installed' | i18next) + ' ' + ('plugins' | i18next) + ' (' + installedPlugins().length + ')'"
+  class="d-block mt-4"
+>
+  <div
+    card-actions
+    class="d-flex gap-2"
+  >
+    @if (installedPlugins().length > 0) {
+      <button
+        class="btn btn-outline-secondary btn-sm"
+        (click)="selectAllInstalled()"
+        [disabled]="selectedInstalled().size === installedPlugins().length"
+      >
+        {{ 'selectAll' | i18next }}
+      </button>
+      <button
+        class="btn btn-outline-secondary btn-sm"
+        (click)="deselectAllInstalled()"
+        [disabled]="selectedInstalled().size === 0"
+      >
+        {{ 'deselectAll' | i18next }}
+      </button>
+      <button
+        class="btn btn-danger btn-sm"
+        (click)="uninstallSelectedPlugins()"
+        [disabled]="selectedInstalled().size === 0 || busy()"
+      >
+        <i class="bi bi-trash"></i>
+        {{ 'uninstall' | i18next }}
+        (
+        <span class="font-monospace">{{ selectedInstalled().size }}</span>
+        )
+      </button>
+    }
   </div>
   <div class="px-3">
     @if (plugins.isLoading()) {
@@ -117,4 +124,4 @@
       </div>
     }
   </div>
-</div>
+</app-card-section>

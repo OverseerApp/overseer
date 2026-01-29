@@ -5,25 +5,37 @@
     </div>
   } @else {
     @if (displayedMachines()?.length) {
-      <div class="machines d-flex flex-1 flex-column">
+      <div class="machines d-flex flex-1 flex-column py-4">
         @for (item of displayedMachines(); track item.id) {
           <app-machine-monitor [machine]="item"></app-machine-monitor>
         }
       </div>
     } @else {
-      <div class="d-flex flex-1 justify-content-center align-items-center p-3">
+      <div class="d-flex flex-1 justify-content-center align-items-center p-4">
         @if (!machines()?.length) {
           <div class="text-center">
             <p class="fs-3">{{ 'noMachines' | i18next }}</p>
             <p>{{ 'noMachinesAddMachine' | i18next }}</p>
-            <a class="btn btn-outline-primary m-2" routerLink="/settings/machines/new">{{ 'addMachine' | i18next }}</a>
+            <a
+              class="btn btn-outline-primary m-2"
+              routerLink="/settings/machines/new"
+              >{{ 'addMachine' | i18next }}</a
+            >
           </div>
         } @else {
           <div class="text-center">
             <p class="fs-3">{{ 'noVisibleMachines' | i18next }}</p>
             <p>{{ 'noMachinesEditMachines' | i18next }}</p>
-            <a class="btn btn-outline-primary m-2" routerLink="/settings">{{ 'editVisibility' | i18next }}</a>
-            <a class="btn btn-outline-primary m-2" routerLink="/settings/machines">{{ 'editMachineConfig' | i18next }}</a>
+            <a
+              class="btn btn-outline-primary m-2"
+              routerLink="/settings"
+              >{{ 'editVisibility' | i18next }}</a
+            >
+            <a
+              class="btn btn-outline-primary m-2"
+              routerLink="/settings/machines"
+              >{{ 'editMachineConfig' | i18next }}</a
+            >
           </div>
         }
       </div>

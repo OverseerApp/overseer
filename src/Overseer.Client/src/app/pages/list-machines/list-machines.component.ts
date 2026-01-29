@@ -3,6 +3,7 @@ import { NgClass } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { I18NextPipe } from 'angular-i18next';
+import { CardSectionComponent } from '../../components/card-section/card-section.component';
 import { Machine } from '../../models/machine.model';
 import { MachinesService } from '../../services/machines.service';
 
@@ -10,7 +11,7 @@ import { MachinesService } from '../../services/machines.service';
   selector: 'app-list-machines',
   templateUrl: './list-machines.component.html',
   styleUrl: './list-machines.component.scss',
-  imports: [I18NextPipe, RouterLink, CdkDropList, CdkDrag, NgClass],
+  imports: [I18NextPipe, RouterLink, CdkDropList, CdkDrag, NgClass, CardSectionComponent],
 })
 export class ListMachinesComponent {
   private machinesService = inject(MachinesService);

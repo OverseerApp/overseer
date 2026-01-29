@@ -4,6 +4,7 @@ import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angul
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { I18NextPipe } from 'angular-i18next';
 import { filter, map, Observable, switchMap } from 'rxjs';
+import { CardSectionComponent } from '../../components/card-section/card-section.component';
 import { MachineHostComponent } from '../../components/machine-host/machine-host.component';
 import { MachineForm } from '../../models/form.types';
 import { Machine } from '../../models/machine.model';
@@ -15,7 +16,7 @@ import { ToastsService } from '../../services/toast.service';
 @Component({
   selector: 'app-edit-machine',
   templateUrl: './edit-machine.component.html',
-  imports: [I18NextPipe, ReactiveFormsModule, RouterLink, MachineHostComponent],
+  imports: [CardSectionComponent, I18NextPipe, ReactiveFormsModule, RouterLink, MachineHostComponent],
   providers: [DialogService, CertificateErrorService],
 })
 export class EditMachineComponent {

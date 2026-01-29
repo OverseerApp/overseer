@@ -2,6 +2,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { I18NextPipe } from 'angular-i18next';
 import { forkJoin, tap } from 'rxjs';
+import { CardSectionComponent } from '../../components/card-section/card-section.component';
 import { PluginCardComponent } from '../../components/plugin-card/plugin-card.component';
 import { RestartDialogComponent } from '../../components/restart-dialog/restart-dialog.component';
 import { DialogService } from '../../services/dialog.service';
@@ -10,7 +11,7 @@ import { PluginsService } from '../../services/plugins.service';
 @Component({
   selector: 'app-plugins',
   templateUrl: './plugins.component.html',
-  imports: [I18NextPipe, PluginCardComponent],
+  imports: [CardSectionComponent, I18NextPipe, PluginCardComponent],
   providers: [DialogService],
 })
 export class PluginsComponent {

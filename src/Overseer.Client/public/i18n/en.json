@@ -39,7 +39,7 @@
   "aiMonitoring": "AI Monitoring",
   "enableAiMonitoring": "Enable AI Monitoring",
   "aiMonitoringFrameCaptureRate": "Frame Capture Rate (seconds)",
-  "aiMonitoringFrameCaptureRateHelp": "How often to capture and analyze frames from the webcam",
+  "aiMonitoringFrameCaptureRateHelp": "Capturing more frames increases accuracy but also increases resource usage.",
   "aiMonitoringFailureAction": "Failure Detection Action",
   "aiMonitoringFailureActionAlertOnly": "Alert Only",
   "aiMonitoringFailureActionPauseJob": "Pause Job",
@@ -297,7 +297,7 @@
     "inProgress": "Restarting application, please wait...",
     "complete": "Restart complete! The application is ready.",
     "failed": "Failed to restart the application. Please restart manually.",
-    "manualRequired": "Auto-restart is not available on this platform. Please restart the application manually to apply changes.",
+    "manualRequired": "A restart is required to apply changes. Please restart the application to complete the process.",
     "retry": "Retry"
   }
 }

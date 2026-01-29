@@ -1,8 +1,4 @@
-.draggable {
-  cursor: grab;
-}
-
-.machine-card {
+.user-card {
   transition: box-shadow 0.2s ease;
 
   &:hover {
@@ -10,7 +6,7 @@
   }
 }
 
-.machine-card-content {
+.user-card-content {
   gap: 1rem;
 
   @media (max-width: 768px) {
@@ -20,33 +16,22 @@
   }
 }
 
-.machine-controls {
-  @media (max-width: 768px) {
-    // Hidden on mobile, shown on md and up
-    flex-direction: row;
-    border: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    gap: 0.5rem;
-  }
-}
-
-.machine-info {
+.user-info {
   flex-grow: 1;
   min-width: 0; // Allow flex item to shrink below content size
 
-  .machine-name {
+  .user-name {
     font-size: 1.1rem;
     word-break: break-word;
   }
 
-  .machine-status {
+  .user-metadata {
     flex-wrap: wrap;
     font-size: 0.875rem;
   }
 }
 
-.machine-actions {
+.user-actions {
   @media (max-width: 768px) {
     width: 100%;
     flex-wrap: wrap;

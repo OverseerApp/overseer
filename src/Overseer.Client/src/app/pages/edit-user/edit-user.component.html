@@ -14,10 +14,11 @@
 
   <div class="row g-4">
     <div class="col-lg-6">
-      <div class="card border-secondary shadow-sm h-100">
-        <div class="card-header border-secondary bg-opacity-25 py-3">
-          <h6 class="mb-0 text-uppercase fw-bold text-primary"><i class="bi bi-shield-lock me-2"></i>{{ 'changePassword' | i18next }}</h6>
-        </div>
+      <app-card-section
+        icon="bi-shield-lock"
+        [heading]="'changePassword' | i18next"
+        class="h-100"
+      >
         <div class="card-body">
           <form
             [formGroup]="passwordForm"
@@ -62,14 +63,15 @@
             </button>
           </form>
         </div>
-      </div>
+      </app-card-section>
     </div>
 
     <div class="col-lg-6">
-      <div class="card border-secondary shadow-sm h-100">
-        <div class="card-header border-secondary bg-opacity-25 py-3">
-          <h6 class="mb-0 text-uppercase fw-bold text-primary"><i class="bi bi-person-badge me-2"></i>{{ 'userSettings' | i18next }}</h6>
-        </div>
+      <app-card-section
+        icon="bi-person-badge"
+        [heading]="'userSettings' | i18next"
+        class="h-100"
+      >
         <div class="card-body">
           <form
             [formGroup]="updateForm"
@@ -125,7 +127,7 @@
             </div>
           </form>
         </div>
-      </div>
+      </app-card-section>
     </div>
 
     <div class="col-12 mt-4">

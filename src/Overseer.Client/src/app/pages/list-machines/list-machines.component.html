@@ -1,16 +1,15 @@
-<div class="card border-secondary shadow-sm">
-  <div class="card-header border-secondary d-flex justify-content-between align-items-center">
-    <h6 class="mb-0 text-uppercase fw-bold text-primary d-flex align-items-center gap-2">
-      <i class="bi bi-cpu-fill me-2"></i>
-      {{ 'machines' | i18next }}
-    </h6>
-    <button
-      class="btn btn-primary d-flex align-items-center gap-2 btn-sm"
-      routerLink="new"
-    >
-      <i class="bi bi-plus-lg"></i> {{ 'addMachine' | i18next }}
-    </button>
-  </div>
+<app-card-section
+  icon="bi-cpu-fill"
+  [heading]="'machines' | i18next"
+>
+  <button
+    card-actions
+    class="btn btn-primary d-flex align-items-center gap-2 btn-sm"
+    routerLink="new"
+  >
+    <i class="bi bi-plus-lg"></i>
+    {{ 'addMachine' | i18next }}
+  </button>
   <div class="list-group px-3">
     <div
       class="drag-boundary"
@@ -24,10 +23,10 @@
         <div
           cdkDrag
           cdkDragBoundary=".drag-boundary"
-          class="list-group-item border border-secondary p-3 my-3 rounded shadow-sm draggable bg-body"
+          class="list-group-item border border-secondary p-3 my-3 rounded shadow-sm draggable bg-body machine-card"
         >
-          <div class="row align-items-start">
-            <div class="col-auto d-flex flex-column gap-1 border-end border-secondary pe-3 me-2">
+          <div class="row align-items-start machine-card-content">
+            <div class="col-auto d-none d-md-flex flex-column gap-1 border-end border-secondary pe-3 me-2 machine-controls">
               <button
                 class="btn btn-link btn-sm p-0 text-secondary"
                 [disabled]="first"
@@ -44,15 +43,15 @@
               </button>
             </div>
 
-            <div class="col">
-              <div class="d-flex align-items-center gap-2">
-                <h5 class="mb-0">{{ machine.name }}</h5>
-                <span class="badge bg-outline-info border border-info text-info small">
+            <div class="col machine-info">
+              <div class="d-flex flex-column flex-md-row align-items-start align-md-items-center gap-2 mb-2">
+                <h5 class="mb-0 machine-name">{{ machine.name }}</h5>
+                <span class="badge bg-outline-info border border-info text-info small flex-shrink-0">
                   {{ machine.machineType | i18next }}
                 </span>
               </div>
 
-              <div class="d-flex gap-3 mt-1 small text-muted">
+              <div class="d-flex gap-3 small text-muted machine-status">
                 <span [ngClass]="machine.disabled ? 'text-warning' : 'text-success'">
                   <i
                     class="bi"
@@ -63,9 +62,9 @@
               </div>
             </div>
 
-            <div class="col-auto d-flex gap-2">
+            <div class="col-12 col-md-auto d-flex gap-2 mt-3 mt-md-0 machine-actions">
               <a
-                class="btn btn-outline-secondary btn-sm px-3"
+                class="btn btn-outline-secondary btn-sm px-3 flex-grow-1 flex-md-grow-0"
                 [routerLink]="[machine.id, 'edit']"
               >
                 <i class="bi bi-pencil"></i>
@@ -78,4 +77,4 @@
       }
     </div>
   </div>
-</div>
+</app-card-section>

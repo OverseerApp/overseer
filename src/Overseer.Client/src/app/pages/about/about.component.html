@@ -34,7 +34,7 @@
         <button
           type="button"
           class="btn-close ms-2"
-          (click)="updatedDismissed.set(true)"
+          (click)="dismissUpdateMessage()"
         ></button>
       </div>
     </div>
@@ -51,12 +51,10 @@
 
   <div class="row g-4">
     <div class="col-md-12">
-      <div class="card border-secondary shadow-sm">
-        <div class="card-header border-secondary py-3">
-          <h6 class="mb-0 text-uppercase fw-bold text-primary">
-            <i class="bi bi-app-indicator me-2"></i>{{ 'about.info.applicationInfo' | i18next }}
-          </h6>
-        </div>
+      <app-card-section
+        icon="bi-app-indicator"
+        [heading]="'about.info.applicationInfo' | i18next"
+      >
         <div class="card-body p-0">
           <ul class="list-group list-group-flush">
             <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center py-3 border-secondary">
@@ -101,55 +99,54 @@
             </li>
           </ul>
         </div>
-      </div>
+      </app-card-section>
     </div>
 
-    <div class="col-md-12">
-      <div class="card border-secondary mb-4 shadow-sm">
-        <div class="card-header border-secondary py-3">
-          <h6 class="mb-0 text-uppercase fw-bold text-primary"><i class="bi bi-cpu me-2"></i>{{ 'about.info.systemInfo' | i18next }}</h6>
-        </div>
-        <div class="card-body p-0">
-          <ul class="list-group list-group-flush">
-            <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center py-3 border-secondary">
-              <span class="text-secondary small fw-bold">{{ 'about.info.platform' | i18next }}</span>
-              <span class="badge bg-secondary border border-secondary">{{ appInfo?.platform }}</span>
-            </li>
+    <app-card-section
+      icon="bi-cpu"
+      [heading]="'about.info.systemInfo' | i18next"
+      class="my-4"
+    >
+      <div class="card-body p-0">
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center py-3 border-secondary">
+            <span class="text-secondary small fw-bold">{{ 'about.info.platform' | i18next }}</span>
+            <span class="badge bg-secondary border border-secondary">{{ appInfo?.platform }}</span>
+          </li>
 
-            <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center py-3 border-secondary">
-              <span class="text-secondary small fw-bold">{{ 'about.info.operatingSystem' | i18next }}</span>
-              <div class="d-flex align-items-center gap-2">
-                <span
-                  class="text-truncate small opacity-75"
-                  title="{{ appInfo?.operatingSystem }}"
-                >
-                  {{ appInfo?.operatingSystem }}
-                </span>
-                <button
-                  class="btn btn-sm btn-outline-secondary border-0 p-1"
-                  (click)="copyToClipboard(appInfo?.operatingSystem)"
-                >
-                  <i class="bi bi-clipboard"></i>
-                </button>
-              </div>
-            </li>
+          <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center py-3 border-secondary">
+            <span class="text-secondary small fw-bold">{{ 'about.info.operatingSystem' | i18next }}</span>
+            <div class="d-flex align-items-center gap-2">
+              <span
+                class="text-truncate small opacity-75"
+                title="{{ appInfo?.operatingSystem }}"
+              >
+                {{ appInfo?.operatingSystem }}
+              </span>
+              <button
+                class="btn btn-sm btn-outline-secondary border-0 p-1"
+                (click)="copyToClipboard(appInfo?.operatingSystem)"
+              >
+                <i class="bi bi-clipboard"></i>
+              </button>
+            </div>
+          </li>
 
-            <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center py-3 border-0">
-              <span class="text-secondary small fw-bold">{{ 'about.info.machineName' | i18next }}</span>
-              <div class="d-flex align-items-center gap-2">
-                <span class="font-monospace small opacity-75">{{ appInfo?.machineName }}</span>
-                <button
-                  class="btn btn-sm btn-outline-secondary border-0 p-1"
-                  (click)="copyToClipboard(appInfo?.machineName)"
-                >
-                  <i class="bi bi-clipboard"></i>
-                </button>
-              </div>
-            </li>
-          </ul>
-        </div>
+          <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center py-3 border-0">
+            <span class="text-secondary small fw-bold">{{ 'about.info.machineName' | i18next }}</span>
+            <div class="d-flex align-items-center gap-2">
+              <span class="font-monospace small opacity-75">{{ appInfo?.machineName }}</span>
+              <button
+                class="btn btn-sm btn-outline-secondary border-0 p-1"
+                (click)="copyToClipboard(appInfo?.machineName)"
+              >
+                <i class="bi bi-clipboard"></i>
+              </button>
+            </div>
+          </li>
+        </ul>
       </div>
-    </div>
+    </app-card-section>
   </div>
 
   <div class="card border-secondary mb-4 shadow-sm">

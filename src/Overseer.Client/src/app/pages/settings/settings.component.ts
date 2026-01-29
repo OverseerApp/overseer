@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { I18NextPipe } from 'angular-i18next';
+import { CardSectionComponent } from '../../components/card-section/card-section.component';
 import { defaultPollInterval, pollIntervals } from '../../models/constants';
 import { ApplicationSettings } from '../../models/settings.model';
 import { FeaturesService } from '../../services/features.service';
@@ -12,7 +13,7 @@ import { ToastsService } from '../../services/toast.service';
 @Component({
   selector: 'app-settings',
   templateUrl: './settings.component.html',
-  imports: [ReactiveFormsModule, I18NextPipe, FormsModule],
+  imports: [CardSectionComponent, ReactiveFormsModule, I18NextPipe, FormsModule],
 })
 export class SettingsComponent {
   intervals = pollIntervals;

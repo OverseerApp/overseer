@@ -1,6 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { I18NextPipe } from 'angular-i18next';
+import { map } from 'rxjs';
+import { CardSectionComponent } from '../../components/card-section/card-section.component';
 import { LoggingService } from '../../services/logging.service';
 import { SettingsService } from '../../services/settings.service';
 import { SystemService } from '../../services/system.service';
@@ -8,9 +10,10 @@ import { SystemService } from '../../services/system.service';
 @Component({
   selector: 'app-about',
   templateUrl: './about.component.html',
-  imports: [I18NextPipe],
+  imports: [CardSectionComponent, I18NextPipe],
 })
 export class AboutComponent {
+  private static UpdateVersionDismissed = 'updateVersionDismissed';
   private settingsService = inject(SettingsService);
   private loggingService = inject(LoggingService);
   private updateService = inject(SystemService);
@@ -24,7 +27,16 @@ export class AboutComponent {
   });
 
   updateInfo = rxResource({
-    stream: () => this.updateService.checkForUpdates(),
+    stream: () =>
+      this.updateService.checkForUpdates().pipe(
+        map((info) => {
+          const dismissedVersion = sessionStorage.getItem(AboutComponent.UpdateVersionDismissed);
+          if (info.latestVersion === dismissedVersion) {
+            this.updatedDismissed.set(true);
+          }
+          return info;
+        })
+      ),
   });
 
   installUpdate() {
@@ -92,5 +104,10 @@ export class AboutComponent {
     } catch (err) {
       console.error('Failed to copy: ', err);
     }
+  }
+
+  dismissUpdateMessage() {
+    this.updatedDismissed.set(true);
+    sessionStorage.setItem(AboutComponent.UpdateVersionDismissed, this.updateInfo.value()?.latestVersion || '');
   }
 }

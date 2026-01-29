@@ -1,16 +1,11 @@
 @if (form) {
   <form [formGroup]="form">
     <div class="container-fluid p-0">
-      <div class="card border-secondary mb-4 shadow-sm">
-        <div
-          class="card-header border-secondary d-flex align-items-center"
-          style="height: 54px"
-        >
-          <h6 class="mb-0 text-uppercase fw-bold text-primary">
-            <i class="bi bi-sliders2-vertical me-2"></i>
-            {{ 'generalConfiguration' | i18next }}
-          </h6>
-        </div>
+      <app-card-section
+        icon="bi-sliders2-vertical"
+        [heading]="'generalConfiguration' | i18next"
+        class="mb-4"
+      >
         <div class="card-body">
           <div class="row g-4">
             <div class="col-md-6">
@@ -87,15 +82,13 @@
             </div>
           </div>
         </div>
-      </div>
+      </app-card-section>
       @if (supportsAiMonitoring.value()) {
-        <div class="card border-secondary shadow-sm">
-          <div
-            class="card-header border-secondary d-flex align-items-center"
-            style="height: 54px"
-          >
-            <h6 class="mb-0 text-uppercase fw-bold text-primary"><i class="bi bi-robot me-2"></i>{{ 'aiMonitoring' | i18next }}</h6>
-          </div>
+        <app-card-section
+          icon="bi-robot"
+          class="d-block mt-4"
+          [heading]="'aiMonitoring' | i18next"
+        >
           <div class="card-body">
             <div class="form-check form-switch mb-4">
               <input
@@ -134,7 +127,7 @@
               </div>
             </div>
           </div>
-        </div>
+        </app-card-section>
       }
     </div>
   </form>
