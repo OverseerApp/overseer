@@ -13,14 +13,7 @@ public class PluginDiscoveryService()
 
   public static IEnumerable<IPluginConfiguration> DiscoverPlugins()
   {
-    foreach (var dir in PluginUtilities.GetPluginDirectories())
-    {
-      var pluginConfig = LoadPlugin(dir);
-      if (pluginConfig != null)
-      {
-        yield return pluginConfig;
-      }
-    }
+    return PluginUtilities.GetPluginDirectories().Select(LoadPlugin).Where(pc => pc is not null).Cast<IPluginConfiguration>();
   }
 
   public static IPluginConfiguration? LoadPlugin(string pluginDirectoryPath)

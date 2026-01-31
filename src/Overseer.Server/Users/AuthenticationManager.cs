@@ -11,10 +11,6 @@ namespace Overseer.Server.Users
 
     readonly IRepository<User> _users = context.Repository<User>();
 
-    /// <summary>
-    /// Creates a SHA256 hash of the token for secure storage comparison.
-    /// This prevents timing attacks by allowing constant-time comparison of hashes.
-    /// </summary>
     static string HashToken(string token)
     {
       var tokenBytes = Encoding.UTF8.GetBytes(token);

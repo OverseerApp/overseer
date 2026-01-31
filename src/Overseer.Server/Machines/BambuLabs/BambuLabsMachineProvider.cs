@@ -40,7 +40,7 @@ public class BambuMachineProvider(BambuMachine machine, IMachineStatusChannel ma
 
   private async Task SendPrintCommand(object command)
   {
-    IMqttClient? client = null;
+    IMqttClient? client;
     lock (_lockObject)
     {
       client = _mqttClient;

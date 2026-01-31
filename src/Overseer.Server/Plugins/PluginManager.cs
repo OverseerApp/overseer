@@ -1,6 +1,5 @@
 using System.IO.Compression;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using log4net;
 using Octokit;
 using Overseer.Server.Plugins.Models;
@@ -145,19 +144,11 @@ public class PluginManager(IHttpClientFactory httpClientFactory, IGitHubClient g
 
   public IEnumerable<PluginRegistryItem> GetInstalledPlugins()
   {
-    var installedPlugins = new List<PluginRegistryItem>();
-    var pluginDirectories = PluginUtilities.GetPluginDirectories();
-
-    foreach (var dir in pluginDirectories)
-    {
-      var metadata = PluginUtilities.ReadPluginMetadata(dir);
-      if (metadata != null)
-      {
-        installedPlugins.Add(metadata);
-      }
-    }
-
-    return installedPlugins;
+    return PluginUtilities
+      .GetPluginDirectories()
+      .Select(PluginUtilities.ReadPluginMetadata)
+      .Where(metadata => metadata != null)
+      .Cast<PluginRegistryItem>();
   }
 
   public bool UninstallPlugin(string pluginName)

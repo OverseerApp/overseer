@@ -122,15 +122,7 @@ namespace Overseer.Server.System
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "overseer/scripts", OverseerScriptName),
       };
 
-      foreach (var path in searchPaths)
-      {
-        if (File.Exists(path))
-        {
-          return path;
-        }
-      }
-
-      return null;
+      return searchPaths.FirstOrDefault(p => File.Exists(p));
     }
 
     private string GetDotNetPath()
@@ -150,15 +142,7 @@ namespace Overseer.Server.System
         "/opt/.dotnet",
       };
 
-      foreach (var path in possiblePaths)
-      {
-        if (Directory.Exists(path) && File.Exists(Path.Combine(path, "dotnet")))
-        {
-          return path;
-        }
-      }
-
-      return possiblePaths[0]; // Default to relative path
+      return possiblePaths.FirstOrDefault(path => Directory.Exists(path) && File.Exists(Path.Combine(path, "dotnet"))) ?? possiblePaths[0];
     }
 
     private static string NormalizeVersion(string? version)
@@ -258,12 +242,6 @@ namespace Overseer.Server.System
       }
 
       process.WaitForExit();
-
-      if (process.ExitCode != 0)
-      {
-        var errorOutput = process.StandardError.ReadToEnd();
-        throw new Exception($"Process {action} failed with exit code {process.ExitCode}. Error: {errorOutput}");
-      }
     }
   }
 }

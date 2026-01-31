@@ -106,7 +106,5 @@ using (var context = new LiteDataContext())
     });
   }
 
-  var pluginManager = app.Services.GetRequiredService<IPluginManager>();
-
   app.Run(url);
 }
