@@ -1,29 +1,162 @@
-<div class="text-center">
-  <h4>{{ 'about.appSystemDetails' | i18next }}</h4>
-  <p>
-    <span class="me-1">{{ 'about.helpDescription' | i18next }}</span>
-    <a class="link" target="_blank" href="https://github.com/michaelfdeberry/overseer/issues">{{ 'about.issueTracker' | i18next }}</a>
-  </p>
-  <table class="table mx-auto text-start" style="max-width: 320px">
-    <tbody>
-      @for (infoItem of applicationInfo(); track $index) {
-      <tr>
-        <th>{{ 'about.info.' + infoItem.label | i18next }}</th>
-        <td>{{ infoItem.value }}</td>
-      </tr>
-      }
-    </tbody>
-  </table>
-  <div class="py-3">
-    <button class="btn btn-primary btn-block" (click)="downloadLog()">Download Log</button>
+<div>
+  @let appInfo = this.applicationInfo.value();
+  @let updateInfo = this.updateInfo.value();
+
+  @if (updateInfo?.updateAvailable && !updatedDismissed()) {
+    <div
+      class="alert alert-primary border-0 shadow-sm d-flex align-items-center mb-4 py-3"
+      role="alert"
+    >
+      <i class="bi bi-rocket-takeoff-fill fs-4 me-3 text-primary"></i>
+      <div class="flex-grow-1">
+        <h6 class="mb-0 fw-bold">{{ 'updates.available' | i18next }}</h6>
+        <span class="small opacity-75">{{ 'updates.newVersionAvailable' | i18next: { version: updateInfo?.latestVersion } }}</span>
+      </div>
+      <div class="d-flex gap-2 ms-3">
+        <button
+          class="btn btn-sm btn-link text-decoration-none text-primary fw-bold"
+          (click)="openReleaseUrl()"
+        >
+          {{ 'updates.viewRelease' | i18next }}
+        </button>
+        @if (updateInfo?.canAutoUpdate) {
+          <button
+            class="btn btn-primary btn-sm px-3 shadow-sm"
+            (click)="installUpdate()"
+            [disabled]="isUpdating()"
+          >
+            @if (isUpdating()) {
+              <span class="spinner-border spinner-border-sm me-2"></span>
+            }
+            <i class="bi bi-download me-1"></i> {{ 'updates.installUpdate' | i18next }}
+          </button>
+        }
+        <button
+          type="button"
+          class="btn-close ms-2"
+          (click)="dismissUpdateMessage()"
+        ></button>
+      </div>
+    </div>
+  }
+
+  @if (updateError()) {
+    <div
+      class="alert alert-danger border-0 mb-4 d-flex align-items-center"
+      role="alert"
+    >
+      <i class="bi bi-exclamation-octagon me-2"></i> {{ updateError() }}
+    </div>
+  }
+
+  <div class="row g-4">
+    <div class="col-md-12">
+      <app-card-section
+        icon="bi-app-indicator"
+        [heading]="'about.info.applicationInfo' | i18next"
+      >
+        <div class="card-body p-0">
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center py-3 border-secondary">
+              <span class="text-secondary small fw-bold">{{ 'about.info.appVersion' | i18next }}</span>
+              <div class="d-flex align-items-center gap-2">
+                <code class="text-info bg-dark px-2 py-1 rounded small border border-secondary">{{ appInfo?.version }}</code>
+                <button
+                  class="btn btn-sm btn-outline-secondary border-0 p-1"
+                  (click)="copyToClipboard(appInfo?.version)"
+                  title="Copy"
+                >
+                  <i class="bi bi-clipboard"></i>
+                </button>
+              </div>
+            </li>
+
+            <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center py-3 border-secondary">
+              <span class="text-secondary small fw-bold">{{ 'about.info.runtimeVersion' | i18next }}</span>
+              <div class="d-flex align-items-center gap-2">
+                <span class="font-monospace small opacity-75">{{ appInfo?.runtime }}</span>
+                <button
+                  class="btn btn-sm btn-outline-secondary border-0 p-1"
+                  (click)="copyToClipboard(appInfo?.runtime)"
+                  title="Copy"
+                >
+                  <i class="bi bi-clipboard"></i>
+                </button>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </app-card-section>
+    </div>
+
+    <app-card-section
+      icon="bi-cpu"
+      [heading]="'about.info.systemInfo' | i18next"
+      class="my-4"
+    >
+      <div class="card-body p-0">
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center py-3 border-secondary">
+            <span class="text-secondary small fw-bold">{{ 'about.info.platform' | i18next }}</span>
+            <span class="badge bg-secondary border border-secondary">{{ appInfo?.platform }}</span>
+          </li>
+
+          <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center py-3 border-secondary">
+            <span class="text-secondary small fw-bold">{{ 'about.info.operatingSystem' | i18next }}</span>
+            <div class="d-flex align-items-center gap-2">
+              <span
+                class="text-truncate small opacity-75"
+                title="{{ appInfo?.operatingSystem }}"
+              >
+                {{ appInfo?.operatingSystem }}
+              </span>
+              <button
+                class="btn btn-sm btn-outline-secondary border-0 p-1"
+                (click)="copyToClipboard(appInfo?.operatingSystem)"
+              >
+                <i class="bi bi-clipboard"></i>
+              </button>
+            </div>
+          </li>
+
+          <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center py-3 border-0">
+            <span class="text-secondary small fw-bold">{{ 'about.info.machineName' | i18next }}</span>
+            <div class="d-flex align-items-center gap-2">
+              <span class="font-monospace small opacity-75">{{ appInfo?.machineName }}</span>
+              <button
+                class="btn btn-sm btn-outline-secondary border-0 p-1"
+                (click)="copyToClipboard(appInfo?.machineName)"
+              >
+                <i class="bi bi-clipboard"></i>
+              </button>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </app-card-section>
   </div>
-  <div class="py-3">
-    <div class="copy">&copy;{{ currentYear() }} Overseer</div>
-    <div>
-      {{ 'about.openSourceNotice' | i18next }}
-      <a href="https://en.wikipedia.org/wiki/GNU_Affero_General_Public_License" target="_blank">
-        {{ 'about.license' | i18next }}
-      </a>
+
+  <div class="card border-secondary mb-4 shadow-sm">
+    <div class="card-body d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <div>
+        <h6 class="mb-1 fw-bold"><i class="bi bi-tools text-success me-2"></i>{{ 'about.maintenanceSupport' | i18next }}</h6>
+        <p class="text-muted small mb-0">{{ 'about.helpDescription' | i18next }}</p>
+      </div>
+      <div class="d-flex gap-2">
+        <button
+          class="btn btn-outline-light btn-sm px-3"
+          (click)="downloadLog()"
+        >
+          <i class="bi bi-file-earmark-arrow-down me-2"></i>{{ 'about.downloadLog' | i18next }}
+        </button>
+        <a
+          class="btn btn-outline-light btn-sm px-3"
+          target="_blank"
+          href="https://github.com/overseerapp/overseer/issues"
+        >
+          <i class="bi bi-github me-2"></i>{{ 'about.issueTracker' | i18next }}
+        </a>
+      </div>
     </div>
   </div>
 </div>

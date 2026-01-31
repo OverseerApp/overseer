@@ -13,6 +13,7 @@ jobs:
   build:
     permissions:
       contents: write
+      packages: write
 
     runs-on: ubuntu-latest
 
@@ -28,10 +29,10 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v2
         with:
-          dotnet-version: '8.x'
+          dotnet-version: '10.x'
 
       - name: Set version in shell script
-        run: sed -i "s/overseerVersion='.*'/overseerVersion='${{ github.event.inputs.release_version }}'/" scripts/overseer-installer.sh
+        run: sed -i "s/DEFAULT_VERSION='.*'/DEFAULT_VERSION='${{ github.event.inputs.release_version }}'/" scripts/overseer.sh
 
       - name: Build Angular project
         run: |
@@ -48,11 +49,23 @@ jobs:
         working-directory: src/Overseer.Server
 
       - name: Copy Angular project build to output
-        run: cp -r ./src/Overseer.Client/dist/overseer.client/* ./src/Overseer.Server/bin/Release/net8.0
+        run: cp -r ./src/Overseer.Client/dist/overseer.client/* ./src/Overseer.Server/bin/Release/net10.0
+
+      - name: Copy scripts to output
+        run: cp -r ./scripts ./src/Overseer.Server/bin/Release/net10.0/scripts
 
       - name: Create Server Build Artifacts
         run: zip -r overseer_server.zip *
-        working-directory: src/Overseer.Server/bin/Release/net8.0
+        working-directory: src/Overseer.Server/bin/Release/net10.0
+
+      - name: Check if prerelease
+        id: check_prerelease
+        run: |
+          if [[ "${{ github.event.inputs.release_version }}" == *-* ]]; then
+            echo "is_prerelease=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_prerelease=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Create GitHub Release
         id: create_release
@@ -63,7 +76,39 @@ jobs:
           tag_name: ${{ github.event.inputs.release_version }}
           release_name: Release ${{ github.event.inputs.release_version }}
           draft: false
-          prerelease: false
+          prerelease: ${{ steps.check_prerelease.outputs.is_prerelease }}
+          body: |
+            ## Installation
+
+            ### Fresh Install (Linux with systemd)
+            ```bash
+            # Download and run the installer
+            wget https://github.com/overseerapp/overseer/releases/download/${{ github.event.inputs.release_version }}/overseer-${{ github.event.inputs.release_version }}.sh
+            chmod +x overseer-${{ github.event.inputs.release_version }}.sh
+            sudo ./overseer-${{ github.event.inputs.release_version }}.sh install
+            ```
+
+            ### Update Existing Installation
+            Updates can be performed automatically from the About page in the application, or manually:
+            ```bash
+            # Download the server package
+            wget https://github.com/overseerapp/overseer/releases/download/${{ github.event.inputs.release_version }}/overseer_server_${{ github.event.inputs.release_version }}.zip
+
+            # Stop the service, extract, and restart
+            sudo systemctl stop overseer
+            unzip -o overseer_server_${{ github.event.inputs.release_version }}.zip -d /path/to/overseer
+            sudo systemctl start overseer
+            ```
+
+            ### Docker
+            ```bash
+            docker pull ghcr.io/overseerapp/overseer:${{ github.event.inputs.release_version }}
+            docker run -d -p 9000:9000 -v overseer-data:/app/data ghcr.io/overseerapp/overseer:${{ github.event.inputs.release_version }}
+            ```
+
+            ### Requirements
+            - Linux with systemd (for auto-update support)
+            - .NET 10.0 ASP.NET Core Runtime (installed automatically by the script)
 
       - name: Upload Release Asset - Server
         uses: actions/upload-release-asset@v1
@@ -71,16 +116,47 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: src/Overseer.Server/bin/Release/net8.0/overseer_server.zip
+          asset_path: src/Overseer.Server/bin/Release/net10.0/overseer_server.zip
           asset_name: overseer_server_${{ github.event.inputs.release_version }}.zip
           asset_content_type: application/zip
 
-      - name: Upload Release Asset - Server Installer
+      - name: Upload Release Asset - Install/Update Script
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: scripts/overseer-installer.sh
-          asset_name: overseer-installer-${{ github.event.inputs.release_version }}.sh
+          asset_path: scripts/overseer.sh
+          asset_name: overseer-${{ github.event.inputs.release_version }}.sh
           asset_content_type: application/x-sh
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=raw,value=${{ github.event.inputs.release_version }}
+            type=raw,value=latest,enable=${{ steps.check_prerelease.outputs.is_prerelease == 'false' }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            VERSION=${{ github.event.inputs.release_version }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

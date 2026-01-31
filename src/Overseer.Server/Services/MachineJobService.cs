@@ -8,11 +8,11 @@ namespace Overseer.Server.Services;
 public class MachineJobService(IDataContext dataContext, IMachineStatusChannel machineStatusChannel, INotificationChannel notificationChannel)
   : BackgroundService
 {
-  const int JobUpdateIntervalMilliseconds = (int)TimeSpan.FromSeconds(30).TotalMilliseconds;
+  static readonly int JobUpdateIntervalMilliseconds = (int)TimeSpan.FromSeconds(30).TotalMilliseconds;
 
   static readonly ILog Log = LogManager.GetLogger(typeof(MachineJobService));
 
-  readonly Guid _subscriberId = Guid.NewGuid();
+  static readonly Guid _subscriberId = Guid.NewGuid();
 
   readonly IRepository<MachineJob> _repository = dataContext.Repository<MachineJob>();
 
@@ -28,7 +28,6 @@ public class MachineJobService(IDataContext dataContext, IMachineStatusChannel m
           continue;
 
         var job = _repository.Get(x => x.MachineId == status.MachineId && !x.EndTime.HasValue);
-
         async Task NotifyJobEvent(JobNotificationType type, string? message = null)
         {
           await notificationChannel.WriteAsync(

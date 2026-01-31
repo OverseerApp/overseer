@@ -1,23 +1,97 @@
-@if (form) {
-  <form [formGroup]="form" (submit)="save()">
-    <div class="d-flex">
-      <div class="flex-1">
-        <p>
-          <i class="bi bi-person-fill-add me-1"></i>
-          {{ 'editing' | i18next }} {{ machine()?.name }}
-        </p>
-      </div>
-      <div class="form-check form-switch mb-3">
-        <input class="form-check-input" type="checkbox" role="switch" id="disabled" formControlName="disabled" />
-        <label class="form-check-label" for="disabled">{{ 'disableMonitoring' | i18next }}</label>
-      </div>
-    </div>
-    <app-machine [form]="form" [machine]="machine()"></app-machine>
+<div class="d-flex align-items-center mb-4">
+  <a
+    routerLink="/settings/machines"
+    class="btn btn-link text-secondary p-0 me-3"
+  >
+    <i class="bi bi-arrow-left fs-4"></i>
+  </a>
+  <h4 class="mb-0">
+    <i class="bi bi-person-fill-gear text-primary me-2"></i>
+    {{ 'editing' | i18next }} <span class="text-info font-monospace">{{ machine()?.name }}</span>
+  </h4>
+</div>
 
-    <div class="d-grid gap-2 d-sm-block">
-      <button type="submit" class="btn btn-primary" [disabled]="form.pristine || form.invalid || form.disabled">{{ 'save' | i18next }}</button>
-      <a class="btn btn-secondary ms-sm-2" routerLink="/settings/machines">{{ 'cancel' | i18next }}</a>
-      <button type="button" class="btn btn-outline-danger ms-sm-2" (click)="deleteMachine()">{{ 'delete' | i18next }}</button>
+@if (machine() && form) {
+  <form
+    [formGroup]="form"
+    (submit)="save()"
+  >
+    <app-card-section
+      icon="bi-sliders2"
+      [heading]="'machineDetails' | i18next"
+    >
+      <div class="p-3">
+        <app-machine
+          [form]="form"
+          [machine]="machine()"
+        />
+
+        <div class="d-grid gap-2 d-sm-flex justify-content-sm-end">
+          <a
+            class="btn btn-secondary ms-sm-2"
+            routerLink="/settings/machines"
+          >
+            {{ 'cancel' | i18next }}
+          </a>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="form.pristine || form.invalid || form.disabled"
+          >
+            <i class="bi bi-check-lg me-1"></i>
+            {{ 'save' | i18next }}
+          </button>
+        </div>
+      </div>
+    </app-card-section>
+
+    <div class="col-12 mt-4">
+      <div class="card border-danger bg-opacity-25 shadow-sm">
+        <div class="card-body d-flex flex-wrap align-items-center justify-content-between gap-3">
+          <div>
+            <h6 class="mb-1 fw-bold text-danger">
+              <i class="bi bi-exclamation-octagon me-2"></i>
+              {{ 'dangerZone' | i18next }}
+            </h6>
+            <p class="text-muted small mb-0">
+              {{ 'machineDangerZoneDescription' | i18next }}
+            </p>
+          </div>
+          <div class="d-flex gap-2">
+            <input
+              type="hidden"
+              id="disabled"
+              formControlName="disabled"
+            />
+            @if (machine()?.disabled) {
+              <button
+                type="button"
+                class="btn btn-outline-primary btn-sm"
+                (click)="updateMonitoring(false)"
+              >
+                <i class="bi bi-check-circle-fill me-2"></i>
+                {{ 'enableMonitoring' | i18next }}
+              </button>
+            } @else {
+              <button
+                type="button"
+                class="btn btn-outline-warning btn-sm"
+                (click)="updateMonitoring(true)"
+              >
+                <i class="bi bi-circle-fill me-2"></i>
+                {{ 'disableMonitoring' | i18next }}
+              </button>
+            }
+            <button
+              type="button"
+              class="btn btn-outline-danger btn-sm"
+              (click)="deleteMachine()"
+            >
+              <i class="bi bi-trash3 me-2"></i>{{ 'delete' | i18next }}
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </form>
 }

@@ -1,0 +1,39 @@
+.user-card {
+  transition: box-shadow 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+  }
+}
+
+.user-card-content {
+  gap: 1rem;
+
+  @media (max-width: 768px) {
+    // Stack vertically on mobile
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+.user-info {
+  flex-grow: 1;
+  min-width: 0; // Allow flex item to shrink below content size
+
+  .user-name {
+    font-size: 1.1rem;
+    word-break: break-word;
+  }
+
+  .user-metadata {
+    flex-wrap: wrap;
+    font-size: 0.875rem;
+  }
+}
+
+.user-actions {
+  @media (max-width: 768px) {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+}

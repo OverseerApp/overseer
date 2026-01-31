@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { effect, inject, Injectable, signal } from '@angular/core';
-import { catchError, map, Observable, of, tap } from 'rxjs';
+import { catchError, filter, map, Observable, of, tap } from 'rxjs';
 import { User } from '../models/user.model';
 import { endpointFactory } from './endpoint-factory';
 import { LocalStorageService } from './local-storage.service';
@@ -16,6 +16,16 @@ export class AuthenticationService {
   constructor() {
     effect(() => {
       this.updateActiveUser(this.activeUser());
+    });
+
+    // Listen for activeUser changes in the same tab
+    this.localStorageService.changes$.pipe(filter((change) => change.key === 'activeUser')).subscribe((change) => {
+      this.activeUser.set(change.value);
+    });
+
+    // Listen for activeUser changes from other tabs/windows
+    this.localStorageService.watchKey('activeUser').subscribe((value) => {
+      this.activeUser.set(value);
     });
   }
 

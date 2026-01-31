@@ -5,7 +5,9 @@ using Overseer.Server;
 using Overseer.Server.Api;
 using Overseer.Server.Data;
 using Overseer.Server.Hubs;
+using Overseer.Server.Infrastructure;
 using Overseer.Server.Models;
+using Overseer.Server.Plugins;
 using Overseer.Server.Updates;
 
 if (!UpdateManager.Update())
@@ -17,17 +19,49 @@ using (var context = new LiteDataContext())
 {
   var values = context.ValueStore();
   var settings = values.GetOrPut(() => new ApplicationSettings());
-  var portOption = new Option<int?>(name: "--port", description: "The Overseer Server Port");
-  var intervalOption = new Option<int?>(name: "--interval", description: "How often Overseer will poll for updates.");
-  var options = new RootCommand("Overseer CLI Options...");
-  var parseResults = options.Parse(args);
-  settings.LocalPort = parseResults.GetValueForOption(portOption) ?? ApplicationSettings.DefaultPort;
-  settings.Interval = parseResults.GetValueForOption(intervalOption) ?? ApplicationSettings.DefaultInterval;
+  var portOption = new Option<int?>("--port") { Description = "The local port Overseer will listen on." };
+  var intervalOption = new Option<int?>("--interval") { Description = "How often Overseer will poll for updates." };
+  var command = new RootCommand("Overseer CLI Options...");
+  var parseResults = command.Parse(args);
+  settings.LocalPort = parseResults.GetValue(portOption) ?? ApplicationSettings.DefaultPort;
+  settings.Interval = parseResults.GetValue(intervalOption) ?? ApplicationSettings.DefaultInterval;
 
   var builder = WebApplication.CreateBuilder(args);
+
+  // Configure logging to output to console for Docker
+  builder.Logging.ClearProviders();
+  builder.Logging.AddConsole();
+  builder.Services.AddOutputCache(options =>
+  {
+    options.AddPolicy(
+      "RefreshCache",
+      policy =>
+      {
+        policy.AddPolicy<RefreshCachePolicy>();
+        policy.Expire(TimeSpan.FromHours(1));
+      }
+    );
+  });
+
   builder.Services.AddEndpointsApiExplorer();
   builder.Services.AddSwaggerGen();
   builder.Services.AddSignalR();
+
+  var isDev = builder.Environment.IsDevelopment();
+  if (isDev)
+  {
+    builder.Services.AddCors(options =>
+    {
+      options.AddPolicy(
+        "DevCorsPolicy",
+        policy =>
+        {
+          policy.WithOrigins("http://localhost:4200").AllowAnyHeader().AllowAnyMethod().AllowCredentials();
+        }
+      );
+    });
+  }
+
   builder.Services.AddOverseerDependencies(context);
   builder.Services.AddAuthentication(OverseerAuthenticationOptions.Setup).UseOverseerAuthentication();
 
@@ -39,19 +73,23 @@ using (var context = new LiteDataContext())
   var app = builder.Build();
 
   XmlConfigurator.Configure(new FileInfo(Path.Combine(app.Environment.ContentRootPath, "log4net.config")));
-  var isDev = app.Environment.IsDevelopment();
+
+  app.UseWebSockets();
 
   if (isDev)
   {
+    app.UseCors("DevCorsPolicy");
     app.UseSwagger();
     app.UseSwaggerUI();
-    app.UseCors((builder) => builder.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin().SetIsOriginAllowedToAllowWildcardSubdomains());
   }
 
   app.HandleOverseerExceptions();
+  app.UseAuthentication();
+  app.UseAuthorization();
+  app.UseOutputCache();
   app.MapOverseerApi();
-  app.MapHub<StatusHub>("/push/status");
-  app.MapHub<NotificationHub>("/push/notifications");
+  app.MapHub<StatusHub>("/push/status").RequireAuthorization();
+  app.MapHub<NotificationHub>("/push/notifications").RequireAuthorization();
 
   var url = $"http://*:{settings.LocalPort}";
   if (!isDev)

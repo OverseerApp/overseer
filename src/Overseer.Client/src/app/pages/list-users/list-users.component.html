@@ -1,44 +1,73 @@
-<table class="table table-fixed">
-  <thead>
-    <tr>
-      <th scope="col">{{ 'username' | i18next }}</th>
-      <th scope="col">{{ 'accessLevel' | i18next }}</th>
-      <th scope="col" class="d-none d-sm-table-cell">{{ 'sessionLifetime' | i18next }}</th>
-      <th scope="col" class="text-center d-none d-sm-table-cell">{{ 'isLoggedIn' | i18next }}</th>
-      <th scope="col" class="action">
-        <a class="btn btn-primary" routerLink="new">
-          <i class="bi bi-plus"></i>
-          {{ 'add' | i18next }}
-        </a>
-      </th>
-    </tr>
-  </thead>
-  <tbody>
-    @for (user of users(); track user.id) {
-    <tr>
-      <td>{{ user.username }}</td>
-      <td>{{ user.accessLevel }}</td>
-      <td class="d-none d-sm-table-cell">
-        @if(user.sessionLifetime){
-        {{ user.sessionLifetime }} {{ 'days' | i18next }}
-        } @else{
-        {{ 'indefinite' | i18next }}
-        }
-      </td>
-      <td class="text-center d-none d-sm-table-cell">
-        @if(user.isLoggedIn) {
-        <i class="bi bi-check-circle-fill"></i>
-        } @else {
-        <i class="bi bi-exclamation-triangle-fill"></i>
-        }
-      </td>
-      <td class="action">
-        <a class="btn btn-outline-primary" [routerLink]="[user.id, 'edit']">
-          <i class="bi bi-pencil"></i>
-          {{ 'edit' | i18next }}
-        </a>
-      </td>
-    </tr>
-    }
-  </tbody>
-</table>
+<app-card-section
+  icon="bi-people-fill"
+  [heading]="'users' | i18next"
+>
+  <a
+    card-actions
+    class="btn btn-primary d-flex align-items-center gap-2 btn-sm"
+    routerLink="new"
+  >
+    <i class="bi bi-person-plus"></i>
+    {{ 'addUser' | i18next }}
+  </a>
+  <div class="list-group px-3">
+    <div>
+      @for (user of users(); track user.id) {
+        <div class="list-group-item border-secondary p-3 my-3 rounded shadow-sm user-card">
+          <div class="row align-items-start user-card-content">
+            <div class="col user-info">
+              <div class="d-flex flex-column flex-md-row align-items-start align-md-items-center gap-2 mb-2">
+                <h5 class="mb-0 user-name">{{ user.username }}</h5>
+                <span
+                  class="badge border small flex-shrink-0"
+                  [ngClass]="{
+                    'bg-outline-info border-info text-info': user.accessLevel === 'Administrator',
+                    'bg-outline-secondary border-secondary text-text-secondary': user.accessLevel !== 'Administrator',
+                  }"
+                >
+                  {{ user.accessLevel }}
+                </span>
+              </div>
+
+              <div class="d-flex gap-3 small user-metadata flex-column flex-md-row">
+                <span class="text-muted">
+                  <i class="bi bi-clock-history"></i>
+                  {{ 'session' | i18next }}
+                  <strong>
+                    @if (user.sessionLifetime) {
+                      {{ user.sessionLifetime }} {{ 'days' | i18next }}
+                    } @else {
+                      {{ 'indefinite' | i18next }}
+                    }
+                  </strong>
+                </span>
+
+                <div
+                  class="d-flex gap-1 small text-secondary flex-wrap"
+                  [ngClass]="user.isLoggedIn ? 'text-success' : 'text-muted'"
+                >
+                  <i
+                    class="bi"
+                    [ngClass]="user.isLoggedIn ? 'bi-circle-fill' : 'bi-circle'"
+                  ></i>
+                  {{ (user.isLoggedIn ? 'online' : 'offline') | i18next }}
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 col-md-auto d-flex gap-2 mt-3 mt-md-0 user-actions">
+              <a
+                class="btn btn-outline-secondary btn-sm px-3 flex-grow-1 flex-md-grow-0"
+                [routerLink]="[user.id, 'edit']"
+              >
+                <i class="bi bi-pencil"></i>
+                {{ 'edit' | i18next }}
+              </a>
+            </div>
+          </div>
+        </div>
+        <span></span>
+      }
+    </div>
+  </div>
+</app-card-section>

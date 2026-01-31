@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build outputs
+**/bin/
+**/obj/
+**/dist/
+
+# IDE
+.vs/
+.vscode/
+.idea/
+*.suo
+*.user
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+docs/
+*.md
+
+# Tests
+**/Tests/
+**/*.Tests/
+**/test/
+**/*.spec.ts
+
+# Misc
+*.log
+*.tmp
+.angular/

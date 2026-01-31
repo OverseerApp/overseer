@@ -1,5 +1,14 @@
-﻿namespace Overseer.Server.Models
+﻿using System.Text.Json.Serialization;
+
+namespace Overseer.Server.Models
 {
+  public enum AIMonitoringFailureAction
+  {
+    AlertOnly = 0,
+    PauseJob = 1,
+    CancelJob = 2,
+  }
+
   public class ApplicationSettings
   {
     public const int DefaultPort = 9000;
@@ -31,5 +40,21 @@
     /// Gets/Sets the port which the overseer daemon listens on
     /// </summary>
     public int LocalPort { get; set; } = DefaultPort;
+
+    /// <summary>
+    /// If true AI based monitoring is enabled.
+    /// </summary>
+    public bool EnableAiMonitoring { get; set; } = false;
+
+    /// <summary>
+    /// Frame captures per second. Default 5 fps
+    /// </summary>
+    public int AiMonitoringFrameCaptureRate { get; set; } = 5;
+
+    /// <summary>
+    /// Action to take when AI monitoring detects a failure.
+    /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public AIMonitoringFailureAction AiMonitoringFailureAction { get; set; } = AIMonitoringFailureAction.AlertOnly;
   }
 }

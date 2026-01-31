@@ -1,7 +1,15 @@
 import { Injectable } from '@angular/core';
+import { fromEvent, Observable, Subject } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
 export class LocalStorageService {
+  private changeSubject = new Subject<{ key: string; value: any }>();
+  private storageEvent$ = fromEvent<StorageEvent>(window, 'storage');
+
+  // Observable that emits when localStorage changes in the same tab
+  changes$ = this.changeSubject.asObservable();
+
   get<T>(name: string): T | undefined {
     try {
       let value = window.localStorage.getItem(name);
@@ -25,13 +33,23 @@ export class LocalStorageService {
   set<T>(name: string, item: T): void {
     if (!item) return;
     window.localStorage.setItem(name, JSON.stringify(item));
+    this.changeSubject.next({ key: name, value: item });
   }
 
   remove(name: string): void {
     window.localStorage.removeItem(name);
+    this.changeSubject.next({ key: name, value: null });
   }
 
   clear(): void {
     window.localStorage.clear();
+  }
+
+  // Observable that emits when localStorage changes in other tabs/windows
+  watchKey(key: string): Observable<any> {
+    return this.storageEvent$.pipe(
+      filter((event) => event.key === key && event.storageArea === localStorage),
+      map((event) => (event.newValue ? JSON.parse(event.newValue) : null))
+    );
   }
 }

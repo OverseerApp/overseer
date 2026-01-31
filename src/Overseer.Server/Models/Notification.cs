@@ -5,8 +5,9 @@ namespace Overseer.Server.Models;
 
 public enum NotificationType
 {
-  Job,
   Simple,
+  Job,
+  JobFailure,
 }
 
 [JsonDerivedType(typeof(JobNotification))]
@@ -38,15 +39,27 @@ public enum JobNotificationType
 public class JobNotification : Notification
 {
   [JsonConverter(typeof(JsonStringEnumConverter))]
-  public override NotificationType NotificationType
-  {
-    get => NotificationType.Job;
-  }
+  public override NotificationType NotificationType => NotificationType.Job;
 
   [JsonConverter(typeof(JsonStringEnumConverter))]
-  public JobNotificationType Type { get; set; }
+  public virtual JobNotificationType Type { get; set; }
 
   public int MachineId { get; set; }
 
   public int MachineJobId { get; set; }
+}
+
+public class JobFailureNotification : JobNotification
+{
+  [JsonConverter(typeof(JsonStringEnumConverter))]
+  public override NotificationType NotificationType => NotificationType.JobFailure;
+
+  public JobFailureAnalysisResult? AnalysisResult { get; set; }
+
+  public bool JobPaused { get; set; }
+
+  public bool JobCancelled { get; set; }
+
+  [JsonConverter(typeof(JsonStringEnumConverter))]
+  public override JobNotificationType Type => JobNotificationType.JobError;
 }

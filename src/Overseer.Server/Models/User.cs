@@ -47,7 +47,10 @@ namespace Overseer.Server.Models
 
     public string? PasswordSalt { get; set; }
 
-    public string? Token { get; set; }
+    /// <summary>
+    /// SHA256 hash of the token for secure storage and constant-time comparison
+    /// </summary>
+    public string? TokenHash { get; set; }
 
     public DateTime? TokenExpiration { get; set; }
 
@@ -63,14 +66,13 @@ namespace Overseer.Server.Models
     /// <summary>
     /// Helper method to quickly convert a user to a user display object
     /// </summary>
-    public UserDisplay ToDisplay(bool includeToken = false)
+    public UserDisplay ToDisplay()
     {
       return new UserDisplay
       {
         Id = Id,
         Username = Username,
         SessionLifetime = SessionLifetime,
-        Token = includeToken ? Token : null,
         IsLoggedIn = !this.IsTokenExpired(),
         AccessLevel = AccessLevel,
       };
@@ -81,8 +83,8 @@ namespace Overseer.Server.Models
   {
     public static bool IsTokenExpired(this User user)
     {
-      //if the user or token is null it's considered expired
-      if (string.IsNullOrWhiteSpace(user?.Token))
+      //if the user or token hash is null it's considered expired
+      if (string.IsNullOrWhiteSpace(user?.TokenHash))
         return true;
 
       //if there is no expiration set the, with the presence of a token, the user

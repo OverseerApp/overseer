@@ -5,12 +5,16 @@
     "Bambu",
     "Curren",
     "Elegoo",
+    "Emgu",
     "Filepos",
     "Gcode",
+    "Imencode",
     "Klipper",
     "Mainboard",
     "Newtonsoft",
     "Octoprint",
+    "Onnx",
+    "overseerapp",
     "Preauthenticated",
     "Preauthentication",
     "reprapfirmware",
@@ -20,24 +24,28 @@
   "editor.formatOnPaste": true,
   "editor.rulers": [150],
   "prettier.configPath": "src/Overseer.Client/prettierrc.json",
+  "prettier.singleAttributePerLine": true,
   "editor.tabSize": 2,
   "[typescript]": {
     "editor.codeActionsOnSave": {
-      "source.addMissingImports.ts": "explicit",      
+      "source.addMissingImports.ts": "explicit",
       "source.fixAll.eslint": "always",
-      "source.organizeImports": "always", 
+      "source.organizeImports": "always",
       "source.removeUnusedImports": "always"
     }
   },
   "[csharp]": {
-    "editor.codeActionsOnSave": [ "source.organizeImports" ],
-    "editor.defaultFormatter": "csharpier.csharpier-vscode", 
+    "editor.codeActionsOnSave": ["source.organizeImports"],
+    "editor.defaultFormatter": "csharpier.csharpier-vscode",
     "editor.detectIndentation": false,
     "editor.insertSpaces": true,
     "editor.tabSize": 2
-  },  
+  },
   "[xml]": {
     "editor.defaultFormatter": "csharpier.csharpier-vscode"
   },
-  "csharpOrganizeUsings.splitGroups": false,
+  "[html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "csharpOrganizeUsings.splitGroups": false
 }

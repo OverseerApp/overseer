@@ -1,0 +1,10 @@
+<div class="card border-secondary shadow-sm">
+  <div class="card-header border-secondary py-2 d-flex flex-row flex-wrap justify-content-between align-items-center gap-2">
+    <h6 class="mb-0 text-uppercase fw-bold text-primary d-flex align-items-center gap-2 font-monospace">
+      <i [ngClass]="'bi ' + icon + ' me-2'"></i>
+      {{ heading }}
+    </h6>
+    <ng-content select="[card-actions]"></ng-content>
+  </div>
+  <ng-content></ng-content>
+</div>

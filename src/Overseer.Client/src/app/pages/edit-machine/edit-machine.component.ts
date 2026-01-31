@@ -4,6 +4,7 @@ import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angul
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { I18NextPipe } from 'angular-i18next';
 import { filter, map, Observable, switchMap } from 'rxjs';
+import { CardSectionComponent } from '../../components/card-section/card-section.component';
 import { MachineHostComponent } from '../../components/machine-host/machine-host.component';
 import { MachineForm } from '../../models/form.types';
 import { Machine } from '../../models/machine.model';
@@ -15,7 +16,7 @@ import { ToastsService } from '../../services/toast.service';
 @Component({
   selector: 'app-edit-machine',
   templateUrl: './edit-machine.component.html',
-  imports: [I18NextPipe, ReactiveFormsModule, RouterLink, MachineHostComponent],
+  imports: [CardSectionComponent, I18NextPipe, ReactiveFormsModule, RouterLink, MachineHostComponent],
   providers: [DialogService, CertificateErrorService],
 })
 export class EditMachineComponent {
@@ -42,7 +43,6 @@ export class EditMachineComponent {
         this.form = this.formBuilder.nonNullable.group({}, { updateOn: 'change' });
         this.form.addControl('id', new FormControl(machine?.id));
         this.form.addControl('machineType', new FormControl(null));
-        this.form.addControl('disabled', new FormControl(machine?.disabled));
       });
   }
 
@@ -55,6 +55,16 @@ export class EditMachineComponent {
 
   save() {
     this.handleNetworkAction(this.machinesService.updateMachine({ ...this.machine(), ...this.form!.getRawValue() } as Machine));
+  }
+
+  updateMonitoring(disabled: boolean): void {
+    var update = { ...this.machine(), disabled } as Machine;
+    this.machinesService.updateMachine(update).subscribe({
+      complete: () => {
+        this.form?.patchValue({ disabled: false });
+        this.machine.set(update);
+      },
+    });
   }
 
   private handleNetworkAction(observable: Observable<any>) {

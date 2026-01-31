@@ -1,0 +1,127 @@
+<app-card-section
+  icon="bi-download"
+  [heading]="('available' | i18next) + ' ' + ('plugins' | i18next) + ' (' + availablePlugins().length + ')'"
+>
+  <div
+    card-actions
+    class="d-flex gap-2"
+  >
+    @if (availablePlugins().length > 0) {
+      <button
+        class="btn btn-outline-secondary btn-sm"
+        (click)="selectAllAvailable()"
+        [disabled]="selectedAvailable().size === availablePlugins().length"
+      >
+        {{ 'selectAll' | i18next }}
+      </button>
+      <button
+        class="btn btn-outline-secondary btn-sm"
+        (click)="deselectAllAvailable()"
+        [disabled]="selectedAvailable().size === 0"
+      >
+        {{ 'deselectAll' | i18next }}
+      </button>
+      <button
+        class="btn btn-primary btn-sm"
+        (click)="installSelectedPlugins()"
+        [disabled]="selectedAvailable().size === 0 || busy()"
+      >
+        <i class="bi bi-download"></i>
+        {{ 'install' | i18next }}
+        (
+        <span class="font-monospace">{{ selectedAvailable().size }}</span>
+        )
+      </button>
+    }
+  </div>
+
+  <div class="px-3">
+    @if (plugins.isLoading()) {
+      <div class="d-flex align-items-center my-3">
+        <span class="spinner-border spinner-border-sm me-2"></span>
+        <span>{{ 'loading' | i18next }}</span>
+      </div>
+    } @else if (availablePlugins().length === 0) {
+      <div class="alert alert-info my-3">
+        <i class="bi bi-info-circle"></i>
+        {{ 'noAvailablePlugins' | i18next }}
+      </div>
+    } @else {
+      <div class="list-group">
+        @for (plugin of availablePlugins(); track plugin.name) {
+          <app-plugin-card
+            [plugin]="plugin"
+            [selected]="selectedAvailable().has(plugin.name)"
+            [selectable]="true"
+            (selectionChange)="toggleAvailableSelection(plugin.name)"
+          >
+          </app-plugin-card>
+        }
+      </div>
+    }
+  </div>
+</app-card-section>
+
+<app-card-section
+  icon="bi-check-circle"
+  [heading]="('installed' | i18next) + ' ' + ('plugins' | i18next) + ' (' + installedPlugins().length + ')'"
+  class="d-block mt-4"
+>
+  <div
+    card-actions
+    class="d-flex gap-2"
+  >
+    @if (installedPlugins().length > 0) {
+      <button
+        class="btn btn-outline-secondary btn-sm"
+        (click)="selectAllInstalled()"
+        [disabled]="selectedInstalled().size === installedPlugins().length"
+      >
+        {{ 'selectAll' | i18next }}
+      </button>
+      <button
+        class="btn btn-outline-secondary btn-sm"
+        (click)="deselectAllInstalled()"
+        [disabled]="selectedInstalled().size === 0"
+      >
+        {{ 'deselectAll' | i18next }}
+      </button>
+      <button
+        class="btn btn-danger btn-sm"
+        (click)="uninstallSelectedPlugins()"
+        [disabled]="selectedInstalled().size === 0 || busy()"
+      >
+        <i class="bi bi-trash"></i>
+        {{ 'uninstall' | i18next }}
+        (
+        <span class="font-monospace">{{ selectedInstalled().size }}</span>
+        )
+      </button>
+    }
+  </div>
+  <div class="px-3">
+    @if (plugins.isLoading()) {
+      <div class="d-flex align-items-center my-3">
+        <span class="spinner-border spinner-border-sm me-2"></span>
+        <span>{{ 'loading' | i18next }}</span>
+      </div>
+    } @else if (installedPlugins().length === 0) {
+      <div class="alert alert-info my-3">
+        <i class="bi bi-info-circle"></i>
+        {{ 'noInstalledPlugins' | i18next }}
+      </div>
+    } @else {
+      <div class="list-group">
+        @for (plugin of installedPlugins(); track plugin.name) {
+          <app-plugin-card
+            [plugin]="plugin"
+            [selected]="selectedInstalled().has(plugin.name)"
+            [selectable]="true"
+            (selectionChange)="toggleInstalledSelection(plugin.name)"
+          >
+          </app-plugin-card>
+        }
+      </div>
+    }
+  </div>
+</app-card-section>

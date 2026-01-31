@@ -1,53 +1,80 @@
-<div #container>
-  <table class="table table-fixed">
-    <thead>
-      <tr>
-        <th scope="col" class="action text-start">{{ 'sort' | i18next }}</th>
-        <th scope="col">{{ 'name' | i18next }}</th>
-        <th scope="col" class="d-none d-sm-table-cell">{{ 'machineType' | i18next }}</th>
-        <th scope="col" class="text-center d-none d-sm-table-cell">{{ 'monitoringEnabled' | i18next }}</th>
-        <th scope="col" class="action">
-          <a class="btn btn-primary" routerLink="new">
-            <i class="bi bi-plus"></i>
-            {{ 'add' | i18next }}
-          </a>
-        </th>
-      </tr>
-    </thead>
-    <tbody class="drag-boundary" cdkDropList (cdkDropListDropped)="drop($event)">
-      @for (machine of machines(); track machine.id) {
-      <tr cdkDrag cdkDragBoundary=".drag-boundary" [cdkDragPreviewContainer]="container">
-        <td class="action">
-          <div class="btn-group">
-            <button class="btn btn-outline-primary" [disabled]="$index === 0" (click)="moveUp($index)">
-              <i class="bi bi-chevron-up"></i>
-            </button>
-            <button class="btn btn-outline-primary" [disabled]="$index === $count - 1" (click)="moveDown($index)">
-              <i class="bi bi-chevron-down"></i>
-            </button>
+<app-card-section
+  icon="bi-cpu-fill"
+  [heading]="'machines' | i18next"
+>
+  <button
+    card-actions
+    class="btn btn-primary d-flex align-items-center gap-2 btn-sm"
+    routerLink="new"
+  >
+    <i class="bi bi-plus-lg"></i>
+    {{ 'addMachine' | i18next }}
+  </button>
+  <div class="list-group px-3">
+    <div
+      class="drag-boundary"
+      cdkDropList
+      (cdkDropListDropped)="drop($event)"
+    >
+      @for (machine of machines(); track $index) {
+        @let first = $index === 0;
+        @let last = $index === $count - 1;
+
+        <div
+          cdkDrag
+          cdkDragBoundary=".drag-boundary"
+          class="list-group-item border border-secondary p-3 my-3 rounded shadow-sm draggable bg-body machine-card"
+        >
+          <div class="row align-items-start machine-card-content">
+            <div class="col-auto d-none d-md-flex flex-column gap-1 border-end border-secondary pe-3 me-2 machine-controls">
+              <button
+                class="btn btn-link btn-sm p-0 text-secondary"
+                [disabled]="first"
+                (click)="moveUp($index)"
+              >
+                <i class="bi bi-chevron-up"></i>
+              </button>
+              <button
+                class="btn btn-link btn-sm p-0 text-secondary"
+                [disabled]="last"
+                (click)="moveDown($index)"
+              >
+                <i class="bi bi-chevron-down"></i>
+              </button>
+            </div>
+
+            <div class="col machine-info">
+              <div class="d-flex flex-column flex-md-row align-items-start align-md-items-center gap-2 mb-2">
+                <h5 class="mb-0 machine-name">{{ machine.name }}</h5>
+                <span class="badge bg-outline-info border border-info text-info small flex-shrink-0">
+                  {{ machine.machineType | i18next }}
+                </span>
+              </div>
+
+              <div class="d-flex gap-3 small text-muted machine-status">
+                <span [ngClass]="machine.disabled ? 'text-warning' : 'text-success'">
+                  <i
+                    class="bi"
+                    [ngClass]="machine.disabled ? 'bi-exclamation-triangle' : 'bi-check-circle-fill'"
+                  ></i>
+                  {{ machine.disabled ? 'Monitoring Disabled' : 'Monitoring Active' }}
+                </span>
+              </div>
+            </div>
+
+            <div class="col-12 col-md-auto d-flex gap-2 mt-3 mt-md-0 machine-actions">
+              <a
+                class="btn btn-outline-secondary btn-sm px-3 flex-grow-1 flex-md-grow-0"
+                [routerLink]="[machine.id, 'edit']"
+              >
+                <i class="bi bi-pencil"></i>
+                {{ 'edit' | i18next }}
+              </a>
+            </div>
           </div>
-        </td>
-        <td>{{ machine.name }}</td>
-        <td class="d-none d-sm-table-cell">{{ machine.machineType }}</td>
-        <td class="text-center d-none d-sm-table-cell">
-          @if(machine.disabled) {
-          <i class="bi bi-exclamation-triangle-fill"></i>
-          } @else {
-          <i class="bi bi-check-circle-fill"></i>
-          }
-        </td>
-        <td class="action">
-          <a class="btn btn-outline-primary" [routerLink]="[machine.id, 'edit']">
-            <i class="bi bi-pencil"></i>
-            {{ 'edit' | i18next }}
-          </a>
-        </td>
-      </tr>
-      } @if(!machines().length){
-      <tr>
-        <td colspan="5">{{ 'noMachines' | i18next }}</td>
-      </tr>
+        </div>
+        <span></span>
       }
-    </tbody>
-  </table>
-</div>
+    </div>
+  </div>
+</app-card-section>

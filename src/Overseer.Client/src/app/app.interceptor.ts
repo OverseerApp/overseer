@@ -1,6 +1,5 @@
 import { HttpEvent, HttpHandlerFn, HttpRequest } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { Router } from '@angular/router';
 
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -10,7 +9,6 @@ import { ErrorHandlerService } from './services/error-handler.service';
 import { LocalStorageService } from './services/local-storage.service';
 
 export function overseerInterceptor(request: HttpRequest<unknown>, next: HttpHandlerFn): Observable<HttpEvent<unknown>> {
-  const router = inject(Router);
   const errorHandler = inject(ErrorHandlerService);
   const localStorageService = inject(LocalStorageService);
 
@@ -30,6 +28,12 @@ export function overseerInterceptor(request: HttpRequest<unknown>, next: HttpHan
 
   return next(request).pipe(
     catchError((errorResponse) => {
+      // ignore errors from the ping endpoint,
+      // it's used to check if the backend is back online after a restart
+      if (request.url.endsWith('/system/ping')) {
+        return throwError(() => errorResponse);
+      }
+
       let errorMessage = 'unknown_exception';
       if (!(errorResponse.error instanceof Error)) {
         switch (errorResponse.status) {

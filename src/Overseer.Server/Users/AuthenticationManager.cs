@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Security.Cryptography;
+using System.Text;
 using Overseer.Server.Data;
 using Overseer.Server.Models;
 
@@ -9,6 +10,13 @@ namespace Overseer.Server.Users
     const string Bearer = "Bearer";
 
     readonly IRepository<User> _users = context.Repository<User>();
+
+    static string HashToken(string token)
+    {
+      var tokenBytes = Encoding.UTF8.GetBytes(token);
+      var hashBytes = SHA256.HashData(tokenBytes);
+      return Convert.ToBase64String(hashBytes);
+    }
 
     public UserDisplay? AuthenticateUser(UserDisplay user)
     {
@@ -23,8 +31,7 @@ namespace Overseer.Server.Users
       }
 
       var user = _users.Get(u => u.Username!.ToLower() == username.ToLower()) ?? throw new OverseerException("invalid_username");
-      var passwordHash = BCrypt.Net.BCrypt.HashPassword(password, user.PasswordSalt);
-      if (user.PasswordHash?.SequenceEqual(passwordHash) == false)
+      if (!BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
       {
         throw new OverseerException("invalid_password");
       }
@@ -39,7 +46,11 @@ namespace Overseer.Server.Users
         return null;
       }
 
-      var user = _users.Get(u => u.Token == StripToken(token));
+      var strippedToken = StripToken(token);
+      var tokenHash = HashToken(strippedToken);
+
+      // Compare hashed tokens to prevent timing attacks
+      var user = _users.Get(u => u.TokenHash == tokenHash);
 
       if (user.IsTokenExpired())
       {
@@ -57,7 +68,8 @@ namespace Overseer.Server.Users
         return null;
       }
 
-      return DeauthenticateUser(_users.Get(u => u.Token == StripToken(token)));
+      var tokenHash = HashToken(StripToken(token));
+      return DeauthenticateUser(_users.Get(u => u.TokenHash == tokenHash));
     }
 
     public UserDisplay? DeauthenticateUser(int userId)
@@ -107,7 +119,7 @@ namespace Overseer.Server.Users
         return null;
       }
 
-      user.Token = null;
+      user.TokenHash = null;
       user.TokenExpiration = null;
       _users.Update(user);
 
@@ -116,12 +128,14 @@ namespace Overseer.Server.Users
 
     UserDisplay AuthenticateUser(User user)
     {
-      if (!user.IsTokenExpired())
-      {
-        return user.ToDisplay(includeToken: true);
-      }
+      // Always generate a new token on login since we only store the hash
+      // and cannot return the previous plain token
+      var tokenBytes = RandomNumberGenerator.GetBytes(32);
+      var plainToken = Convert.ToBase64String(tokenBytes);
 
-      user.Token = BCrypt.Net.BCrypt.GenerateSalt(16);
+      // Store only the hash of the token, never the plain token
+      user.TokenHash = HashToken(plainToken);
+
       if (user.SessionLifetime.HasValue)
       {
         user.TokenExpiration = DateTime.UtcNow.AddDays(user.SessionLifetime.Value);
@@ -135,7 +149,11 @@ namespace Overseer.Server.Users
       user.PreauthenticatedTokenExpiration = null;
 
       _users.Update(user);
-      return user.ToDisplay(includeToken: true);
+
+      var display = user.ToDisplay();
+      display.Token = plainToken;
+
+      return display;
     }
   }
 }

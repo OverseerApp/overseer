@@ -108,7 +108,7 @@ namespace Overseer.Server.Machines
           break;
 
         var buffer = new byte[4096];
-        using var ms = new System.IO.MemoryStream();
+        using var ms = new MemoryStream();
         WebSocketReceiveResult receiveResult;
         do
         {

@@ -1,31 +1,46 @@
-<div class="container-md py-5">
-  <ul class="nav nav-tabs d-flex">
-    <li class="nav-item text-center flex-1">
-      <a class="nav-link" routerLink="./" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" href="#">
-        <i class="bi bi-gear-fill me-sm-1"></i>
-        <span class="d-none d-sm-inline">{{ 'generalSettings' | i18next }}</span>
-      </a>
-    </li>
-    <li class="nav-item text-center flex-1">
-      <a class="nav-link" routerLink="machines" routerLinkActive="active" href="#">
-        <i class="bi bi-robot me-sm-1"></i>
-        <span class="d-none d-sm-inline">{{ 'machines' | i18next }}</span>
-      </a>
-    </li>
-    <li class="nav-item text-center flex-1">
-      <a class="nav-link" routerLink="users" routerLinkActive="active" href="#">
-        <i class="bi bi-people-fill me-sm-1"></i>
-        <span class="d-none d-sm-inline">{{ 'users' | i18next }}</span>
-      </a>
-    </li>
-    <li class="nav-item text-center flex-1">
-      <a class="nav-link" routerLink="about" routerLinkActive="active">
-        <i class="bi bi-info-circle-fill me-sm-1"></i>
-        <span class="d-none d-sm-inline">{{ 'aboutSettings' | i18next }}</span>
-      </a>
-    </li>
-  </ul>
-  <div class="p-3 border-start border-end border-bottom rounded-bottom">
+<div class="container-md d-flex flex-column flex-1">
+  <div class="nav-container p-1 rounded-3 border border-secondary my-4 shadow-sm">
+    <ul class="nav nav-pills d-flex">
+      <ng-template
+        #navItem
+        let-item
+      >
+        <li class="nav-item flex-fill">
+          <a
+            class="nav-link text-center border-0 py-2 d-flex align-items-center justify-content-center gap-2"
+            [routerLink]="item.routerLink"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: item.exact }"
+          >
+            <i class="bi {{ item.icon }}"></i>
+            <span class="d-none d-md-inline">{{ item.label | i18next }}</span>
+          </a>
+        </li>
+      </ng-template>
+
+      @for (item of navItems; track $index) {
+        <ng-container>
+          <ng-container *ngTemplateOutlet="navItem; context: { $implicit: item }"></ng-container>
+        </ng-container>
+      }
+    </ul>
+  </div>
+
+  <div class="fade-in-content">
     <router-outlet></router-outlet>
   </div>
+  <div class="flex-1 py-3"></div>
+  <footer class="text-center">
+    <p class="text-muted small mb-1">&copy; {{ currentYear() }} Michael DeBerry</p>
+    <p class="text-muted small">
+      {{ 'about.openSourceNotice' | i18next }}
+      <a
+        href="https://en.wikipedia.org/wiki/GNU_Affero_General_Public_License"
+        target="_blank"
+        class="text-success text-decoration-none fw-bold"
+      >
+        {{ 'about.license' | i18next }} <i class="bi bi-box-arrow-up-right small"></i>
+      </a>
+    </p>
+  </footer>
 </div>

@@ -4,6 +4,7 @@ import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } 
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { I18NextPipe } from 'angular-i18next';
 import { filter, forkJoin, map, Observable, take } from 'rxjs';
+import { CardSectionComponent } from '../../components/card-section/card-section.component';
 import { accessLevels, sessionLifetimes } from '../../models/constants';
 import { AccessLevel, User } from '../../models/user.model';
 import { AuthenticationService } from '../../services/authentication.service';
@@ -14,7 +15,7 @@ import { UsersService } from '../../services/users.service';
 @Component({
   selector: 'app-edit-user',
   templateUrl: './edit-user.component.html',
-  imports: [I18NextPipe, ReactiveFormsModule, RouterLink],
+  imports: [CardSectionComponent, I18NextPipe, ReactiveFormsModule, RouterLink],
   providers: [DialogService],
 })
 export class EditUserComponent {

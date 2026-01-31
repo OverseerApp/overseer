@@ -2,12 +2,17 @@
 using System.Reflection;
 using log4net;
 using Microsoft.AspNetCore.Diagnostics;
+using Octokit;
 using Overseer.Server.Channels;
 using Overseer.Server.Data;
+using Overseer.Server.Integration.Automation;
 using Overseer.Server.Machines;
 using Overseer.Server.Models;
+using Overseer.Server.Plugins;
 using Overseer.Server.Services;
+using Overseer.Server.System;
 using Overseer.Server.Users;
+using Machine = Overseer.Server.Models.Machine;
 
 namespace Overseer.Server
 {
@@ -60,28 +65,49 @@ namespace Overseer.Server
           return machineProvider;
         }
       );
+      services.AddSingleton<Func<Machine, MachineJob, JobSentinel>>(provider =>
+        (machine, job) =>
+        {
+          // This will need to change because it could be possible that the user has multiple failure detection analyzer
+          // plugins installed, if that is the case, then we  need to create multiple sentinels per job.
+          var failureDetectionAnalyzer = provider.GetRequiredService<IFailureDetectionAnalyzer>();
+          var jobFailureChannel = provider.GetRequiredService<IJobFailureChannel>();
+          var configurationManager = provider.GetRequiredService<Settings.IConfigurationManager>();
+          return new JobSentinel(machine, job, failureDetectionAnalyzer, configurationManager, jobFailureChannel);
+        }
+      );
       services.AddTransient<IAuthenticationManager, Users.AuthenticationManager>();
       services.AddTransient<IAuthorizationManager, AuthorizationManager>();
+      services.AddSingleton<IRateLimitingService, RateLimitingService>();
       services.AddTransient<Settings.IConfigurationManager, Settings.ConfigurationManager>();
       services.AddTransient<IUserManager, UserManager>();
       services.AddTransient<IMachineManager, MachineManager>();
       services.AddTransient<IControlManager, ControlManager>();
+      services.AddTransient<ISystemManager, SystemManager>();
+      services.AddTransient<IGitHubClient>((_) => new GitHubClient(new ProductHeaderValue("OverseerApp")));
+      services.AddTransient<IPluginManager, PluginManager>();
 
       services.AddSingleton<IMonitoringService, MonitoringService>();
       services.AddSingleton<MachineProviderManager>();
-
       services.AddSingleton<IMachineStatusChannel, MachineStatusChannel>();
       services.AddSingleton<IRestartMonitoringChannel, RestartMonitoringChannel>();
       services.AddSingleton<ICertificateExceptionChannel, CertificateExceptionChannel>();
       services.AddSingleton<INotificationChannel, NotificationChannel>();
+      services.AddSingleton<IJobFailureChannel, JobFailureChannel>();
 
       services.AddHostedService<MachineStatusUpdateService>();
       services.AddHostedService<CertificateExceptionService>();
       services.AddHostedService<RestartMonitoringService>();
       services.AddHostedService<MachineJobService>();
       services.AddHostedService<NotificationService>();
+      services.AddHostedService<JobSentinelService>();
+      services.AddHostedService<JobFailureService>();
 
-      services.AddCors();
+      var pluginConfigurations = PluginDiscoveryService.DiscoverPlugins().ToList();
+      foreach (var pluginConfiguration in pluginConfigurations)
+      {
+        pluginConfiguration.ConfigureServices(services);
+      }
 
       return services;
     }
