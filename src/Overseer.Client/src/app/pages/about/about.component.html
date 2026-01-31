@@ -84,19 +84,6 @@
                 </button>
               </div>
             </li>
-
-            <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center py-3 border-0">
-              <span class="text-secondary small fw-bold">{{ 'about.info.healthStatus' | i18next }}</span>
-              @if (appInfo) {
-                <span class="badge rounded-pill bg-success-subtle text-success border border-success px-3">
-                  <i class="bi bi-check2-circle me-1"></i> {{ 'about.info.healthy' | i18next }}
-                </span>
-              } @else {
-                <span class="badge rounded-pill bg-warning-subtle text-warning border border-warning px-3">
-                  <i class="bi bi-dash-circle me-1"></i> {{ 'about.info.unavailable' | i18next }}
-                </span>
-              }
-            </li>
           </ul>
         </div>
       </app-card-section>

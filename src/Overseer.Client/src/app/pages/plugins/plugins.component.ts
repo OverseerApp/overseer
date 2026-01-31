@@ -82,12 +82,7 @@ export class PluginsComponent {
 
     this.busy.set(true);
     forkJoin(selected.map((plugin) => this.pluginsService.installPlugin(plugin))).subscribe({
-      next: () => {
-        this.busy.set(false);
-        this.plugins.reload();
-        this.selectedAvailable.set(new Set());
-        this.dialogService.show(RestartDialogComponent);
-      },
+      next: () => this.restart(),
     });
   }
 
@@ -97,12 +92,14 @@ export class PluginsComponent {
 
     this.busy.set(true);
     forkJoin(selected.map((plugin) => this.pluginsService.uninstallPlugin(plugin))).subscribe({
-      next: () => {
-        this.busy.set(false);
-        this.plugins.reload();
-        this.selectedInstalled.set(new Set());
-        this.dialogService.show(RestartDialogComponent);
-      },
+      next: () => this.restart(),
     });
+  }
+
+  private restart(): void {
+    this.busy.set(false);
+    this.plugins.reload();
+    this.selectedAvailable.set(new Set());
+    this.dialogService.show(RestartDialogComponent, { beforeDismiss: () => false });
   }
 }

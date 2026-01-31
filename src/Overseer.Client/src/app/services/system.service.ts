@@ -9,6 +9,10 @@ export class SystemService {
   private getUpdateEndpoint = endpointFactory('/api/system');
   private http = inject(HttpClient);
 
+  ping(): Observable<'pong'> {
+    return this.http.get<'pong'>(this.getUpdateEndpoint('ping'));
+  }
+
   /**
    * Check for available updates from GitHub releases
    * @param includePreRelease Whether to include pre-release versions
@@ -31,6 +35,6 @@ export class SystemService {
    * Restart the overseer application, if supported.
    */
   restart(): Observable<void> {
-    return this.http.post<void>(this.getUpdateEndpoint('/restart'), {});
+    return this.http.post<void>(this.getUpdateEndpoint('restart'), {});
   }
 }

@@ -2,8 +2,7 @@ import { Component, DestroyRef, effect, inject, signal } from '@angular/core';
 import { rxResource, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { I18NextPipe } from 'angular-i18next';
-import { catchError, delay, of, retry, switchMap, timer } from 'rxjs';
-import { AuthenticationService } from '../../services/authentication.service';
+import { catchError, delay, of, retry, switchMap } from 'rxjs';
 import { FeaturesService } from '../../services/features.service';
 import { SystemService } from '../../services/system.service';
 
@@ -14,7 +13,6 @@ import { SystemService } from '../../services/system.service';
 })
 export class RestartDialogComponent {
   private featuresService = inject(FeaturesService);
-  private authenticationService = inject(AuthenticationService);
   private systemService = inject(SystemService);
   private destroyRef = inject(DestroyRef);
 
@@ -31,10 +29,11 @@ export class RestartDialogComponent {
   });
 
   constructor() {
-    effect(() => {
+    const effectRef = effect(() => {
       const canAutoUpdate = this.canAutoUpdate.value();
       if (canAutoUpdate) {
         this.initiateRestart();
+        effectRef.destroy();
       }
     });
   }
@@ -72,8 +71,7 @@ export class RestartDialogComponent {
   }
 
   private pollForBackend() {
-    return timer(0, this.POLL_INTERVAL_MS).pipe(
-      switchMap(() => this.authenticationService.checkLogin()),
+    return this.systemService.ping().pipe(
       retry({ count: this.MAX_RETRIES, delay: this.POLL_INTERVAL_MS }),
       catchError(() => of(false))
     );

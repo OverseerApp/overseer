@@ -1,20 +1,23 @@
 using Overseer.Server.Models;
-using Overseer.Server.Updates;
+using Overseer.Server.Services;
+using Overseer.Server.System;
 
 namespace Overseer.Server.Api
 {
-  public static class UpdateApi
+  public static class SystemApi
   {
     public static RouteGroupBuilder MapSystemApi(this RouteGroupBuilder builder)
     {
       var group = builder.MapGroup("/system");
       group.RequireAuthorization();
 
+      group.MapGet("/ping", (IRateLimitingService rateLimiter, HttpContext context) => Results.Ok(new { message = "pong" }));
+
       group.MapGet(
         "/updates/check",
-        async (IUpdateService updateService, bool? includePreRelease) =>
+        async (ISystemManager systemService) =>
         {
-          var updateInfo = await updateService.CheckForUpdatesAsync(includePreRelease ?? false);
+          var updateInfo = await systemService.CheckForUpdates();
           return Results.Ok(updateInfo);
         }
       );
@@ -22,25 +25,27 @@ namespace Overseer.Server.Api
       group
         .MapPost(
           "/updates/install",
-          async (IUpdateService updateService, UpdateInstallRequest request) =>
+          (ISystemManager systemService, UpdateInstallRequest request) =>
           {
             if (string.IsNullOrEmpty(request.Version))
             {
               return Results.BadRequest(new { message = "Version is required" });
             }
 
-            var result = await updateService.InitiateUpdateAsync(request.Version);
-
-            if (result.Success)
-            {
-              return Results.Ok(result);
-            }
-
-            return Results.BadRequest(result);
+            systemService.InitiateUpdate(request.Version);
+            return Results.Ok();
           }
         )
         .RequireAuthorization(AccessLevel.Administrator.ToString());
 
+      group.MapPost(
+        "/restart",
+        (ISystemManager systemService) =>
+        {
+          systemService.InitiateRestart();
+          return Results.Ok();
+        }
+      );
       return builder;
     }
   }

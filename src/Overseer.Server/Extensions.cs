@@ -10,7 +10,7 @@ using Overseer.Server.Machines;
 using Overseer.Server.Models;
 using Overseer.Server.Plugins;
 using Overseer.Server.Services;
-using Overseer.Server.Updates;
+using Overseer.Server.System;
 using Overseer.Server.Users;
 using Machine = Overseer.Server.Models.Machine;
 
@@ -83,7 +83,7 @@ namespace Overseer.Server
       services.AddTransient<IUserManager, UserManager>();
       services.AddTransient<IMachineManager, MachineManager>();
       services.AddTransient<IControlManager, ControlManager>();
-      services.AddTransient<IUpdateService, UpdateService>();
+      services.AddTransient<ISystemManager, SystemManager>();
       services.AddTransient<IGitHubClient>((_) => new GitHubClient(new ProductHeaderValue("OverseerApp")));
       services.AddTransient<IPluginManager, PluginManager>();
 

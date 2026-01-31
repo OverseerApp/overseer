@@ -1,30 +1,22 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Text.Json;
 using log4net;
 using Octokit;
 using Overseer.Server.Models;
 
-namespace Overseer.Server.Updates
+namespace Overseer.Server.System
 {
-  public class UpdateService : IUpdateService
+  public class SystemManager(IWebHostEnvironment environment, IGitHubClient gitHubClient) : ISystemManager
   {
-    static readonly ILog Log = LogManager.GetLogger(typeof(UpdateService));
+    static readonly ILog Log = LogManager.GetLogger(typeof(SystemManager));
 
-    const string UpdaterScriptName = "overseer.sh";
+    const string OverseerScriptName = "overseer.sh";
 
-    readonly IWebHostEnvironment _environment;
-    readonly IGitHubClient _gitHubClient;
-    readonly JsonSerializerOptions _jsonOptions;
+    readonly IWebHostEnvironment _environment = environment;
 
-    public UpdateService(IWebHostEnvironment environment, IGitHubClient gitHubClient)
-    {
-      _environment = environment;
-      _gitHubClient = gitHubClient;
-      _jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true, PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower };
-    }
+    readonly IGitHubClient _gitHubClient = gitHubClient;
 
-    public async Task<UpdateInfo> CheckForUpdatesAsync(bool includePreRelease = false)
+    public async Task<UpdateInfo> CheckForUpdates()
     {
       var currentVersion = ApplicationInfo.Instance.Version;
       var updateInfo = new UpdateInfo
@@ -86,92 +78,14 @@ namespace Overseer.Server.Updates
       return updateInfo;
     }
 
-    public async Task<UpdateResult> InitiateUpdateAsync(string version)
+    public void InitiateUpdate(string version)
     {
-      if (!CanAutoUpdate())
-      {
-        return new UpdateResult
-        {
-          Success = false,
-          Message = "Auto-update is not supported on this platform. Please update manually.",
-          Version = version,
-        };
-      }
+      InvokeOverseerScript("update", version, $"\"{_environment.ContentRootPath}\"", $"\"{GetDotNetPath()}\"");
+    }
 
-      try
-      {
-        // Check if the service exists
-        if (!ServiceExists())
-        {
-          return new UpdateResult
-          {
-            Success = false,
-            Message = "Overseer service not found. Auto-update requires the application to be running as a systemd service.",
-            Version = version,
-          };
-        }
-
-        // Find the updater script
-        var updaterPath = FindUpdaterScript();
-        if (string.IsNullOrEmpty(updaterPath))
-        {
-          return new UpdateResult
-          {
-            Success = false,
-            Message = "Updater script not found. Please ensure overseer.sh is available.",
-            Version = version,
-          };
-        }
-
-        // Get paths for the updater
-        var overseerDirectory = _environment.ContentRootPath;
-        var dotnetPath = GetDotNetPath();
-
-        // Launch the updater script in the background
-        // The updater will stop this service, perform the update, and restart
-        // Use bash -c with nohup and & to fully detach the process from the parent
-        // Redirect output to log file to prevent blocking
-        var command = $"nohup /bin/bash {updaterPath} update {version} \"{overseerDirectory}\" \"{dotnetPath}\" >> /var/log/overseer.log 2>&1 &";
-
-        var processInfo = new ProcessStartInfo
-        {
-          FileName = "/bin/bash",
-          Arguments = $"-c \"{command}\"",
-          UseShellExecute = false,
-          CreateNoWindow = true,
-          RedirectStandardOutput = true,
-          RedirectStandardError = true,
-        };
-
-        Log.Info($"Launching updater with command: {command}");
-
-        var process = Process.Start(processInfo);
-
-        // Don't wait for the process - let it run independently
-        if (process != null)
-        {
-          // Read any immediate output (there shouldn't be much due to background execution)
-          _ = process.StandardOutput.ReadToEndAsync();
-          _ = process.StandardError.ReadToEndAsync();
-        }
-
-        return new UpdateResult
-        {
-          Success = true,
-          Message = "Update initiated. The application will restart automatically.",
-          Version = version,
-        };
-      }
-      catch (Exception ex)
-      {
-        Log.Error("Error initiating update", ex);
-        return new UpdateResult
-        {
-          Success = false,
-          Message = $"Failed to initiate update: {ex.Message}",
-          Version = version,
-        };
-      }
+    public void InitiateRestart()
+    {
+      InvokeOverseerScript("restart");
     }
 
     public bool CanAutoUpdate()
@@ -180,7 +94,7 @@ namespace Overseer.Server.Updates
       return RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && ServiceExists();
     }
 
-    private bool ServiceExists()
+    private static bool ServiceExists()
     {
       if (!RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
       {
@@ -191,21 +105,21 @@ namespace Overseer.Server.Updates
       return File.Exists(servicePath);
     }
 
-    private string? FindUpdaterScript()
+    private string? FindOverseerScript()
     {
       // Look for the updater script in several locations
       var searchPaths = new[]
       {
         // Docker installation: /opt/overseer/overseer.sh
-        Path.Combine(_environment.ContentRootPath, "..", UpdaterScriptName),
+        Path.Combine(_environment.ContentRootPath, "..", OverseerScriptName),
         // Manual installation (scripts folder adjacent to app): ./scripts/overseer.sh
-        Path.Combine(_environment.ContentRootPath, "scripts", UpdaterScriptName),
-        Path.Combine(_environment.ContentRootPath, "..", "scripts", UpdaterScriptName),
+        Path.Combine(_environment.ContentRootPath, "scripts", OverseerScriptName),
+        Path.Combine(_environment.ContentRootPath, "..", "scripts", OverseerScriptName),
         // Absolute path for Docker: /opt/overseer/overseer.sh
-        Path.Combine("/opt/overseer", UpdaterScriptName),
+        Path.Combine("/opt/overseer", OverseerScriptName),
         // Legacy path (keeping for backward compatibility)
-        Path.Combine("/opt/overseer/scripts", UpdaterScriptName),
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "overseer/scripts", UpdaterScriptName),
+        Path.Combine("/opt/overseer/scripts", OverseerScriptName),
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "overseer/scripts", OverseerScriptName),
       };
 
       foreach (var path in searchPaths)
@@ -302,6 +216,54 @@ namespace Overseer.Server.Updates
       }
 
       return true;
+    }
+
+    private void InvokeOverseerScript(string action, params string[] args)
+    {
+      if (!CanAutoUpdate())
+      {
+        throw new Exception("Restart not supported on this platform.");
+      }
+
+      if (!ServiceExists())
+      {
+        throw new Exception("Overseer service not found. This operation requires the application to be running as a systemd service.");
+      }
+
+      var overseerScriptPath = FindOverseerScript();
+      if (string.IsNullOrEmpty(overseerScriptPath))
+      {
+        throw new Exception("Overseer script not found. Please ensure overseer.sh is available.");
+      }
+
+      var arguments = args.Length > 0 ? $" {string.Join(" ", args)}" : string.Empty;
+      var command = $"nohup /bin/bash {overseerScriptPath} {action}{arguments} >> /var/log/overseer.log 2>&1 &";
+
+      Log.Info($"Executing {action} with command: {command}");
+
+      var processInfo = new ProcessStartInfo
+      {
+        FileName = "/bin/bash",
+        Arguments = $"-c \"{command}\"",
+        UseShellExecute = false,
+        CreateNoWindow = true,
+        RedirectStandardOutput = true,
+        RedirectStandardError = true,
+      };
+
+      var process = Process.Start(processInfo);
+      if (process == null)
+      {
+        throw new Exception($"Failed to start process for action: {action}");
+      }
+
+      process.WaitForExit();
+
+      if (process.ExitCode != 0)
+      {
+        var errorOutput = process.StandardError.ReadToEnd();
+        throw new Exception($"Process {action} failed with exit code {process.ExitCode}. Error: {errorOutput}");
+      }
     }
   }
 }

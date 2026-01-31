@@ -21,6 +21,7 @@ This guide covers the different ways to install and run Overseer for monitoring 
 
 - **Docker**: Any platform that supports Docker (Linux, Windows, macOS)
 - **Native**: Linux with systemd (Ubuntu, Debian, Raspberry Pi OS, etc.)
+- **Manual**: Any platform that supports .Net 10+
 
 ### Hardware Requirements
 
@@ -39,7 +40,7 @@ This guide covers the different ways to install and run Overseer for monitoring 
 
 ### Docker (Recommended)
 
-Docker is the easiest way to run Overseer and works on any platform that supports Docker.
+Docker is the easiest way to run Overseer and works on any platform that supports Docker/Podman.
 
 #### Quick Start
 
@@ -101,6 +102,19 @@ docker run -d \
   --network host \
   -v overseer-data:/app/data \
   ghcr.io/overseerapp/overseer:latest
+```
+
+#### Using Podman
+
+Podman is a drop-in replacement for Docker. The same commands work:
+
+```bash
+podman run -d \
+   --name overseer \
+   -p 9000:9000 \
+   -v overseer-data:/app/data \
+   --restart unless-stopped \
+   ghcr.io/overseerapp/overseer:latest
 ```
 
 ---
@@ -376,9 +390,9 @@ sudo systemctl start overseer
 The database is stored in the application directory or Docker volume. To reset:
 
 ```bash
-# systemd
+# systemd (Overseer stores files under the user profile, most likely root for the system service)
 sudo systemctl stop overseer
-rm /path/to/overseer/*.db
+sudo rm /root/overseer/*.db
 sudo systemctl start overseer
 
 # Docker

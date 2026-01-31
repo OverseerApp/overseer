@@ -27,7 +27,4 @@
     <PackageReference Include="MQTTnet" Version="5.0.1.1416" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
   </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\print_guard_prototypes.json" />
-  </ItemGroup>
 </Project>

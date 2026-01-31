@@ -1,5 +1,5 @@
 using Overseer.Server.Integration.Automation;
-using Overseer.Server.Updates;
+using Overseer.Server.System;
 
 namespace Overseer.Server.Api;
 
@@ -12,7 +12,7 @@ public static class FeaturesApi
 
     group.MapGet("/ai-monitoring", (IEnumerable<IFailureDetectionAnalyzer> failureDetectionAnalyzers) => Results.Ok(failureDetectionAnalyzers.Any()));
 
-    group.MapGet("/auto-update", (IUpdateService updateService) => Results.Ok(updateService.CanAutoUpdate()));
+    group.MapGet("/auto-update", (ISystemManager systemService) => Results.Ok(systemService.CanAutoUpdate()));
 
     return builder;
   }
