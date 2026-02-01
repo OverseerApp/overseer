@@ -29,6 +29,7 @@ export const pollIntervals: DisplayOption<PollInterval>[] = [
 
 export const accessLevels: DisplayOption<AccessLevel>[] = [
   new DisplayOption('readonly', 'Readonly'),
+  new DisplayOption('user', 'User'),
   new DisplayOption('administrator', 'Administrator'),
 ];
 

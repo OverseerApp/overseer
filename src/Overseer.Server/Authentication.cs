@@ -1,70 +1,62 @@
-﻿using System.Security.Claims;
-using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Overseer.Server.Users;
 
 namespace Overseer.Server
 {
-  public class OverseerAuthenticationOptions : AuthenticationSchemeOptions
-  {
-    public const string OverseerAuthenticationName = "Overseer Authentication";
-    public const string OverseerAuthenticationScheme = "Overseer Scheme";
-
-    public static void Setup(AuthenticationOptions options)
-    {
-      options.DefaultAuthenticateScheme = OverseerAuthenticationScheme;
-      options.DefaultChallengeScheme = OverseerAuthenticationScheme;
-    }
-  }
-
-  public class OverseerAuthenticationHandler(
-    IOptionsMonitor<OverseerAuthenticationOptions> options,
-    ILoggerFactory logger,
-    UrlEncoder encoder,
-    IAuthorizationManager authorizationManager
-  ) : AuthenticationHandler<OverseerAuthenticationOptions>(options, logger, encoder)
-  {
-    readonly IAuthorizationManager _authorizationManager = authorizationManager;
-
-    protected override Task<AuthenticateResult> HandleAuthenticateAsync()
-    {
-      var authHeader = Context.Request.Headers.Authorization;
-      if (string.IsNullOrEmpty(authHeader))
-      {
-        authHeader = Context.Request.Query["access_token"];
-      }
-
-      if (string.IsNullOrEmpty(authHeader))
-      {
-        return Task.FromResult(AuthenticateResult.NoResult());
-      }
-
-      var identity = _authorizationManager.Authorize(authHeader!);
-      if (identity == null)
-        return Task.FromResult(AuthenticateResult.NoResult());
-
-      var ticket = new AuthenticationTicket(new ClaimsPrincipal(identity), OverseerAuthenticationOptions.OverseerAuthenticationScheme);
-      return Task.FromResult(AuthenticateResult.Success(ticket));
-    }
-  }
-
   public static class AuthenticationExtensions
   {
-    public static AuthenticationBuilder UseOverseerAuthentication(this AuthenticationBuilder builder)
+    public static AuthenticationBuilder UseOverseerAuthentication(this AuthenticationBuilder builder, bool isDevelopment)
     {
-      return builder.UseOverseerAuthentication(options => { });
-    }
+      return builder.AddCookie(
+        CookieAuthenticationDefaults.AuthenticationScheme,
+        options =>
+        {
+          options.Cookie.Name = "Overseer.Session";
+          options.Cookie.HttpOnly = true;
 
-    public static AuthenticationBuilder UseOverseerAuthentication(
-      this AuthenticationBuilder builder,
-      Action<OverseerAuthenticationOptions> configurationOptions
-    )
-    {
-      return builder.AddScheme<OverseerAuthenticationOptions, OverseerAuthenticationHandler>(
-        OverseerAuthenticationOptions.OverseerAuthenticationScheme,
-        OverseerAuthenticationOptions.OverseerAuthenticationName,
-        configurationOptions
+          // Development: Cross-port (localhost:4200 -> localhost:9000)
+          // Requires SameSite=None + Secure=Always to allow credentials across ports on localhost.
+          // Note: Secure cookies work on localhost HTTP.
+          if (isDevelopment)
+          {
+            options.Cookie.SameSite = SameSiteMode.None;
+            options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+          }
+          else
+          {
+            // Production: Same-origin setup.
+            // Lax allows proper functionality on local network IPs (insecure HTTP).
+            options.Cookie.SameSite = SameSiteMode.Lax;
+            options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+          }
+
+          options.SlidingExpiration = true;
+          options.ExpireTimeSpan = TimeSpan.FromDays(7);
+          options.Events.OnRedirectToLogin = context =>
+          {
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            return Task.CompletedTask;
+          };
+
+          options.Events.OnRedirectToAccessDenied = context =>
+          {
+            context.Response.StatusCode = StatusCodes.Status403Forbidden;
+            return Task.CompletedTask;
+          };
+
+          options.Events.OnValidatePrincipal = async context =>
+          {
+            var authManager = context.HttpContext.RequestServices.GetRequiredService<IAuthenticationManager>();
+            var token = context.Principal?.FindFirst("SessionToken")?.Value;
+
+            if (string.IsNullOrEmpty(token) || !authManager.AuthenticateToken(token))
+            {
+              context.RejectPrincipal();
+              await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            }
+          };
+        }
       );
     }
   }

@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Reflection;
 using log4net;
 using Overseer.Server.Integration;
@@ -23,7 +24,10 @@ public class PluginDiscoveryService()
       var metadata = PluginUtilities.ReadPluginMetadata(pluginDirectoryPath);
       if (metadata == null)
       {
-        Log.Warn($"No plugin metadata found in {pluginDirectoryPath}. Skipping.");
+        // The uninstall will remove the metadata file if it exists
+        // once the app is restarted it will remove any orphaned plugin directories
+        Log.Warn($"No plugin metadata found in {pluginDirectoryPath}. Removing...");
+        Directory.Delete(pluginDirectoryPath, true);
         return null;
       }
 

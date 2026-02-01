@@ -14,16 +14,6 @@ namespace Overseer.Server.Machines
 
     public abstract TMachine Machine { get; protected set; }
 
-    public virtual Task SetToolTemperature(int heaterIndex, int targetTemperature)
-    {
-      return ExecuteGcode($"M104 P{heaterIndex} S{targetTemperature}");
-    }
-
-    public virtual Task SetBedTemperature(int targetTemperature)
-    {
-      return ExecuteGcode($"M140 S{targetTemperature}");
-    }
-
     public virtual Task PauseJob()
     {
       return ExecuteGcode("M25");

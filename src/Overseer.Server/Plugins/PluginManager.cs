@@ -158,7 +158,11 @@ public class PluginManager(IHttpClientFactory httpClientFactory, IGitHubClient g
       var installPath = Path.Combine(PluginUtilities.GetPluginsPath(), pluginName);
       if (Directory.Exists(installPath))
       {
-        Directory.Delete(installPath, true);
+        var metadataPath = Path.Combine(installPath, "plugin.json");
+        if (File.Exists(metadataPath))
+        {
+          File.Delete(metadataPath);
+        }
         Log.Info($"Successfully uninstalled plugin {pluginName}");
 
         return true;

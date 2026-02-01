@@ -7,7 +7,7 @@ public static class FeaturesApi
 {
   public static RouteGroupBuilder MapFeaturesApi(this RouteGroupBuilder builder)
   {
-    var group = builder.MapGroup("/features");
+    var group = builder.MapGroup("/features").WithTags("Features").CacheOutput("ColdCache");
     group.RequireAuthorization();
 
     group.MapGet("/ai-monitoring", (IEnumerable<IFailureDetectionAnalyzer> failureDetectionAnalyzers) => Results.Ok(failureDetectionAnalyzers.Any()));

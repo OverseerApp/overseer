@@ -1,31 +1,20 @@
-import { inject, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HubConnection, HubConnectionBuilder, HubConnectionState } from '@microsoft/signalr';
 import { Observable, ReplaySubject } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { defaultPollInterval } from '../models/constants';
 import { MachineStatus } from '../models/machine-status.model';
-import { User } from '../models/user.model';
-import { LocalStorageService } from './local-storage.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class MonitoringService {
-  private localStorageService = inject(LocalStorageService);
   private statusEvent$ = new ReplaySubject<MachineStatus>(10, defaultPollInterval, { now: () => Date.now() });
   private hubConnection: HubConnection;
   private isConnected = false;
 
   constructor() {
-    this.hubConnection = new HubConnectionBuilder()
-      .withUrl(`${environment.apiHost}/push/status`, {
-        accessTokenFactory: () => {
-          const activeUser = this.localStorageService.get<User>('activeUser');
-          return activeUser?.token ?? '';
-        },
-      })
-      .build();
-
+    this.hubConnection = new HubConnectionBuilder().withUrl(`${environment.apiHost}/push/status`).build();
     this.hubConnection.on('statusUpdate', (statusUpdate: MachineStatus) => this.statusEvent$.next(statusUpdate));
     this.hubConnection.onclose(() => {
       if (!this.isConnected) return;

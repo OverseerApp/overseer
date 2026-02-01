@@ -8,23 +8,25 @@ namespace Overseer.Server.Api
   {
     public static RouteGroupBuilder MapSystemApi(this RouteGroupBuilder builder)
     {
-      var group = builder.MapGroup("/system");
+      var group = builder.MapGroup("/system").WithTags("System");
       group.RequireAuthorization();
 
       group.MapGet("/ping", (IRateLimitingService rateLimiter, HttpContext context) => Results.Ok(new { message = "pong" }));
 
-      group.MapGet(
-        "/updates/check",
-        async (ISystemManager systemService) =>
-        {
-          var updateInfo = await systemService.CheckForUpdates();
-          return Results.Ok(updateInfo);
-        }
-      );
+      group
+        .MapGet(
+          "/updates",
+          async (ISystemManager systemService) =>
+          {
+            var updateInfo = await systemService.CheckForUpdates();
+            return Results.Ok(updateInfo);
+          }
+        )
+        .RequireAuthorization(AccessLevel.Administrator.ToString());
 
       group
         .MapPost(
-          "/updates/install",
+          "/updates",
           (ISystemManager systemService, UpdateInstallRequest request) =>
           {
             if (string.IsNullOrEmpty(request.Version))
@@ -38,14 +40,16 @@ namespace Overseer.Server.Api
         )
         .RequireAuthorization(AccessLevel.Administrator.ToString());
 
-      group.MapPost(
-        "/restart",
-        (ISystemManager systemService) =>
-        {
-          systemService.InitiateRestart();
-          return Results.Ok();
-        }
-      );
+      group
+        .MapPost(
+          "/restart",
+          (ISystemManager systemService) =>
+          {
+            systemService.InitiateRestart();
+            return Results.Ok();
+          }
+        )
+        .RequireAuthorization(AccessLevel.Administrator.ToString());
       return builder;
     }
   }

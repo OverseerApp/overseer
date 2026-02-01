@@ -100,6 +100,6 @@ export class PluginsComponent {
     this.busy.set(false);
     this.plugins.reload();
     this.selectedAvailable.set(new Set());
-    this.dialogService.show(RestartDialogComponent, { beforeDismiss: () => false });
+    this.dialogService.show(RestartDialogComponent, { backdrop: 'static', keyboard: false });
   }
 }

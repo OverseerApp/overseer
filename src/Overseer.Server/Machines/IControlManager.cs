@@ -5,6 +5,5 @@
     Task Cancel(int machineId);
     Task Pause(int machineId);
     Task Resume(int machineId);
-    Task SetTemperature(int machineId, int heaterIndex, int temperature);
   }
 }

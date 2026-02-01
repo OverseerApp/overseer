@@ -13,6 +13,7 @@ import { AccessLevel } from '../../models/user.model';
 export class CreateUserComponent implements OnInit {
   accessLevel = input<AccessLevel | undefined>();
   form = input<FormGroup<CreateUserForm>>();
+  isInitialSetup = input<boolean>(false);
 
   lifetimes = sessionLifetimes;
   accessLevels = accessLevels;
@@ -39,5 +40,21 @@ export class CreateUserComponent implements OnInit {
         return password === confirmPassword ? null : { passwordMismatch: true };
       },
     ]);
+
+    const accessLevelControl = form.get('accessLevel');
+    const passwordControl = form.get('password');
+    const confirmPasswordControl = form.get('confirmPassword');
+
+    accessLevelControl?.valueChanges.subscribe((level) => {
+      if (level === 'User') {
+        passwordControl?.setValidators([]);
+        confirmPasswordControl?.setValidators([]);
+      } else {
+        passwordControl?.setValidators([Validators.required, Validators.minLength(8)]);
+        confirmPasswordControl?.setValidators([Validators.required]);
+      }
+      passwordControl?.updateValueAndValidity();
+      confirmPasswordControl?.updateValueAndValidity();
+    });
   }
 }

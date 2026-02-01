@@ -18,7 +18,7 @@ export class SystemService {
    * @param includePreRelease Whether to include pre-release versions
    */
   checkForUpdates(includePreRelease = false): Observable<UpdateInfo> {
-    return this.http.get<UpdateInfo>(this.getUpdateEndpoint('updates/check'), {
+    return this.http.get<UpdateInfo>(this.getUpdateEndpoint('updates'), {
       params: { includePreRelease: includePreRelease.toString() },
     });
   }
@@ -28,7 +28,7 @@ export class SystemService {
    * @param version The version to update to
    */
   installUpdate(version: string): Observable<UpdateResult> {
-    return this.http.post<UpdateResult>(this.getUpdateEndpoint('updates/install'), { version });
+    return this.http.post<UpdateResult>(this.getUpdateEndpoint('updates'), { version });
   }
 
   /**

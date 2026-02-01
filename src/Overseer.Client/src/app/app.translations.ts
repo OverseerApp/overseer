@@ -11,11 +11,11 @@ export function appInit(i18next: ITranslationService) {
       .use(LanguageDetector)
       .init({
         backend: {
-          loadPath: `/i18n/{{lng}}.json?v=${environment.appVersion}`,
+          loadPath: `/i18n/{{lng}}.json?v=${Date.now()}`,
         },
         supportedLngs: ['en'],
         fallbackLng: 'en',
-        debug: true,
+        debug: !environment.production,
         returnEmptyString: false,
         ns: ['translation'],
       });
@@ -27,9 +27,9 @@ export function localeIdFactory(i18next: ITranslationService) {
 
 export const I18N_PROVIDERS = [
   provideAppInitializer(() => {
-        const initializerFn = (appInit)(inject(I18NEXT_SERVICE));
-        return initializerFn();
-      }),
+    const initializerFn = appInit(inject(I18NEXT_SERVICE));
+    return initializerFn();
+  }),
   {
     provide: LOCALE_ID,
     deps: [I18NEXT_SERVICE],

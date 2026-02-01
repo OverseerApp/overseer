@@ -1,5 +1,7 @@
 using System.CommandLine;
 using log4net.Config;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.Extensions.FileProviders;
 using Overseer.Server;
 using Overseer.Server.Api;
@@ -7,7 +9,6 @@ using Overseer.Server.Data;
 using Overseer.Server.Hubs;
 using Overseer.Server.Infrastructure;
 using Overseer.Server.Models;
-using Overseer.Server.Plugins;
 using Overseer.Server.Updates;
 
 if (!UpdateManager.Update())
@@ -41,8 +42,17 @@ using (var context = new LiteDataContext())
         policy.Expire(TimeSpan.FromHours(1));
       }
     );
+
+    options.AddPolicy(
+      "ColdCache",
+      policy =>
+      {
+        policy.Expire(TimeSpan.FromDays(30));
+      }
+    );
   });
 
+  builder.Services.AddHttpContextAccessor();
   builder.Services.AddEndpointsApiExplorer();
   builder.Services.AddSwaggerGen();
   builder.Services.AddSignalR();
@@ -63,13 +73,16 @@ using (var context = new LiteDataContext())
   }
 
   builder.Services.AddOverseerDependencies(context);
-  builder.Services.AddAuthentication(OverseerAuthenticationOptions.Setup).UseOverseerAuthentication();
+  builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).UseOverseerAuthentication(isDev);
 
   builder
     .Services.AddAuthorizationBuilder()
-    .AddPolicy("Readonly", policy => policy.RequireRole(AccessLevel.Readonly.ToString()))
-    .AddPolicy("Administrator", policy => policy.RequireRole(AccessLevel.Administrator.ToString()));
-
+    .AddPolicy(
+      AccessLevel.Readonly.ToString(),
+      policy => policy.RequireRole(AccessLevel.Readonly.ToString(), AccessLevel.User.ToString(), AccessLevel.Administrator.ToString())
+    )
+    .AddPolicy(AccessLevel.User.ToString(), policy => policy.RequireRole(AccessLevel.User.ToString(), AccessLevel.Administrator.ToString()))
+    .AddPolicy(AccessLevel.Administrator.ToString(), policy => policy.RequireRole(AccessLevel.Administrator.ToString()));
   var app = builder.Build();
 
   XmlConfigurator.Configure(new FileInfo(Path.Combine(app.Environment.ContentRootPath, "log4net.config")));

@@ -6,10 +6,6 @@ namespace Overseer.Server.Machines
   {
     int MachineId { get; }
 
-    Task SetToolTemperature(int heaterIndex, int targetTemperature);
-
-    Task SetBedTemperature(int targetTemperature);
-
     Task PauseJob();
 
     Task ResumeJob();

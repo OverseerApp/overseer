@@ -10,7 +10,8 @@ export class PluginsService {
   private http = inject(HttpClient);
 
   getPlugins(refresh = false): Observable<PluginInfo[]> {
-    return this.http.get<PluginInfo[]>(this.getEndpoint(), { params: { refresh: refresh.toString() } });
+    const params: Record<string, string> = refresh ? { refresh: refresh.toString() } : {};
+    return this.http.get<PluginInfo[]>(this.getEndpoint(), { params: params });
   }
 
   installPlugin(pluginInfo: PluginInfo): Observable<boolean> {

@@ -9,23 +9,8 @@ namespace Overseer.Server.Api
   {
     public static RouteGroupBuilder MapConfigurationApi(this RouteGroupBuilder builder)
     {
-      var group = builder.MapGroup("/settings");
+      var group = builder.MapGroup("/settings").WithTags("Configuration");
       group.RequireAuthorization();
-
-      group.MapGet(
-        "/bundle",
-        (IConfigurationManager configuration, IMachineManager machines, IUserManager users) =>
-        {
-          return Results.Ok(
-            new
-            {
-              Machines = machines.GetMachines(),
-              Users = users.GetUsers(),
-              Settings = configuration.GetApplicationSettings(),
-            }
-          );
-        }
-      );
 
       group.MapGet("/", (IConfigurationManager configuration) => Results.Ok(configuration.GetApplicationSettings()));
 
@@ -47,7 +32,8 @@ namespace Overseer.Server.Api
         )
         .RequireAuthorization(AccessLevel.Administrator.ToString());
 
-      group.MapGet("/about", (IConfigurationManager configuration) => Results.Ok(configuration.GetApplicationInfo()));
+      // using the cold cache policy as this data will only change with new releases
+      group.MapGet("/about", (IConfigurationManager configuration) => Results.Ok(configuration.GetApplicationInfo())).CacheOutput("ColdCache");
 
       return builder;
     }

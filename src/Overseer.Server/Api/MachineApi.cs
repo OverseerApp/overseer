@@ -25,7 +25,7 @@ namespace Overseer.Server.Api
 
     public static RouteGroupBuilder MapMachineApi(this RouteGroupBuilder builder)
     {
-      var group = builder.MapGroup("/machines");
+      var group = builder.MapGroup("/machines").WithTags("Machines");
       group.RequireAuthorization();
 
       group.MapGet("/", (IMachineManager machines) => Results.Ok(machines.GetMachines()));

@@ -22,6 +22,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/setup/setup.component').then((m) => m.SetupComponent),
   },
   {
+    path: 'user-settings',
+    loadComponent: () => import('./pages/user-settings/user-settings.component').then((m) => m.UserSettingsComponent),
+  },
+  {
     path: 'settings',
     canActivate: [authenticationGuard(), authorizationGuard()],
     loadComponent: () => import('./pages/configuration/configuration.component').then((m) => m.ConfigurationComponent),

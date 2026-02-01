@@ -12,7 +12,7 @@
   </a>
   <div class="list-group px-3">
     <div>
-      @for (user of users(); track user.id) {
+      @for (user of users.value(); track user.id) {
         <div class="list-group-item border-secondary p-3 my-3 rounded shadow-sm user-card">
           <div class="row align-items-start user-card-content">
             <div class="col user-info">
@@ -22,15 +22,15 @@
                   class="badge border small flex-shrink-0"
                   [ngClass]="{
                     'bg-outline-info border-info text-info': user.accessLevel === 'Administrator',
-                    'bg-outline-secondary border-secondary text-text-secondary': user.accessLevel !== 'Administrator',
+                    'bg-outline-secondary border-secondary text-secondary': user.accessLevel !== 'Administrator',
                   }"
                 >
                   {{ user.accessLevel }}
                 </span>
               </div>
 
-              <div class="d-flex gap-3 small user-metadata flex-column flex-md-row">
-                <span class="text-muted">
+              <div class="d-flex gap-1 gap-md-3 small flex-column flex-md-row align-items-center-md">
+                <div class="text-muted">
                   <i class="bi bi-clock-history"></i>
                   {{ 'session' | i18next }}
                   <strong>
@@ -40,17 +40,24 @@
                       {{ 'indefinite' | i18next }}
                     }
                   </strong>
-                </span>
+                </div>
 
+                @let isLoggedIn = user.id == activeUser()?.id;
                 <div
-                  class="d-flex gap-1 small text-secondary flex-wrap"
-                  [ngClass]="user.isLoggedIn ? 'text-success' : 'text-muted'"
+                  class="d-flex gap-1 flex-wrap align-items-center"
+                  [ngClass]="isLoggedIn ? 'text-success' : 'text-muted'"
                 >
                   <i
                     class="bi"
-                    [ngClass]="user.isLoggedIn ? 'bi-circle-fill' : 'bi-circle'"
+                    [ngClass]="isLoggedIn ? 'bi-circle-fill' : 'bi-circle'"
                   ></i>
-                  {{ (user.isLoggedIn ? 'online' : 'offline') | i18next }}
+                  @if (isLoggedIn) {
+                    {{ 'online' | i18next }}
+                  } @else if (user.lastLogin) {
+                    {{ 'lastLogin' | i18next: { lastLogin: user.lastLogin | date } }}
+                  } @else {
+                    {{ 'neverLoggedIn' | i18next }}
+                  }
                 </div>
               </div>
             </div>

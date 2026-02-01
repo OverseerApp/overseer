@@ -1,5 +1,5 @@
 import { Component, computed, effect, inject, Renderer2 } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { isActive, IsActiveMatchOptions, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { I18NextPipe } from 'angular-i18next';
 import { NgProgressbar } from 'ngx-progressbar';
 import { NgProgressHttp } from 'ngx-progressbar/http';
@@ -33,6 +33,15 @@ export class AppComponent {
 
   isLoggedIn = computed(() => !!this.authenticationService.activeUser());
   isAdmin = computed(() => this.authenticationService.activeUser()?.accessLevel === 'Administrator');
+  isUser = computed(() => this.authenticationService.activeUser()?.accessLevel === 'User');
+  isHeaderHidden = computed(() => {
+    const options: IsActiveMatchOptions = { paths: 'exact', queryParams: 'ignored', fragment: 'ignored', matrixParams: 'ignored' };
+    const isLoginActive = isActive('/login', this.router, options);
+    const isSetupActive = isActive('/setup', this.router, options);
+    const isSsoActive = isActive('/sso', this.router, options);
+
+    return isLoginActive() || isSetupActive() || isSsoActive();
+  });
 
   constructor() {
     effect(() => {

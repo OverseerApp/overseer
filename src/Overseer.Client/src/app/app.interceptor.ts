@@ -4,7 +4,6 @@ import { inject } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { environment } from '../environments/environment';
-import { User } from './models/user.model';
 import { ErrorHandlerService } from './services/error-handler.service';
 import { LocalStorageService } from './services/local-storage.service';
 
@@ -17,14 +16,9 @@ export function overseerInterceptor(request: HttpRequest<unknown>, next: HttpHan
     return next(request);
   }
 
-  const activeUser = localStorageService.get('activeUser') as User;
-  if (activeUser?.token) {
-    request = request.clone({
-      setHeaders: {
-        Authorization: 'Bearer ' + activeUser.token,
-      },
-    });
-  }
+  request = request.clone({
+    withCredentials: true,
+  });
 
   return next(request).pipe(
     catchError((errorResponse) => {

@@ -1,0 +1,26 @@
+<nav class="navbar navbar-expand sticky-top bg-body-tertiary p-0 border-bottom">
+  <div class="container-fluid px-3 py-3">
+    <app-svg name="logo" />
+  </div>
+</nav>
+<div class="container p-4">
+  @let user = userRequiringPasswordChange();
+  @if (user) {
+    <p>{{ 'forcedPasswordChange' | i18next }}</p>
+    <app-change-password
+      [user]="user"
+      (passwordUpdated)="redirectHome()"
+    />
+  } @else {
+    <div class="d-flex flex-column align-items-center justify-content-center text-center p-4">
+      <div
+        class="spinner-border text-primary"
+        role="status"
+        aria-hidden="true"
+      >
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <div class="mt-2">Redirecting...</div>
+    </div>
+  }
+</div>
