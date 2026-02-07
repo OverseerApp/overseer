@@ -49,7 +49,10 @@ export class CreateUserComponent implements OnInit {
     const confirmPasswordControl = form.get('confirmPassword');
 
     accessLevelControl?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((level) => {
-      if (level === 'User') {
+      // If the access level is not 'Readonly', remove the validators for password and confirmPassword
+      // Admins create the password for readonly users, so they are required.
+      // For other access levels, the admin will send a magic link and the user will set their own password, so it is not required.
+      if (level !== 'Readonly') {
         passwordControl?.setValidators([]);
         confirmPasswordControl?.setValidators([]);
       } else {
