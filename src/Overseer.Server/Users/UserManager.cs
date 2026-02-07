@@ -25,15 +25,12 @@ public class UserManager(IDataContext context) : IUserManager
     // since that gets created on initial setup.
     // Normal users and additional admins only require a username because
     // a magic link is used to allow them to set their password.
-    if (createdBy is null || userModel.AccessLevel == AccessLevel.Readonly)
+    if ((createdBy is null || userModel.AccessLevel == AccessLevel.Readonly) && string.IsNullOrWhiteSpace(userModel.Password))
     {
-      if (string.IsNullOrWhiteSpace(userModel.Password))
-      {
-        throw new OverseerException("invalid_password");
-      }
+      throw new OverseerException("invalid_password");
     }
 
-    if (_users.Exist(u => u.Username!.Equals(userModel.Username, StringComparison.CurrentCultureIgnoreCase)))
+    if (_users.Exist(u => u.Username!.Equals(userModel.Username, StringComparison.OrdinalIgnoreCase)))
     {
       throw new OverseerException("unavailable_username");
     }
@@ -89,11 +86,22 @@ public class UserManager(IDataContext context) : IUserManager
     return user.ToDisplay();
   }
 
-  public UserDisplay ChangePassword(UserDisplay userModel, UserDisplay? changedBy = null)
+  public UserDisplay ChangePassword(UserDisplay userModel, UserDisplay changedBy)
   {
     if (string.IsNullOrWhiteSpace(userModel.Password))
     {
       throw new OverseerException("invalid_password");
+    }
+
+    // readonly users can't change their own password, only admins can change readonly user passwords
+    if (changedBy.AccessLevel != AccessLevel.Administrator && userModel.AccessLevel == AccessLevel.Readonly)
+    {
+      throw new OverseerException("invalid_user");
+    }
+
+    if (changedBy.AccessLevel != AccessLevel.Administrator && changedBy.Id != userModel.Id)
+    {
+      throw new OverseerException("invalid_user");
     }
 
     var salt = BCrypt.Net.BCrypt.GenerateSalt();
@@ -103,8 +111,9 @@ public class UserManager(IDataContext context) : IUserManager
     user.PasswordHash = hash;
     // if the user is changing their own password, keep them logged in
     // if it's an admin changing another user's password, force a re-login
-    // if changedBy is null, we assume it's an admin action
-    if (changedBy is null || changedBy.Id != user.Id)
+    // if changedBy is null, we assume it's an admin action during initial setup,
+    // so we also force a re-login
+    if (changedBy.AccessLevel == AccessLevel.Administrator && changedBy.Id != userModel.Id)
     {
       user.TokenHash = null;
     }

@@ -1,7 +1,6 @@
 using System.CommandLine;
 using log4net.Config;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.Extensions.FileProviders;
 using Overseer.Server;
 using Overseer.Server.Api;

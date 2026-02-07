@@ -62,7 +62,7 @@ namespace Overseer.Server.Api
 
           try
           {
-            var result = authenticationManager.AuthenticateUser(user);
+            var result = await authenticationManager.AuthenticateUser(user);
             if (result == null)
             {
               rateLimiter.RecordAttempt(rateLimitKey);

@@ -9,5 +9,5 @@ public interface IUserManager
   UserDisplay GetUser(int userId);
   IReadOnlyList<UserDisplay> GetUsers();
   UserDisplay? UpdateUser(UserDisplay user);
-  UserDisplay ChangePassword(UserDisplay user, UserDisplay? changedBy = null);
+  UserDisplay ChangePassword(UserDisplay user, UserDisplay changedBy);
 }

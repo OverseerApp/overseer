@@ -13,7 +13,7 @@ namespace Overseer.Server.Api
 
       group.MapGet("/", (IUserManager users) => Results.Ok(users.GetUsers())).RequireAuthorization(AccessLevel.Administrator.ToString());
 
-      group.MapGet("/{id}", (int id, IUserManager users) => Results.Ok(users.GetUser(id)));
+      group.MapGet("/{id}", (int id, IUserManager users) => Results.Ok(users.GetUser(id))).RequireAuthorization(AccessLevel.Administrator.ToString());
 
       group
         .MapPost(

@@ -186,6 +186,8 @@
   "newUserPermissionMessage": "You will be able to give this user a magic link to set their password after the user has been created.",
   "lastLogin": "Last Login {{lastLogin}}",
   "neverLoggedIn": "Never Logged In",
+  "loading": "Loading...",
+  "errorLoadingUsers": "Error loading users",
   "about": {
     "title": "Overseer is a utility that allows you to monitor multiple automated machines, such as 3D Printers, from a single web interface.",
     "helpDescription": "Troubleshoot or report issues with your Overseer installation.",

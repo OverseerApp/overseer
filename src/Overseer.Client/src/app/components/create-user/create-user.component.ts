@@ -1,4 +1,5 @@
-import { Component, input, OnInit } from '@angular/core';
+import { Component, DestroyRef, inject, input, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { I18NextPipe } from 'angular-i18next';
 import { accessLevels, SessionLifetime, sessionLifetimes } from '../../models/constants';
@@ -11,6 +12,8 @@ import { AccessLevel } from '../../models/user.model';
   imports: [ReactiveFormsModule, I18NextPipe],
 })
 export class CreateUserComponent implements OnInit {
+  private destroyRef = inject(DestroyRef);
+
   accessLevel = input<AccessLevel | undefined>();
   form = input<FormGroup<CreateUserForm>>();
   isInitialSetup = input<boolean>(false);
@@ -45,7 +48,7 @@ export class CreateUserComponent implements OnInit {
     const passwordControl = form.get('password');
     const confirmPasswordControl = form.get('confirmPassword');
 
-    accessLevelControl?.valueChanges.subscribe((level) => {
+    accessLevelControl?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((level) => {
       if (level === 'User') {
         passwordControl?.setValidators([]);
         confirmPasswordControl?.setValidators([]);

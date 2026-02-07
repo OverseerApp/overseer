@@ -26,7 +26,12 @@ namespace Overseer.Server.Users
       }
 
       var user = _users.Get(u => u.Username!.ToLower() == username.ToLower());
-      if (user is null || !BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
+      if (user is null || string.IsNullOrWhiteSpace(user.PasswordHash))
+      {
+        throw new OverseerException("invalid_username_or_password");
+      }
+
+      if (!BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
       {
         throw new OverseerException("invalid_username_or_password");
       }
