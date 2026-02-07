@@ -2,6 +2,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Mvc;
 using Overseer.Server.Models;
 using Overseer.Server.Services;
 using Overseer.Server.Users;
@@ -109,7 +110,7 @@ namespace Overseer.Server.Api
 
       group.MapPost(
         "/sso",
-        async (string token, HttpContext httpContext, IAuthenticationManager authenticationManager) =>
+        async ([FromQuery] string token, HttpContext httpContext, IAuthenticationManager authenticationManager) =>
         {
           var user = await authenticationManager.ValidatePreauthenticatedToken(token);
           if (user is null)

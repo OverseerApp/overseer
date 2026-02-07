@@ -23,7 +23,7 @@ export class ChangePasswordComponent {
     this.formBuilder.nonNullable.group(
       {
         id: [0],
-        password: ['', [Validators.min(8), Validators.required]],
+        password: ['', [Validators.minLength(8), Validators.required]],
         confirmPassword: ['', [Validators.required]],
       },
       {

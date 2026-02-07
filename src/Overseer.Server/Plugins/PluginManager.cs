@@ -163,7 +163,7 @@ public class PluginManager(IHttpClientFactory httpClientFactory, IGitHubClient g
         {
           File.Delete(metadataPath);
         }
-        Log.Info($"Successfully uninstalled plugin {pluginName}");
+        Log.Info($"Successfully marked plugin {pluginName} for uninstallation, the plugin will be fully removed on next startup.");
 
         return true;
       }

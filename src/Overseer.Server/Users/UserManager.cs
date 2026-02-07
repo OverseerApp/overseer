@@ -93,8 +93,9 @@ public class UserManager(IDataContext context) : IUserManager
       throw new OverseerException("invalid_password");
     }
 
+    var user = _users.GetById(userModel.Id);
     // readonly users can't change their own password, only admins can change readonly user passwords
-    if (changedBy.AccessLevel != AccessLevel.Administrator && userModel.AccessLevel == AccessLevel.Readonly)
+    if (changedBy.AccessLevel != AccessLevel.Administrator && user.AccessLevel == AccessLevel.Readonly)
     {
       throw new OverseerException("invalid_user");
     }
@@ -107,11 +108,10 @@ public class UserManager(IDataContext context) : IUserManager
     var salt = BCrypt.Net.BCrypt.GenerateSalt();
     var hash = BCrypt.Net.BCrypt.HashPassword(userModel.Password, salt);
 
-    var user = _users.GetById(userModel.Id);
     user.PasswordHash = hash;
     // if the user is changing their own password, keep them logged in
     // if it's an admin changing another user's password, force a re-login
-    if (changedBy.AccessLevel == AccessLevel.Administrator && changedBy.Id != userModel.Id)
+    if (changedBy.AccessLevel == AccessLevel.Administrator && changedBy.Id != user.Id)
     {
       user.TokenHash = null;
     }
