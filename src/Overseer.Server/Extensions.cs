@@ -129,13 +129,13 @@ public static class Extensions
           }
 
           object exceptionModel = exception is OverseerException oEx
-            ? exceptionModel = new
+            ? new
             {
               message = oEx.Message,
               oEx.Properties,
               exceptionType = "overseer",
             }
-            : exceptionModel = new { message = exception.Message };
+            : new { message = exception.Message };
 
           context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
           context.Response.ContentType = "application/json";

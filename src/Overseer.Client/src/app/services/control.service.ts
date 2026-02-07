@@ -20,20 +20,4 @@ export class ControlService {
   cancelJob(machineId: number): Observable<void> {
     return this.http.post<void>(this.getEndpoint(machineId, 'cancel'), null);
   }
-
-  setFanSpeed(machineId: number, speedPercentage: number): Observable<void> {
-    return this.http.post<void>(this.getEndpoint(machineId, 'fan', speedPercentage), null);
-  }
-
-  setFeedRate(machineId: number, speedPercentage: number): Observable<void> {
-    return this.http.post<void>(this.getEndpoint(machineId, 'feed', speedPercentage), null);
-  }
-
-  setTemperature(machineId: number, heaterIndex: number, temperature: number): Observable<void> {
-    return this.http.post<void>(this.getEndpoint(machineId, heaterIndex, 'temp', temperature), null);
-  }
-
-  setFlowRate(machineId: number, extruderIndex: number, flowRatePercentage: number): Observable<void> {
-    return this.http.post<void>(this.getEndpoint(machineId, extruderIndex, 'flow', flowRatePercentage), null);
-  }
 }

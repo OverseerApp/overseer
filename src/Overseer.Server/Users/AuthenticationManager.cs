@@ -11,7 +11,6 @@ namespace Overseer.Server.Users
   public class AuthenticationManager(IDataContext context, IHttpContextAccessor httpContextAccessor) : IAuthenticationManager
   {
     readonly IRepository<User> _users = context.Repository<User>();
-    readonly HttpContext httpContext = httpContextAccessor.HttpContext!;
 
     public async Task<UserDisplay?> AuthenticateUser(UserDisplay user)
     {
@@ -25,7 +24,7 @@ namespace Overseer.Server.Users
         throw new OverseerException("invalid_username_or_password");
       }
 
-      var user = _users.Get(u => u.Username!.ToLower() == username.ToLower());
+      var user = _users.Get(u => u.Username!.Equals(username, StringComparison.OrdinalIgnoreCase));
       if (user is null || string.IsNullOrWhiteSpace(user.PasswordHash))
       {
         throw new OverseerException("invalid_username_or_password");
@@ -126,6 +125,7 @@ namespace Overseer.Server.Users
         ExpiresUtc = user.SessionLifetime.HasValue ? DateTime.UtcNow.AddDays(user.SessionLifetime.Value) : null,
       };
 
+      var httpContext = httpContextAccessor.HttpContext!;
       await httpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
 
       return user.ToDisplay();

@@ -111,8 +111,6 @@ public class UserManager(IDataContext context) : IUserManager
     user.PasswordHash = hash;
     // if the user is changing their own password, keep them logged in
     // if it's an admin changing another user's password, force a re-login
-    // if changedBy is null, we assume it's an admin action during initial setup,
-    // so we also force a re-login
     if (changedBy.AccessLevel == AccessLevel.Administrator && changedBy.Id != userModel.Id)
     {
       user.TokenHash = null;
