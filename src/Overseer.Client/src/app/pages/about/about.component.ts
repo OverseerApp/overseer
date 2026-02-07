@@ -3,19 +3,18 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { I18NextPipe } from 'angular-i18next';
 import { map } from 'rxjs';
 import { CardSectionComponent } from '../../components/card-section/card-section.component';
-import { LoggingService } from '../../services/logging.service';
+import { HelpComponent } from '../../components/help/help.component';
 import { SettingsService } from '../../services/settings.service';
 import { SystemService } from '../../services/system.service';
 
 @Component({
   selector: 'app-about',
   templateUrl: './about.component.html',
-  imports: [CardSectionComponent, I18NextPipe],
+  imports: [CardSectionComponent, I18NextPipe, HelpComponent],
 })
 export class AboutComponent {
   private static UpdateVersionDismissed = 'updateVersionDismissed';
   private settingsService = inject(SettingsService);
-  private loggingService = inject(LoggingService);
   private updateService = inject(SystemService);
 
   isUpdating = signal(false);
@@ -72,18 +71,6 @@ export class AboutComponent {
     if (updateInfo?.releaseUrl) {
       window.open(updateInfo.releaseUrl, '_blank');
     }
-  }
-
-  downloadLog() {
-    this.loggingService.download().subscribe((log: string) => {
-      const blob = new Blob([log], { type: 'text/plain;charset=utf-8' });
-      const link = document.createElement('a');
-      link.download = 'overseer.log';
-      link.href = URL.createObjectURL(blob);
-      link.click();
-
-      URL.revokeObjectURL(link.href);
-    });
   }
 
   // UI States for Clipboard feedback

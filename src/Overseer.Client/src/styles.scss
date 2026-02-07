@@ -58,3 +58,27 @@ router-outlet {
     border-bottom: 0 !important;
   }
 }
+
+.fade-in-content {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.logo {
+  width: 120px;
+  fill: light-dark(var(--bs-primary), #fff);
+
+  body[data-bs-theme='light'] & {
+    fill: var(--bs-primary) !important;
+  }
+}

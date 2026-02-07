@@ -1,5 +1,7 @@
 ﻿using System.Net;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Overseer.Server.Models;
 using Overseer.Server.Services;
@@ -11,15 +13,22 @@ namespace Overseer.Server.Api
   {
     public static RouteGroupBuilder MapAuthenticationApi(this RouteGroupBuilder builder)
     {
-      var group = builder.MapGroup("/auth");
+      var group = builder.MapGroup("/auth").WithTags("Authentication");
 
       group.MapGet(
         "/",
-        (ClaimsPrincipal? currentUser, IAuthorizationManager authorizationManager) =>
+        (ClaimsPrincipal? currentUser, IAuthorizationManager authorizationManager, IUserManager userManager) =>
         {
           var isAuthenticated = currentUser?.Identity?.IsAuthenticated ?? false;
-          if (isAuthenticated)
-            return Results.Ok();
+          var userIdClaim = currentUser?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+          if (isAuthenticated && int.TryParse(userIdClaim, out var userId))
+          {
+            var user = userManager.GetUser(userId);
+            if (user is not null)
+            {
+              return Results.Ok(user);
+            }
+          }
 
           return Results.Text($"requiresInitialization={authorizationManager.RequiresAuthorization()}", statusCode: (int)HttpStatusCode.Unauthorized);
         }
@@ -37,7 +46,7 @@ namespace Overseer.Server.Api
 
       group.MapPost(
         "/login",
-        (UserDisplay user, HttpContext httpContext, IAuthenticationManager authenticationManager, IRateLimitingService rateLimiter) =>
+        async (UserDisplay user, HttpContext httpContext, IAuthenticationManager authenticationManager, IRateLimitingService rateLimiter) =>
         {
           // Use IP address as the rate limit key
           var clientIp = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
@@ -54,7 +63,13 @@ namespace Overseer.Server.Api
 
           try
           {
-            var result = authenticationManager.AuthenticateUser(user);
+            var result = await authenticationManager.AuthenticateUser(user);
+            if (result == null)
+            {
+              rateLimiter.RecordAttempt(rateLimitKey);
+              return Results.Unauthorized();
+            }
+
             // Reset rate limit on successful login
             rateLimiter.Reset(rateLimitKey);
             return Results.Ok(result);
@@ -71,9 +86,15 @@ namespace Overseer.Server.Api
       group
         .MapDelete(
           "/logout",
-          ([FromHeader(Name = "Authorization")] string authorization, IAuthenticationManager authenticationManager) =>
+          async (ClaimsPrincipal? currentUser, HttpContext httpContext, IAuthenticationManager authenticationManager) =>
           {
-            authenticationManager.DeauthenticateUser(authorization);
+            var userIdClaim = currentUser?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (int.TryParse(userIdClaim, out var userId))
+            {
+              authenticationManager.DeauthenticateUser(userId);
+            }
+
+            await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return Results.Ok();
           }
         )
@@ -89,7 +110,16 @@ namespace Overseer.Server.Api
 
       group.MapPost(
         "/sso",
-        (string token, IAuthenticationManager authenticationManager) => Results.Ok(authenticationManager.ValidatePreauthenticatedToken(token))
+        async ([FromQuery] string token, HttpContext httpContext, IAuthenticationManager authenticationManager) =>
+        {
+          var user = await authenticationManager.ValidatePreauthenticatedToken(token);
+          if (user is null)
+          {
+            return Results.Unauthorized();
+          }
+
+          return Results.Ok(user);
+        }
       );
 
       return builder;

@@ -1,24 +1,52 @@
 <main class="main">
   <ng-progress ngProgressHttp />
-  @if (isLoggedIn()) {
+  @if (!isHeaderHidden() && isLoggedIn()) {
     <nav class="navbar navbar-expand sticky-top bg-body-tertiary p-0 border-bottom">
       <div class="container-fluid px-3 py-2">
-        <a class="navbar-brand" href="/" routerLink="/">
+        <a
+          class="navbar-brand"
+          href="/"
+          routerLink="/"
+        >
           <app-svg name="logo" />
         </a>
         <div class="d-flex align-items-center">
           <ul class="navbar-nav me-auto mb-0">
+            @if (isUser()) {
+              <li class="nav-item me-2">
+                <a
+                  class="nav-link"
+                  #rla="routerLinkActive"
+                  routerLink="user-settings"
+                  routerLinkActive="active"
+                  (click)="goHome(rla.isActive)"
+                >
+                  {{ 'settings' | i18next }}
+                </a>
+              </li>
+            }
             @if (isAdmin()) {
               <li class="nav-item me-2">
-                <a class="nav-link" #rla="routerLinkActive" routerLink="settings" routerLinkActive="active" (click)="goHome(rla.isActive)">
+                <a
+                  class="nav-link"
+                  #rla="routerLinkActive"
+                  routerLink="settings"
+                  routerLinkActive="active"
+                  (click)="goHome(rla.isActive)"
+                >
                   {{ 'settings' | i18next }}
                 </a>
               </li>
             }
             <li class="nav-item">
-              <a class="nav-link" (click)="logout()" href="#">{{ 'logout' | i18next }}</a>
+              <a
+                class="nav-link"
+                (click)="logout()"
+                href="#"
+                >{{ 'logout' | i18next }}</a
+              >
             </li>
-            @if (isAdmin()) {
+            @if (isUser() || isAdmin()) {
               <li class="nav-item d-flex align-items-center">
                 <div class="border-start ms-3 pe-3 h-100"></div>
                 <app-notifications />

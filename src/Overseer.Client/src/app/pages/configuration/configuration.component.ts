@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { I18NextPipe } from 'angular-i18next';
+import { FooterComponent } from '../../components/footer/footer.component';
 
 interface NavItem {
   routerLink: string;
@@ -14,7 +15,7 @@ interface NavItem {
   selector: 'app-configuration',
   templateUrl: './configuration.component.html',
   styleUrls: ['./configuration.component.scss'],
-  imports: [CommonModule, I18NextPipe, RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [CommonModule, I18NextPipe, RouterOutlet, RouterLink, RouterLinkActive, FooterComponent],
   host: { class: 'd-flex flex-1 flex-column' },
 })
 export class ConfigurationComponent {

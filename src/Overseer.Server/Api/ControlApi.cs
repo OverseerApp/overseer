@@ -7,8 +7,8 @@ namespace Overseer.Server.Api
   {
     public static RouteGroupBuilder MapControlApi(this RouteGroupBuilder builder)
     {
-      var group = builder.MapGroup("/control");
-      group.RequireAuthorization(AccessLevel.Administrator.ToString());
+      var group = builder.MapGroup("/control").WithTags("Control");
+      group.RequireAuthorization(AccessLevel.User.ToString());
 
       group.MapPost(
         "/{id}/pause",
@@ -33,15 +33,6 @@ namespace Overseer.Server.Api
         async (int id, IControlManager control) =>
         {
           await control.Cancel(id);
-          return Results.Ok();
-        }
-      );
-
-      group.MapPost(
-        "/{id}/{tool}/temp/{value}",
-        async (int id, int tool, int value, IControlManager control) =>
-        {
-          await control.SetTemperature(id, tool, value);
           return Results.Ok();
         }
       );

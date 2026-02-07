@@ -13,7 +13,6 @@ COPY src/Overseer.Client/package*.json ./
 RUN npm ci --legacy-peer-deps 
 COPY src/Overseer.Client/ ./
 RUN npm version ${VERSION} --no-git-tag-version 
-RUN sed -i "s/appVersion: '.*'/appVersion: '${VERSION}'/" src/environments/versions.ts
 RUN npm run build
 
 # Build stage for .NET server

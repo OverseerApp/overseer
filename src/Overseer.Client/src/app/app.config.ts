@@ -1,6 +1,5 @@
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter } from '@angular/router';
 import { provideI18Next } from 'angular-i18next';
 import { progressInterceptor } from 'ngx-progressbar/http';
@@ -17,7 +16,6 @@ export const appConfig: ApplicationConfig = {
     ThemeService,
     LocalStorageService,
     provideRouter(routes),
-    provideAnimationsAsync(),
     provideZoneChangeDetection({ eventCoalescing: true }),
     // { provide: ErrorHandler, useClass: OverseerErrorHandler },
     provideI18Next(),

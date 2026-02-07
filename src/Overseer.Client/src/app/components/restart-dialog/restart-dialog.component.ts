@@ -21,8 +21,8 @@ export class RestartDialogComponent {
   protected restartComplete = signal(false);
   protected restartFailed = signal(false);
 
-  private readonly POLL_INTERVAL_MS = 2000;
-  private readonly MAX_RETRIES = 30;
+  private readonly POLL_INTERVAL_MS = 20000;
+  private readonly MAX_RETRIES = 100;
 
   protected canAutoUpdate = rxResource({
     stream: () => this.featuresService.canAutoUpdate(),

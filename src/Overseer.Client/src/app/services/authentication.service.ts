@@ -38,10 +38,18 @@ export class AuthenticationService {
   }
 
   checkLogin(): Observable<boolean> {
-    return this.http
-      .get(this.getEndpoint())
-      .pipe(map(() => true))
-      .pipe(catchError(() => of(false)));
+    return this.http.get<User>(this.getEndpoint()).pipe(
+      tap((user) => {
+        if (user && user.id) {
+          this.activeUser.set(user);
+        }
+      }),
+      map(() => true),
+      catchError(() => {
+        this.activeUser.set(undefined);
+        return of(false);
+      })
+    );
   }
 
   login(user: User): Observable<User> {
@@ -70,12 +78,10 @@ export class AuthenticationService {
   }
 
   getPreauthenticatedToken(userId: number): Observable<string> {
-    return this.http.get(this.getEndpoint('sso', userId), {
-      responseType: 'text',
-    });
+    return this.http.get<string>(this.getEndpoint('sso', userId));
   }
 
   validatePreauthenticatedToken(token: string): Observable<User> {
-    return this.http.post<User>(this.getEndpoint('sso'), token).pipe(tap((activeUser) => this.activeUser.set(activeUser)));
+    return this.http.post<User>(this.getEndpoint('sso'), {}, { params: { token } }).pipe(tap((activeUser) => this.activeUser.set(activeUser)));
   }
 }

@@ -2,13 +2,4 @@
   display: flex;
   flex-direction: column;
   flex: 1;
-
-  .logo {
-    width: 120px;
-    fill: light-dark(var(--bs-primary), #fff);
-
-    body[data-bs-theme='light'] & {
-      fill: var(--bs-primary) !important;
-    }
-  }
 }

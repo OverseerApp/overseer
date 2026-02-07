@@ -1,0 +1,24 @@
+<div class="container-md d-flex flex-column flex-1 py-4 gap-4">
+  <app-card-section
+    icon="bi-sliders2-vertical"
+    [heading]="'generalConfiguration' | i18next"
+  >
+    <div class="card-body">
+      <label class="form-label small fw-bold">{{ 'themes.scheme' | i18next }}</label>
+      <select
+        #schemeSelect
+        id="scheme"
+        class="form-select border-secondary"
+        [value]="themeService.scheme()"
+        (change)="handleSchemeChange(schemeSelect.value)"
+      >
+        <option value="auto">{{ 'themes.auto' | i18next }}</option>
+        <option value="light">{{ 'themes.light' | i18next }}</option>
+        <option value="dark">{{ 'themes.dark' | i18next }}</option>
+      </select>
+    </div>
+  </app-card-section>
+  <app-change-password [user]="user()" />
+  <app-help />
+</div>
+<app-footer />

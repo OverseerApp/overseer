@@ -8,7 +8,8 @@ public static class PluginsApi
 {
   public static RouteGroupBuilder MapPluginsApi(this RouteGroupBuilder builder)
   {
-    var group = builder.MapGroup("plugins");
+    var group = builder.MapGroup("plugins").WithTags("Plugins");
+
     group.RequireAuthorization(AccessLevel.Administrator.ToString());
 
     group.MapGet("/", (IPluginManager pluginManager) => pluginManager.GetRegistryItems()).CacheOutput("RefreshCache");

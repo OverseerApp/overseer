@@ -1,6 +1,6 @@
 # Overseer - AI Agent Instructions
 
-Overseer is a 3D printer monitoring application with support for Octoprint, RepRapFirmware, Elegoo, and Bambu Labs machines. It provides real-time monitoring, control, and AI-powered failure detection.
+Overseer is a 3D printer monitoring application with support for Octoprint, RepRapFirmware, Duet Software Framework, Moonraker, Elegoo, and Bambu Labs machines. It provides real-time monitoring, control, and AI-powered failure detection.
 
 ## Architecture
 
@@ -13,7 +13,7 @@ Overseer is a 3D printer monitoring application with support for Octoprint, RepR
 **Key design pattern - Provider-based machine abstraction:**
 
 - Each printer type has a `Machine` model (e.g., `OctoprintMachine`) and corresponding `IMachineProvider<T>` implementation
-- Providers inherit from either `PollingMachineProvider<T>` (REST-based like Octoprint, RepRapFirmware), `WebSocketMachineProvider<T>` (WebSocket-based like Moonraker, Elegoo), or `MachineProvider<T>` directly (e.g., Bambu uses MQTT via MQTTnet)
+- Providers inherit from either `PollingMachineProvider<T>` (REST-based like Octoprint, RepRapFirmware), `WebSocketMachineProvider<T>` (WebSocket-based like Moonraker, Duet Software Framework, Elegoo), or `MachineProvider<T>` directly (e.g., Bambu uses MQTT via MQTTnet)
 - `MachineProviderManager` dynamically instantiates providers using reflection and caches them by machine ID
 - See [Machines/MachineProviderManager.cs](../src/Overseer.Server/Machines/MachineProviderManager.cs) for the factory pattern
 
@@ -21,7 +21,14 @@ Overseer is a 3D printer monitoring application with support for Octoprint, RepR
 
 - `ChannelBase<T>` implements pub-sub pattern with concurrent dictionary of subscribers
 - `MachineStatusChannel`, `NotificationChannel`, `JobFailureChannel` broadcast updates to connected clients
+- `RestartMonitoringChannel` and `CertificateExceptionChannel` handle system events
 - SignalR hubs at `/push/status` and `/push/notifications` for bi-directional real-time communication
+
+**Plugin Architecture:**
+
+- Supports dynamic loading of plugins via `PluginManager` and `PluginDiscoveryService`
+- Plugins are discovered at startup from `src/Overseer.Server/Plugins/`
+- Configured via `IPluginConfiguration` interface requiring `ConfigureServices` implementation
 
 ## Development Workflows
 
@@ -41,8 +48,6 @@ cd src/Overseer.Client
 npm install  # First time only
 npm start
 ```
-
-**Frontend proxies API calls to backend in development** - check `proxy.conf.json` for proxy configuration to avoid CORS issues.
 
 **Building and running with Docker/Podman:**
 
@@ -89,7 +94,7 @@ docker run --rm -d -p 80:80 -p 9000:9000 overseer:latest
 
 **PrintGuard AI failure detection:**
 
-- Located in [Automation/PrintGuard/](../src/Overseer.Server/Automation/PrintGuard/)
+- Implemented via `Overseer.Server.Integration` package
 - Uses ONNX Runtime with ShuffleNet + prototypical networks for few-shot learning
 - Detects spaghetti prints, layer shifts via camera feed analysis
 - Based on research by Oliver Bravery - see PrintGuard README for full attribution and architecture details
@@ -130,7 +135,7 @@ docker run --rm -d -p 80:80 -p 9000:9000 overseer:latest
 
 **Machine provider communication:**
 
-- Each provider type uses different protocols: REST (Octoprint, RRF), WebSocket (Moonraker, Elegoo), MQTT (Bambu via MQTTnet)
+- Each provider type uses different protocols: REST (Octoprint, RRF), WebSocket (Moonraker, Duet Software Framework, Elegoo), MQTT (Bambu via MQTTnet)
 - Providers handle connection management, auto-reconnect, and polling intervals
 - Status updates pushed through `IMachineStatusChannel` to SignalR clients
 

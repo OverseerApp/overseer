@@ -1,75 +1,57 @@
-﻿using System.Security.Cryptography;
+﻿using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Overseer.Server.Data;
 using Overseer.Server.Models;
 
 namespace Overseer.Server.Users
 {
-  public class AuthenticationManager(IDataContext context) : IAuthenticationManager
+  public class AuthenticationManager(IDataContext context, IHttpContextAccessor httpContextAccessor) : IAuthenticationManager
   {
-    const string Bearer = "Bearer";
-
     readonly IRepository<User> _users = context.Repository<User>();
 
-    static string HashToken(string token)
+    public async Task<UserDisplay?> AuthenticateUser(UserDisplay user)
     {
-      var tokenBytes = Encoding.UTF8.GetBytes(token);
-      var hashBytes = SHA256.HashData(tokenBytes);
-      return Convert.ToBase64String(hashBytes);
+      return await AuthenticateUser(user.Username, user.Password);
     }
 
-    public UserDisplay? AuthenticateUser(UserDisplay user)
-    {
-      return AuthenticateUser(user.Username, user.Password);
-    }
-
-    public UserDisplay? AuthenticateUser(string? username, string? password)
+    public async Task<UserDisplay?> AuthenticateUser(string? username, string? password)
     {
       if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
       {
         throw new OverseerException("invalid_username_or_password");
       }
 
-      var user = _users.Get(u => u.Username!.ToLower() == username.ToLower()) ?? throw new OverseerException("invalid_username");
-      if (!BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
+      var user = _users.Get(u => u.Username!.Equals(username, StringComparison.OrdinalIgnoreCase));
+      if (user is null || string.IsNullOrWhiteSpace(user.PasswordHash))
       {
-        throw new OverseerException("invalid_password");
+        throw new OverseerException("invalid_username_or_password");
       }
 
-      return AuthenticateUser(user);
+      if (!BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
+      {
+        throw new OverseerException("invalid_username_or_password");
+      }
+
+      return await AuthenticateUser(user);
     }
 
-    public User? AuthenticateToken(string token)
+    public bool AuthenticateToken(string token)
     {
       if (string.IsNullOrWhiteSpace(token))
       {
-        return null;
+        return false;
       }
 
-      var strippedToken = StripToken(token);
-      var tokenHash = HashToken(strippedToken);
+      var tokenHash = HashToken(token);
 
       // Compare hashed tokens to prevent timing attacks
       var user = _users.Get(u => u.TokenHash == tokenHash);
 
-      if (user.IsTokenExpired())
-      {
-        return null;
-      }
-
       //has a matching token that isn't expired.
-      return user;
-    }
-
-    public UserDisplay? DeauthenticateUser(string token)
-    {
-      if (string.IsNullOrWhiteSpace(token))
-      {
-        return null;
-      }
-
-      var tokenHash = HashToken(StripToken(token));
-      return DeauthenticateUser(_users.Get(u => u.TokenHash == tokenHash));
+      return user != null;
     }
 
     public UserDisplay? DeauthenticateUser(int userId)
@@ -82,37 +64,26 @@ namespace Overseer.Server.Users
       var user = _users.GetById(userId);
       if (user == null)
         return string.Empty;
-      if (user.AccessLevel != AccessLevel.Readonly)
-        return string.Empty;
 
-      var token = Encoding.UTF8.GetBytes(BCrypt.Net.BCrypt.GenerateSalt(16));
-      user.PreauthenticatedToken = Convert.ToBase64String(token);
+      var token = CreateToken();
+      user.PreauthenticatedToken = HashToken(token);
       user.PreauthenticatedTokenExpiration = DateTime.UtcNow.AddMinutes(2);
       _users.Update(user);
 
-      return user.PreauthenticatedToken;
+      return token;
     }
 
-    public UserDisplay? ValidatePreauthenticatedToken(string token)
+    public async Task<UserDisplay?> ValidatePreauthenticatedToken(string token)
     {
-      var user = _users.Get(u => u.PreauthenticatedToken == token && u.PreauthenticatedTokenExpiration > DateTime.UtcNow);
+      var hashedToken = HashToken(token);
+      var user = _users.Get(u => u.PreauthenticatedToken == hashedToken && u.PreauthenticatedTokenExpiration > DateTime.UtcNow);
       if (user == null)
         return null;
 
-      return AuthenticateUser(user);
+      return await AuthenticateUser(user);
     }
 
-    static string StripToken(string token)
-    {
-      if (string.IsNullOrWhiteSpace(token))
-      {
-        return string.Empty;
-      }
-
-      return token.Replace(Bearer, string.Empty).Trim();
-    }
-
-    UserDisplay? DeauthenticateUser(User user)
+    private UserDisplay? DeauthenticateUser(User user)
     {
       if (user == null)
       {
@@ -120,40 +91,57 @@ namespace Overseer.Server.Users
       }
 
       user.TokenHash = null;
-      user.TokenExpiration = null;
       _users.Update(user);
 
       return user.ToDisplay();
     }
 
-    UserDisplay AuthenticateUser(User user)
+    private async Task<UserDisplay> AuthenticateUser(User user)
     {
       // Always generate a new token on login since we only store the hash
       // and cannot return the previous plain token
-      var tokenBytes = RandomNumberGenerator.GetBytes(32);
-      var plainToken = Convert.ToBase64String(tokenBytes);
+      var plainToken = CreateToken();
 
       // Store only the hash of the token, never the plain token
       user.TokenHash = HashToken(plainToken);
-
-      if (user.SessionLifetime.HasValue)
-      {
-        user.TokenExpiration = DateTime.UtcNow.AddDays(user.SessionLifetime.Value);
-      }
-      else
-      {
-        user.TokenExpiration = null;
-      }
-
       user.PreauthenticatedToken = null;
       user.PreauthenticatedTokenExpiration = null;
+      user.LastLogin = DateTime.UtcNow;
 
       _users.Update(user);
 
-      var display = user.ToDisplay();
-      display.Token = plainToken;
+      var claims = new List<Claim>
+      {
+        new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+        new(ClaimTypes.Name, user.Username!),
+        new(ClaimTypes.Role, user.AccessLevel.ToString()),
+        new("SessionToken", plainToken!),
+      };
 
-      return display;
+      var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+      var authProperties = new AuthenticationProperties
+      {
+        IsPersistent = true,
+        ExpiresUtc = user.SessionLifetime.HasValue ? DateTime.UtcNow.AddDays(user.SessionLifetime.Value) : null,
+      };
+
+      var httpContext = httpContextAccessor.HttpContext!;
+      await httpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
+
+      return user.ToDisplay();
+    }
+
+    private static string CreateToken()
+    {
+      var tokenBytes = RandomNumberGenerator.GetBytes(32);
+      return Convert.ToBase64String(tokenBytes);
+    }
+
+    private static string HashToken(string token)
+    {
+      var tokenBytes = Encoding.UTF8.GetBytes(token);
+      var hashBytes = SHA256.HashData(tokenBytes);
+      return Convert.ToBase64String(hashBytes);
     }
   }
 }

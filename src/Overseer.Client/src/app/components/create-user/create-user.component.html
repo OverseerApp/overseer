@@ -34,36 +34,38 @@
         formControlName="username"
       />
     </div>
-    <div class="mb-3">
-      <label
-        for="password"
-        class="form-label small fw-bold"
-        >{{ 'password' | i18next }}</label
-      >
-      <input
-        required
-        id="password"
-        type="password"
-        class="form-control"
-        autocomplete="new-password"
-        formControlName="password"
-      />
-    </div>
-    <div class="mb-3">
-      <label
-        for="confirmPassword"
-        class="form-label small fw-bold"
-        >{{ 'confirmPassword' | i18next }}</label
-      >
-      <input
-        required
-        id="confirmPassword"
-        type="password"
-        class="form-control"
-        autocomplete="new-password"
-        formControlName="confirmPassword"
-      />
-    </div>
+    @if (isInitialSetup() || form()?.controls?.accessLevel?.value === 'Readonly') {
+      <div class="mb-3">
+        <label
+          for="password"
+          class="form-label small fw-bold"
+          >{{ 'password' | i18next }}</label
+        >
+        <input
+          required
+          id="password"
+          type="password"
+          class="form-control"
+          autocomplete="new-password"
+          formControlName="password"
+        />
+      </div>
+      <div class="mb-3">
+        <label
+          for="confirmPassword"
+          class="form-label small fw-bold"
+          >{{ 'confirmPassword' | i18next }}</label
+        >
+        <input
+          required
+          id="confirmPassword"
+          type="password"
+          class="form-control"
+          autocomplete="new-password"
+          formControlName="confirmPassword"
+        />
+      </div>
+    }
     <div class="mb-3">
       <label
         for="sessionLifetime"

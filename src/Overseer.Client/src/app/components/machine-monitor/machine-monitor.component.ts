@@ -94,52 +94,6 @@ export class MachineMonitorComponent {
       .subscribe(() => this.disableUi(this.controlService.cancelJob(machine.id)));
   }
 
-  increaseTemp(heaterIndex: number): void {
-    const machine = this.machine();
-    const status = this.status();
-    if (!machine) return;
-    if (!status?.temperatures) return;
-
-    this.setTemp(heaterIndex, (status.temperatures[heaterIndex].target += 1));
-  }
-
-  decreaseTemp(heaterIndex: number): void {
-    const machine = this.machine();
-    const status = this.status();
-    if (!machine) return;
-    if (!status?.temperatures) return;
-
-    this.setTemp(heaterIndex, (status.temperatures[heaterIndex].target -= 1));
-  }
-
-  setTemp(heaterIndex: number, temperature: number): void {
-    const machine = this.machine();
-    if (!machine) return;
-
-    this.disableUi(this.controlService.setTemperature(machine.id, heaterIndex, temperature));
-  }
-
-  setFeedRate(feedRate: number): void {
-    const machine = this.machine();
-    if (!machine) return;
-
-    this.disableUi(this.controlService.setFeedRate(machine.id, feedRate));
-  }
-
-  setFlowRate(extruderIndex: number, flowRate: number): void {
-    const machine = this.machine();
-    if (!machine) return;
-
-    this.disableUi(this.controlService.setFlowRate(machine.id, extruderIndex, flowRate));
-  }
-
-  setFanSpeed(fanSpeed: number): void {
-    const machine = this.machine();
-    if (!machine) return;
-
-    this.disableUi(this.controlService.setFanSpeed(machine.id, fanSpeed));
-  }
-
   private disableUi(observable: Observable<void>): void {
     this.busy.set(true);
     observable.subscribe({

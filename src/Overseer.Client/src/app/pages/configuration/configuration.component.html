@@ -30,17 +30,5 @@
     <router-outlet></router-outlet>
   </div>
   <div class="flex-1 py-3"></div>
-  <footer class="text-center">
-    <p class="text-muted small mb-1">&copy; {{ currentYear() }} Michael DeBerry</p>
-    <p class="text-muted small">
-      {{ 'about.openSourceNotice' | i18next }}
-      <a
-        href="https://en.wikipedia.org/wiki/GNU_Affero_General_Public_License"
-        target="_blank"
-        class="text-success text-decoration-none fw-bold"
-      >
-        {{ 'about.license' | i18next }} <i class="bi bi-box-arrow-up-right small"></i>
-      </a>
-    </p>
-  </footer>
+  <app-footer></app-footer>
 </div>

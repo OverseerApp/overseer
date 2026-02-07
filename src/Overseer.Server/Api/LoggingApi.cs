@@ -11,7 +11,7 @@ namespace Overseer.Server.Api
 
     public static RouteGroupBuilder MapLoggingApi(this RouteGroupBuilder builder)
     {
-      var group = builder.MapGroup("/logging");
+      var group = builder.MapGroup("/logging").WithTags("Logging");
       group.RequireAuthorization();
 
       group.MapGet(

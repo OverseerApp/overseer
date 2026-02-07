@@ -19,16 +19,6 @@ public class ElegooMachineProvider(ElegooMachine machine, IMachineStatusChannel 
 
   public override ElegooMachine Machine { get; protected set; } = machine;
 
-  public override Task SetToolTemperature(int heaterIndex, int targetTemperature)
-  {
-    return SendCommand(new { TempTargetNozzle = targetTemperature });
-  }
-
-  public override Task SetBedTemperature(int targetTemperature)
-  {
-    return SendCommand(new { TempTargetHotbed = targetTemperature });
-  }
-
   public override Task ExecuteGcode(string command)
   {
     // may not be supported

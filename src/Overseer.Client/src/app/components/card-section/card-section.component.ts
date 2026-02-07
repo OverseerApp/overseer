@@ -6,6 +6,7 @@ import { Component, Input } from '@angular/core';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './card-section.component.html',
+  host: { class: 'd-block' },
 })
 export class CardSectionComponent {
   @Input() icon: string = '';

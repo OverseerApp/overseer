@@ -11,8 +11,6 @@
 }
 
 .machine-card-content {
-  gap: 1rem;
-
   @media (max-width: 768px) {
     // Stack vertically on mobile
     flex-direction: column;

@@ -5,7 +5,7 @@
     </div>
   } @else {
     @if (displayedMachines()?.length) {
-      <div class="machines d-flex flex-1 flex-column py-4">
+      <div class="machines d-flex flex-1 flex-column py-4 fade-in-content">
         @for (item of displayedMachines(); track item.id) {
           <app-machine-monitor [machine]="item"></app-machine-monitor>
         }
@@ -22,7 +22,7 @@
               >{{ 'addMachine' | i18next }}</a
             >
           </div>
-        } @else {
+        } @else if (isAdmin()) {
           <div class="text-center">
             <p class="fs-3">{{ 'noVisibleMachines' | i18next }}</p>
             <p>{{ 'noMachinesEditMachines' | i18next }}</p>

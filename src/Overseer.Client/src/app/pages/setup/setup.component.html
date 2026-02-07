@@ -3,19 +3,42 @@
     @switch (step()) {
       @case ('user') {
         <p class="fw-2">{{ 'pages.setup.createUserMessage' | i18next }}</p>
-        <app-create-user [form]="adminForm" accessLevel="Administrator" (submit)="handleAdminSubmit()">
-          <button type="submit" class="btn btn-primary" [disabled]="adminForm.invalid">{{ 'pages.setup.next' | i18next }}</button>
+        <app-create-user
+          [form]="adminForm"
+          accessLevel="Administrator"
+          (submit)="handleAdminSubmit()"
+          [isInitialSetup]="true"
+        >
+          <div class="d-flex justify-content-end">
+            <button
+              type="submit"
+              class="btn btn-primary"
+              [disabled]="adminForm.invalid"
+            >
+              {{ 'pages.setup.next' | i18next }}
+            </button>
+          </div>
         </app-create-user>
       }
       @case ('machines') {
         <p class="fw-2">{{ 'pages.setup.createMachineMessage' | i18next }}</p>
         <app-create-machine [form]="machinesForm"></app-create-machine>
-        <button type="submit" class="btn btn-primary me-2" (click)="handleMachineSubmit(true)">
-          {{ 'pages.setup.createMultipleMachines' | i18next }}
-        </button>
-        <button type="submit" class="btn btn-primary" (click)="handleMachineSubmit(false)">
-          {{ 'pages.setup.next' | i18next }}
-        </button>
+        <div class="d-flex justify-content-end">
+          <button
+            type="submit"
+            class="btn btn-primary me-2"
+            (click)="handleMachineSubmit(true)"
+          >
+            {{ 'pages.setup.createMultipleMachines' | i18next }}
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            (click)="handleMachineSubmit(false)"
+          >
+            {{ 'pages.setup.next' | i18next }}
+          </button>
+        </div>
       }
     }
   </div>

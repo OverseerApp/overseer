@@ -7,7 +7,7 @@ public static class NotificationApi
 {
   public static RouteGroupBuilder MapNotificationApi(this RouteGroupBuilder builder)
   {
-    var group = builder.MapGroup("/notifications");
+    var group = builder.MapGroup("/notifications").WithTags("Notifications");
     group.RequireAuthorization();
 
     group.MapGet(

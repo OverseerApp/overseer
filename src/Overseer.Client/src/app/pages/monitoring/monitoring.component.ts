@@ -7,6 +7,7 @@ import { MachineMonitorComponent } from '../../components/machine-monitor/machin
 import { isIdle, MachineStatus } from '../../models/machine-status.model';
 import { Machine } from '../../models/machine.model';
 import { ApplicationSettings } from '../../models/settings.model';
+import { AuthenticationService } from '../../services/authentication.service';
 import { MachinesService } from '../../services/machines.service';
 import { MonitoringService } from '../../services/monitoring.service';
 import { SettingsService } from '../../services/settings.service';
@@ -22,6 +23,9 @@ export class MonitoringComponent {
   private machineService = inject(MachinesService);
   private settingsService = inject(SettingsService);
   private monitoringService = inject(MonitoringService);
+  private authenticationService = inject(AuthenticationService);
+
+  protected isAdmin = computed(() => this.authenticationService.activeUser()?.accessLevel === 'Administrator');
 
   loading = signal(true);
   machines = signal<Machine[] | undefined>(undefined);
