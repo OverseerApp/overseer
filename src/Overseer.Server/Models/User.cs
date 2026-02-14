@@ -34,7 +34,7 @@ namespace Overseer.Server.Models
   /// <summary>
   /// This is the user as represented in the database
   /// </summary>
-  public class User : IEntity
+  public class User
   {
     public int Id { get; set; }
 

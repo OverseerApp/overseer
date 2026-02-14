@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using Overseer.Server.Integration.Machines;
 using Overseer.Server.Models;
 
 namespace Overseer.Server.Machines;

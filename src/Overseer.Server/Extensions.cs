@@ -7,13 +7,15 @@ using Octokit;
 using Overseer.Server.Channels;
 using Overseer.Server.Data;
 using Overseer.Server.Integration.Automation;
+using Overseer.Server.Integration.Common;
+using Overseer.Server.Integration.Machines;
 using Overseer.Server.Machines;
 using Overseer.Server.Models;
 using Overseer.Server.Plugins;
 using Overseer.Server.Services;
 using Overseer.Server.System;
 using Overseer.Server.Users;
-using Machine = Overseer.Server.Models.Machine;
+using Machine = Overseer.Server.Integration.Machines.Machine;
 
 namespace Overseer.Server;
 

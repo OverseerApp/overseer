@@ -4,7 +4,7 @@ using LiteDB;
 namespace Overseer.Server.Data;
 
 public class LiteRepository<T>(LiteDatabase database) : IRepository<T>
-  where T : IEntity
+  where T : class
 {
   readonly ILiteCollection<T> _collection = database.GetCollection<T>(typeof(T).Name);
 

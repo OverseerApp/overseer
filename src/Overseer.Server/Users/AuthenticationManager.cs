@@ -4,6 +4,7 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Overseer.Server.Data;
+using Overseer.Server.Integration.Common;
 using Overseer.Server.Models;
 
 namespace Overseer.Server.Users

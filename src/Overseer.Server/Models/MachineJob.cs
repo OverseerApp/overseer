@@ -1,9 +1,9 @@
 using System.Text.Json.Serialization;
-using Overseer.Server.Data;
+using Overseer.Server.Integration.Machines;
 
 namespace Overseer.Server.Models;
 
-public class MachineJob : IEntity
+public class MachineJob
 {
   public int Id { get; set; }
 

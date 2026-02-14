@@ -1,5 +1,6 @@
 ﻿using Overseer.Server.Channels;
 using Overseer.Server.Data;
+using Overseer.Server.Integration.Machines;
 using Overseer.Server.Models;
 
 namespace Overseer.Server.Machines
@@ -24,7 +25,7 @@ namespace Overseer.Server.Machines
     public async Task<Machine> CreateMachine(Machine machine)
     {
       //load any default configuration that will be retrieved from the machine.
-      await _machineProviderManager.CreateProvider(machine).LoadConfiguration(machine);
+      await _machineProviderManager.CreateProvider(machine).Configure(machine);
 
       //The new machine will be added to the end of the list
       machine.SortIndex = _machines.Count() + 1;
@@ -41,7 +42,7 @@ namespace Overseer.Server.Machines
       if (!machine.Disabled)
       {
         //update the configuration from the machine if the machine isn't disabled
-        await _machineProviderManager.GetProvider(machine).LoadConfiguration(machine);
+        await _machineProviderManager.GetProvider(machine).Configure(machine);
       }
 
       _machines.Update(machine);
@@ -67,9 +68,9 @@ namespace Overseer.Server.Machines
       _machines.Update(machines);
     }
 
-    public IEnumerable<string> GetMachineTypes()
+    public IDictionary<string, IEnumerable<MachineMetadata>> GetMachineMetadata()
     {
-      return [.. Enum.GetNames(typeof(MachineType)).Where(x => x != MachineType.Unknown.ToString()).OrderBy(x => x)];
+      throw new NotImplementedException();
     }
   }
 }

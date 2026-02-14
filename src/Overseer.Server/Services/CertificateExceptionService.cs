@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Security;
 using log4net;
 using Overseer.Server.Channels;
+using Overseer.Server.Integration.Common;
 using Overseer.Server.Models;
 
 namespace Overseer.Server.Services;
