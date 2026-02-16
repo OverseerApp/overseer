@@ -4,7 +4,7 @@ using Overseer.Server.Data;
 
 namespace Overseer.Server.Models
 {
-  public class CertificateDetails : IEntity
+  public class CertificateDetails
   {
     public CertificateDetails() { }
 

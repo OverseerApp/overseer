@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using log4net;
 using Overseer.Server.Channels;
 using Overseer.Server.Data;
+using Overseer.Server.Integration.Machines;
 using Overseer.Server.Machines;
 using Overseer.Server.Models;
 
@@ -99,7 +100,7 @@ public sealed class JobSentinelService(
   {
     var machineRepository = dataContext.Repository<Machine>();
     var machine = machineRepository.GetById(job.MachineId);
-    if (string.IsNullOrEmpty(machine?.WebCamUrl))
+    if (string.IsNullOrEmpty(machine?.WebcamUrl))
     {
       log.Warn($"Machine {machine?.Name} does not have a valid Webcam URL. Sentinel not created for job {job.Id}");
       return;

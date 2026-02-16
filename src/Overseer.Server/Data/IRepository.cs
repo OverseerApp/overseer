@@ -2,13 +2,8 @@ using System.Linq.Expressions;
 
 namespace Overseer.Server.Data;
 
-public interface IEntity
-{
-  int Id { get; set; }
-}
-
 public interface IRepository<T>
-  where T : IEntity
+  where T : class
 {
   IReadOnlyList<T> GetAll();
 

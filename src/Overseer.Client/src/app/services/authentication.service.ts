@@ -41,7 +41,10 @@ export class AuthenticationService {
     return this.http.get<User>(this.getEndpoint()).pipe(
       tap((user) => {
         if (user && user.id) {
-          this.activeUser.set(user);
+          const currentUser = this.activeUser();
+          if (!currentUser || JSON.stringify(currentUser) !== JSON.stringify(user)) {
+            this.activeUser.set(user);
+          }
         }
       }),
       map(() => true),

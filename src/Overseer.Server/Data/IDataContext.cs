@@ -3,7 +3,7 @@
 public interface IDataContext : IDisposable
 {
   IRepository<T> Repository<T>()
-    where T : IEntity;
+    where T : class;
 
   IValueStore ValueStore();
 }

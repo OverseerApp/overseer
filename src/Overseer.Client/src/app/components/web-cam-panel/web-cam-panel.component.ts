@@ -1,5 +1,5 @@
 import { Component, DestroyRef, effect, inject, input, signal } from '@angular/core';
-import { WebCamOrientation } from '../../models/machine.model';
+import { WebcamOrientation } from '../../models/machine.model';
 
 @Component({
   selector: 'app-web-cam-panel',
@@ -16,7 +16,7 @@ export class WebCamPanelComponent {
   private interval: ReturnType<typeof setInterval> | undefined;
 
   url = input<string | undefined>();
-  orientation = input<WebCamOrientation | undefined>('Default');
+  orientation = input<WebcamOrientation | undefined>('Default');
   protected backgroundImage = signal<string | undefined>(undefined);
   protected imageLoadFailed = signal(false);
 

@@ -11,7 +11,7 @@ public enum NotificationType
 }
 
 [JsonDerivedType(typeof(JobNotification))]
-public abstract class Notification : IEntity
+public abstract class Notification
 {
   public int Id { get; set; }
 

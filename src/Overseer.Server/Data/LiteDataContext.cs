@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Reflection.PortableExecutable;
 using LiteDB;
 using log4net;
 
@@ -53,13 +54,18 @@ public class LiteDataContext : IDataContext
   }
 
   public IRepository<T> Repository<T>()
-    where T : IEntity
+    where T : class
   {
     return (IRepository<T>)
       _repositoryCache.GetOrAdd(
         typeof(T),
         type =>
         {
+          if (typeof(T).GetProperty("Id") == null)
+          {
+            throw new InvalidOperationException($"Type {typeof(T).Name} does not have an 'Id' property and cannot be used as a repository entity.");
+          }
+
           return new LiteRepository<T>(Database);
         }
       );

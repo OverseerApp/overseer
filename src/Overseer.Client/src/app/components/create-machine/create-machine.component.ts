@@ -1,41 +1,53 @@
-import { Component, inject, input, OnInit } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { I18NextPipe, I18NextService } from 'angular-i18next';
-import { map } from 'rxjs';
-import { DisplayOption } from '../../models/constants';
-import { MachineForm } from '../../models/form.types';
-import { MachineType } from '../../models/machine.model';
+import { Component, computed, DestroyRef, inject, input, OnInit, signal } from '@angular/core';
+import { rxResource, takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormControl, ReactiveFormsModule, UntypedFormGroup, Validators } from '@angular/forms';
+import { I18NextPipe } from 'angular-i18next';
 import { MachinesService } from '../../services/machines.service';
-import { MachineHostComponent } from '../machine-host/machine-host.component';
+import { MachineFormComponent } from '../machine-form/machine-form.component';
 
 @Component({
   selector: 'app-create-machine',
   templateUrl: './create-machine.component.html',
-  imports: [MachineHostComponent, I18NextPipe, ReactiveFormsModule],
+  imports: [I18NextPipe, ReactiveFormsModule, MachineFormComponent],
 })
 export class CreateMachineComponent implements OnInit {
   private machinesService = inject(MachinesService);
-  private i18NextService = inject(I18NextService);
+  private destroyRef = inject(DestroyRef);
 
-  machineTypes?: DisplayOption<MachineType>[];
-  form = input<FormGroup<MachineForm>>();
+  form = input.required<UntypedFormGroup>();
 
-  constructor() {
-    this.machinesService
-      .getMachineTypes()
-      .pipe(
-        map((types) => {
-          return types.sort((a, b) => {
-            return this.i18NextService.t(a).localeCompare(this.i18NextService.t(b));
-          });
-        })
-      )
-      .subscribe((types) => {
-        this.machineTypes = types.map((type) => new DisplayOption(type, type));
-      });
-  }
+  protected machineMetadata = rxResource({
+    stream: () => this.machinesService.getMachineMetadata(),
+  });
+
+  protected machineTypes = computed(() => {
+    if (this.machineMetadata.isLoading()) return [];
+    if (this.machineMetadata.error()) return [];
+
+    const metadata = this.machineMetadata.value();
+    if (!metadata) return [];
+
+    return Object.keys(metadata);
+  });
+
+  protected selectedMachineType = signal<string | undefined>(undefined);
+
+  protected selectedMetadata = computed(() => {
+    const selectedType = this.selectedMachineType();
+    const metadata = this.machineMetadata.value();
+
+    if (!selectedType) return undefined;
+    if (!metadata) return undefined;
+
+    return metadata[selectedType] ?? undefined;
+  });
 
   ngOnInit(): void {
-    this.form()?.addControl('machineType', new FormControl('Unknown'));
+    const form = this.form();
+    form?.addControl('machineType', new FormControl('', Validators.required));
+    form
+      ?.get('machineType')
+      ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((value) => this.selectedMachineType.set(value));
   }
 }

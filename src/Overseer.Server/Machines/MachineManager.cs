@@ -1,75 +1,78 @@
 ﻿using Overseer.Server.Channels;
 using Overseer.Server.Data;
+using Overseer.Server.Integration.Machines;
 using Overseer.Server.Models;
 
-namespace Overseer.Server.Machines
+namespace Overseer.Server.Machines;
+
+public class MachineManager(IDataContext context, MachineProviderManager machineProviderManager, IRestartMonitoringChannel restartMonitoringChannel)
+  : IMachineManager
 {
-  public class MachineManager(IDataContext context, MachineProviderManager machineProviderManager, IRestartMonitoringChannel restartMonitoringChannel)
-    : IMachineManager
+  readonly IRepository<Machine> _machines = context.Repository<Machine>();
+  readonly MachineProviderManager _machineProviderManager = machineProviderManager;
+
+  public Machine GetMachine(int id)
   {
-    readonly IRepository<Machine> _machines = context.Repository<Machine>();
-    readonly MachineProviderManager _machineProviderManager = machineProviderManager;
+    return _machines.GetById(id);
+  }
 
-    public Machine GetMachine(int id)
+  public IReadOnlyList<Machine> GetMachines()
+  {
+    var machines = _machines.GetAll();
+    return machines;
+  }
+
+  public async Task<Machine> CreateMachine(Machine machine)
+  {
+    //load any default configuration that will be retrieved from the machine.
+    var configuredMachine = await _machineProviderManager.ConfigureMachine(machine);
+
+    //The new machine will be added to the end of the list
+    configuredMachine.SortIndex = _machines.Count() + 1;
+
+    //if the configuration is updated with data from the machine then store the configuration.
+    _machines.Create(configuredMachine);
+    await restartMonitoringChannel.Dispatch();
+
+    return configuredMachine;
+  }
+
+  public async Task<Machine> UpdateMachine(Machine machine)
+  {
+    if (!machine.Disabled)
     {
-      return _machines.GetById(id);
-    }
+      //update the configuration from the machine if the machine isn't disabled
+      var configuredMachine = await _machineProviderManager.ConfigureMachine(machine);
+      _machines.Update(configuredMachine);
 
-    public IReadOnlyList<Machine> GetMachines()
-    {
-      var machines = _machines.GetAll();
-      return machines;
-    }
-
-    public async Task<Machine> CreateMachine(Machine machine)
-    {
-      //load any default configuration that will be retrieved from the machine.
-      await _machineProviderManager.CreateProvider(machine).LoadConfiguration(machine);
-
-      //The new machine will be added to the end of the list
-      machine.SortIndex = _machines.Count() + 1;
-
-      //if the configuration is updated with data from the machine then store the configuration.
-      _machines.Create(machine);
       await restartMonitoringChannel.Dispatch();
-
-      return machine;
+      return configuredMachine;
     }
 
-    public async Task<Machine> UpdateMachine(Machine machine)
-    {
-      if (!machine.Disabled)
-      {
-        //update the configuration from the machine if the machine isn't disabled
-        await _machineProviderManager.GetProvider(machine).LoadConfiguration(machine);
-      }
+    _machines.Update(machine);
+    return machine;
+  }
 
-      _machines.Update(machine);
-      await restartMonitoringChannel.Dispatch();
-      return machine;
-    }
+  public Machine? DeleteMachine(int machineId)
+  {
+    var machine = GetMachine(machineId);
+    if (machine == null)
+      return null;
 
-    public Machine? DeleteMachine(int machineId)
-    {
-      var machine = GetMachine(machineId);
-      if (machine == null)
-        return null;
+    _machines.Delete(machineId);
+    return machine;
+  }
 
-      _machines.Delete(machineId);
-      return machine;
-    }
+  public void SortMachines(List<int> sortOrder)
+  {
+    var machines = _machines.GetAll().ToList();
+    machines.ForEach(m => m.SortIndex = sortOrder.IndexOf(m.Id));
 
-    public void SortMachines(List<int> sortOrder)
-    {
-      var machines = _machines.GetAll().ToList();
-      machines.ForEach(m => m.SortIndex = sortOrder.IndexOf(m.Id));
+    _machines.Update(machines);
+  }
 
-      _machines.Update(machines);
-    }
-
-    public IEnumerable<string> GetMachineTypes()
-    {
-      return [.. Enum.GetNames(typeof(MachineType)).Where(x => x != MachineType.Unknown.ToString()).OrderBy(x => x)];
-    }
+  public IDictionary<string, IEnumerable<MachineMetadata>> GetMachineMetadata()
+  {
+    return _machineProviderManager.GetMachineMetadata();
   }
 }

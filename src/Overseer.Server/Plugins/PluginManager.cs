@@ -19,38 +19,80 @@ public class PluginManager(IHttpClientFactory httpClientFactory, IGitHubClient g
 
   public async Task<IEnumerable<PluginRegistryItem>> GetRegistryItems()
   {
-    string response;
+    var registryItems = new List<PluginRegistryItem>();
+    var installedPlugins = GetInstalledPlugins().ToDictionary(p => p.Name, p => p);
+    var registryPluginNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
     try
     {
-      response = await _httpClient.GetStringAsync(RegistryUrl);
+      var response = await _httpClient.GetStringAsync(RegistryUrl);
+      var items = JsonSerializer.Deserialize<IEnumerable<PluginRegistryItem>>(response, JsonSerializerOptions) ?? [];
+
+      foreach (var item in items)
+      {
+        registryPluginNames.Add(item.Name);
+        try
+        {
+          var updateInfo = await GetPluginInfo(installedPlugins.ToDictionary(p => p.Key, p => p.Value.Version), item);
+          if (updateInfo is null)
+            continue;
+
+          registryItems.Add(updateInfo with { IsAvailableInRegistry = true });
+        }
+        catch (Exception ex)
+        {
+          Log.Error($"Failed to fetch latest release for plugin {item.Name} from {item.GithubRepository}: {ex.Message}", ex);
+          continue;
+        }
+      }
     }
     catch (Exception ex)
     {
       Log.Error($"Failed to fetch plugin registry from '{RegistryUrl}': {ex.Message}", ex);
-      throw new Exception($"Failed to fetch plugin registry from '{RegistryUrl}'. See inner exception for details.", ex);
     }
-    var items = JsonSerializer.Deserialize<IEnumerable<PluginRegistryItem>>(response, JsonSerializerOptions) ?? [];
-    var itemsWithLatestVersion = new List<PluginRegistryItem>();
-    var installedPlugins = GetInstalledPlugins().ToDictionary(p => p.Name, p => p.Version);
 
-    foreach (var item in items)
+    // Include locally installed plugins that aren't in the registry (e.g. manually added for development)
+    foreach (var (name, plugin) in installedPlugins)
     {
-      try
-      {
-        var updateInfo = await GetPluginInfo(installedPlugins, item);
-        if (updateInfo is null)
-          continue;
-
-        itemsWithLatestVersion.Add(updateInfo);
-      }
-      catch (Exception ex)
-      {
-        Log.Error($"Failed to fetch latest release for plugin {item.Name} from {item.GithubRepository}: {ex.Message}", ex);
+      if (registryPluginNames.Contains(name))
         continue;
-      }
+
+      registryItems.Add(
+        plugin with
+        {
+          IsInstalled = true,
+          InstalledVersion = plugin.Version,
+          IsUpdateAvailable = false,
+          IsAvailableInRegistry = false,
+        }
+      );
     }
 
-    return itemsWithLatestVersion;
+    // Include plugin directories without metadata (no plugin.json)
+    foreach (var pluginDir in PluginUtilities.GetPluginDirectories())
+    {
+      var dirName = Path.GetFileName(pluginDir);
+      if (registryPluginNames.Contains(dirName) || installedPlugins.ContainsKey(dirName))
+        continue;
+
+      registryItems.Add(
+        new PluginRegistryItem(
+          Name: dirName,
+          Author: "Unknown",
+          Description: "Locally installed plugin (no metadata)",
+          GithubRepository: string.Empty,
+          License: "Unknown",
+          Version: null,
+          DownloadUrl: null,
+          IsInstalled: true,
+          InstalledVersion: null,
+          IsUpdateAvailable: false,
+          IsAvailableInRegistry: false
+        )
+      );
+    }
+
+    return registryItems;
   }
 
   private async Task<PluginRegistryItem?> GetPluginInfo(Dictionary<string, string?> installedPlugins, PluginRegistryItem item)

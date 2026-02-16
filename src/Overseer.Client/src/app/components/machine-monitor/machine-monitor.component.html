@@ -2,9 +2,17 @@
 @let statusRef = status();
 
 @if (machineRef) {
-  <div #machineMonitor class="machine-monitor border" [ngClass]="{ 'machine-monitor--fullScreen': fullScreen() }">
+  <div
+    #machineMonitor
+    class="machine-monitor border"
+    [ngClass]="{ 'machine-monitor--fullScreen': fullScreen() }"
+  >
     <div class="display flex-1 position-relative">
-      <app-web-cam-panel class="video position-absolute" [url]="machineRef.webCamUrl" [orientation]="machineRef.webCamOrientation" />
+      <app-web-cam-panel
+        class="video position-absolute"
+        [url]="machineRef.webcamUrl"
+        [orientation]="machineRef.webcamOrientation"
+      />
       @if (!statusRef || statusRef.state === 'Offline' || statusRef.state === 'Disabled') {
         <div class="status-icon">
           @if (machineRef?.disabled) {
@@ -15,7 +23,11 @@
         </div>
       }
       @if (machineRef) {
-        <img class="logo" src="{{ '/images/' + machineRef.machineType + '.png' }}" alt="logo" />
+        <img
+          class="logo"
+          src="{{ '/images/' + machineRef.machineType + '.png' }}"
+          alt="logo"
+        />
       }
     </div>
     <div class="info flex-1 p-3 d-flex flex-column">
@@ -34,10 +46,10 @@
           </div>
         </div>
         <div class="d-flex flex-1 align-items-center justify-content-end">
-          @if (machineRef?.url?.startsWith('http')) {
+          @if (machineRef.properties['url'] && machineRef.properties['url'].toString().startsWith('http')) {
             <a
               class="btn btn-outline-secondary ms-2"
-              href="{{ machineRef?.url }}"
+              href="{{ machineRef.properties['url'] }}"
               target="_blank"
               rel="noopener"
               title="{{ 'openWebsite' | i18next }}"
@@ -47,7 +59,11 @@
           }
 
           @if (!idle() && supportsFullscreen) {
-            <button class="btn btn-outline-secondary ms-2" title="{{ 'fullScreen' | i18next }}" (click)="fullScreen.set(!fullScreen())">
+            <button
+              class="btn btn-outline-secondary ms-2"
+              title="{{ 'fullScreen' | i18next }}"
+              (click)="fullScreen.set(!fullScreen())"
+            >
               <i class="bi bi-arrows-fullscreen"></i>
             </button>
           }
@@ -64,23 +80,48 @@
             </div>
           </div>
           <div>
-            <ngb-progressbar class="mb-3" type="primary" [value]="statusRef?.progress ?? 0" height="0.4rem" />
+            <ngb-progressbar
+              class="mb-3"
+              type="primary"
+              [value]="statusRef?.progress ?? 0"
+              height="0.4rem"
+            />
           </div>
         }
 
         @if (isAdmin()) {
           <div class="progress-info__actions">
             @if (machineRef?.disabled) {
-              <a class="btn btn-outline-secondary" [routerLink]="['/settings/machines', machineRef?.id, 'edit']">{{ 'enable' | i18next }}</a>
+              <a
+                class="btn btn-outline-secondary"
+                [routerLink]="['/settings/machines', machineRef?.id, 'edit']"
+                >{{ 'enable' | i18next }}</a
+              >
             } @else {
               @if (operational()) {
-                <button class="btn btn-warning" (click)="pause()">{{ 'pause' | i18next }}</button>
+                <button
+                  class="btn btn-warning"
+                  (click)="pause()"
+                >
+                  {{ 'pause' | i18next }}
+                </button>
               }
               @if (paused()) {
-                <button class="btn btn-success" (click)="resume()">{{ 'continue' | i18next }}</button>
+                <button
+                  class="btn btn-success"
+                  (click)="resume()"
+                >
+                  {{ 'continue' | i18next }}
+                </button>
               }
               @if (!idle()) {
-                <button class="btn btn-outline-danger" [disabled]="idle()" (click)="cancel()">{{ 'stop' | i18next }}</button>
+                <button
+                  class="btn btn-outline-danger"
+                  [disabled]="idle()"
+                  (click)="cancel()"
+                >
+                  {{ 'stop' | i18next }}
+                </button>
               }
             }
           </div>

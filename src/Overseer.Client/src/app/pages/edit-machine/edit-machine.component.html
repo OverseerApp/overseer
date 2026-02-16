@@ -11,7 +11,8 @@
   </h4>
 </div>
 
-@if (machine() && form) {
+@if (form) {
+  @let machineMetadata = this.machineMetadata();
   <form
     [formGroup]="form"
     (submit)="save()"
@@ -21,11 +22,14 @@
       [heading]="'machineDetails' | i18next"
     >
       <div class="p-3">
-        <app-machine
-          [form]="form"
-          [machine]="machine()"
-        />
-
+        @if (machineMetadata) {
+          <app-machine-form
+            mode="edit"
+            [form]="form"
+            [machineMetadata]="machineMetadata"
+            [machine]="machine()"
+          />
+        }
         <div class="d-grid gap-2 d-sm-flex justify-content-sm-end">
           <a
             class="btn btn-secondary ms-sm-2"
@@ -58,11 +62,13 @@
             </p>
           </div>
           <div class="d-flex gap-2">
-            <input
-              type="hidden"
-              id="disabled"
-              formControlName="disabled"
-            />
+            @if (machineMetadata) {
+              <input
+                type="hidden"
+                id="disabled"
+                formControlName="disabled"
+              />
+            }
             @if (machine()?.disabled) {
               <button
                 type="button"

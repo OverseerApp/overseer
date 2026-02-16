@@ -1,12 +1,12 @@
 import { Component, effect, inject, signal, untracked } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, UntypedFormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { I18NextPipe } from 'angular-i18next';
 import { filter, of, switchMap, tap } from 'rxjs';
 import { CreateMachineComponent } from '../../components/create-machine/create-machine.component';
 import { CreateUserComponent } from '../../components/create-user/create-user.component';
 import { UnauthenticatedComponent } from '../../components/unauthenticated/unauthenticated.component';
-import { CreateUserForm, MachineForm } from '../../models/form.types';
+import { CreateUserForm } from '../../models/form.types';
 import { Machine } from '../../models/machine.model';
 import { User } from '../../models/user.model';
 import { AuthenticationService } from '../../services/authentication.service';
@@ -33,7 +33,7 @@ export class SetupComponent {
   machines: Machine[] = [];
   step = signal<'user' | 'machines' | 'complete'>('user');
   adminForm: FormGroup<CreateUserForm> = this.formBuilder.nonNullable.group({});
-  machinesForm: FormGroup<MachineForm> = this.formBuilder.nonNullable.group({});
+  machinesForm: UntypedFormGroup = this.formBuilder.nonNullable.group({});
 
   constructor() {
     effect(() => {

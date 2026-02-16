@@ -1,6 +1,7 @@
 using log4net;
 using Overseer.Server.Channels;
 using Overseer.Server.Data;
+using Overseer.Server.Integration.Machines;
 using Overseer.Server.Models;
 
 namespace Overseer.Server.Services;

@@ -1,4 +1,3 @@
-import { WebCamOrientation } from './machine.model';
 import { AccessLevel } from './user.model';
 
 export class DisplayOption<TValue> {
@@ -33,10 +32,10 @@ export const accessLevels: DisplayOption<AccessLevel>[] = [
   new DisplayOption('administrator', 'Administrator'),
 ];
 
-export const webCamOrientations: DisplayOption<WebCamOrientation>[] = [
+export const webCamOrientations: DisplayOption<string>[] = [
   new DisplayOption('default', 'Default'),
-  new DisplayOption('flipVertically', 'FlippedVertically'),
-  new DisplayOption('flipHorizontally', 'FlippedHorizontally'),
+  new DisplayOption('flipVertically', 'Flipped Vertically'),
+  new DisplayOption('flipHorizontally', 'Flipped Horizontally'),
 ];
 
 export const themes = ['blue', 'indigo', 'purple', 'pink', 'red', 'orange', 'yellow', 'green', 'teal', 'cyan'];

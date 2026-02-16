@@ -1,10 +1,9 @@
 import { CdkDrag, CdkDragDrop, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
 import { NgClass } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { I18NextPipe } from 'angular-i18next';
 import { CardSectionComponent } from '../../components/card-section/card-section.component';
-import { Machine } from '../../models/machine.model';
 import { MachinesService } from '../../services/machines.service';
 
 @Component({
@@ -15,14 +14,14 @@ import { MachinesService } from '../../services/machines.service';
 })
 export class ListMachinesComponent {
   private machinesService = inject(MachinesService);
-  machines = signal<Machine[]>([]);
+  machines = computed(() => {
+    if (this.machinesService.machines.error()) return [];
+    if (this.machinesService.machines.isLoading()) return [];
 
-  constructor() {
-    this.machinesService.getMachines().subscribe((machines) => {
-      machines.sort((a, b) => a.sortIndex - b.sortIndex);
-      this.machines.set(machines);
-    });
-  }
+    const machines = this.machinesService.machines.value() ?? [];
+    machines.sort((a, b) => a.sortIndex - b.sortIndex);
+    return machines;
+  });
 
   moveUp(index: number) {
     if (index <= 0) return;

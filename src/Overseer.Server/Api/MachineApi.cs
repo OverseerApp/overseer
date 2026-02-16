@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json.Linq;
+using Overseer.Server.Integration.Machines;
 using Overseer.Server.Machines;
 using Overseer.Server.Models;
 
@@ -6,22 +7,22 @@ namespace Overseer.Server.Api
 {
   public static class MachineApi
   {
-    public class MachineBindingModel(Machine machine)
-    {
-      public Machine Machine { get; set; } = machine;
+    // public class MachineBindingModel(Machine machine)
+    // {
+    //   public Machine Machine { get; set; } = machine;
 
-      public static async ValueTask<MachineBindingModel?> BindAsync(HttpContext context)
-      {
-        using var reader = new StreamReader(context.Request.Body);
-        var machineJson = await reader.ReadToEndAsync();
-        var jObject = JObject.Parse(machineJson);
-        string machineTypeName = jObject["machineType"]?.Value<string>() ?? "Unknown";
+    //   public static async ValueTask<MachineBindingModel?> BindAsync(HttpContext context)
+    //   {
+    //     using var reader = new StreamReader(context.Request.Body);
+    //     var machineJson = await reader.ReadToEndAsync();
+    //     var jObject = JObject.Parse(machineJson);
+    //     string machineTypeName = jObject["machineType"]?.Value<string>() ?? "Unknown";
 
-        return jObject.ToObject(Machine.GetMachineType(machineTypeName)) is not Machine machine
-          ? throw new Exception("Unable to parse machine")
-          : new MachineBindingModel(machine);
-      }
-    }
+    //     return jObject.ToObject(Machine.GetMachineType(machineTypeName)) is not Machine machine
+    //       ? throw new Exception("Unable to parse machine")
+    //       : new MachineBindingModel(machine);
+    //   }
+    // }
 
     public static RouteGroupBuilder MapMachineApi(this RouteGroupBuilder builder)
     {
@@ -33,11 +34,11 @@ namespace Overseer.Server.Api
       group.MapGet("/{id}", (int id, IMachineManager machines) => Results.Ok(machines.GetMachine(id)));
 
       group
-        .MapPost("/", async (MachineBindingModel model, IMachineManager machines) => Results.Ok(await machines.CreateMachine(model.Machine)))
+        .MapPost("/", async (Machine model, IMachineManager machines) => Results.Ok(await machines.CreateMachine(model)))
         .RequireAuthorization(AccessLevel.Administrator.ToString());
 
       group
-        .MapPut("/", async (MachineBindingModel model, IMachineManager machines) => Results.Ok(await machines.UpdateMachine(model.Machine)))
+        .MapPut("/", async (Machine model, IMachineManager machines) => Results.Ok(await machines.UpdateMachine(model)))
         .RequireAuthorization(AccessLevel.Administrator.ToString());
 
       group
@@ -55,7 +56,7 @@ namespace Overseer.Server.Api
         )
         .RequireAuthorization(AccessLevel.Administrator.ToString());
 
-      group.MapGet("/types", (IMachineManager machines) => Results.Ok(machines.GetMachineTypes()));
+      group.MapGet("/metadata", (IMachineManager machines) => Results.Ok(machines.GetMachineMetadata()));
 
       return builder;
     }
