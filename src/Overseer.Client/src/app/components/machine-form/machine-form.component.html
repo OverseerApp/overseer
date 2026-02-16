@@ -1,0 +1,44 @@
+@let form = this.form();
+
+@if (form) {
+  <div [formGroup]="form">
+    @for (field of formFields(); track field.propertyName) {
+      <div class="mb-3">
+        <label
+          [for]="field.propertyName"
+          class="form-label small fw-bold"
+        >
+          {{ field.displayName | i18next }}
+          @if (field.description) {
+            <span
+              class="ms-1"
+              data-bs-toggle="tooltip"
+              [attr.title]="field.description"
+            >
+              <i class="bi bi-info-circle"></i>
+            </span>
+          }
+        </label>
+        @let control = field.isInPropertiesGroup ? form.get('properties')?.get(field.propertyName) : form.get(field.propertyName);
+        @if (field.options) {
+          <select
+            class="form-select"
+            [formControl]="$any(control)"
+            [id]="field.propertyName"
+          >
+            @for (item of field.options; track $index) {
+              <option [value]="item">{{ item | i18next }}</option>
+            }
+          </select>
+        } @else {
+          <input
+            class="form-control"
+            [formControl]="$any(control)"
+            [id]="field.propertyName"
+            [type]="field.isSensitive ? 'password' : 'text'"
+          />
+        }
+      </div>
+    }
+  </div>
+}

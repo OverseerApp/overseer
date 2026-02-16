@@ -1,24 +1,37 @@
-@if (form()?.controls?.machineType) {
+@if (!machineMetadata.isLoading() && machineMetadata.hasValue()) {
   <div class="flex-fill">
-    <div [formGroup]="form()!">
-      <div class="mb-3">
+    @let form = this.form();
+    @if (form) {
+      <div
+        class="mb-3"
+        [formGroup]="form"
+      >
         <label
           for="machineType"
           class="form-label small fw-bold"
-          >{{ 'machineType' | i18next }}</label
         >
+          {{ 'machineType' | i18next }}
+        </label>
         <select
           id="machineType"
           class="form-select"
           required
           formControlName="machineType"
         >
-          @for (option of machineTypes; track $index) {
-            <option [ngValue]="option.value">{{ option.translationKey | i18next }}</option>
+          @for (option of machineTypes(); track $index) {
+            <option [ngValue]="option">{{ option }}</option>
           }
         </select>
       </div>
-    </div>
-    <app-machine [form]="form()"></app-machine>
+
+      @let selectedMetadata = this.selectedMetadata();
+      @if (form && selectedMetadata) {
+        <app-machine-form
+          mode="create"
+          [machineMetadata]="selectedMetadata"
+          [form]="form"
+        />
+      }
+    }
   </div>
 }

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Reflection.PortableExecutable;
 using LiteDB;
 using log4net;
 

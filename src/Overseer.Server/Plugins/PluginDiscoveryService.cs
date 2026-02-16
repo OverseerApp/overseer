@@ -11,6 +11,34 @@ public class PluginDiscoveryService()
 
   static readonly ConcurrentDictionary<string, PluginLoadContext> PluginLoadContexts = new();
 
+  public static IEnumerable<Assembly> GetLoadedAssemblies()
+  {
+    return PluginLoadContexts.Values.SelectMany(ctx => ctx.Assemblies);
+  }
+
+  public static IEnumerable<Type> FindTypes(Func<Type, bool> predicate)
+  {
+    return GetLoadedAssemblies()
+      .SelectMany(a =>
+      {
+        try
+        {
+          return a.GetTypes();
+        }
+        catch (ReflectionTypeLoadException ex)
+        {
+          Log.Error($"Failed to load types from assembly {a.FullName}", ex);
+          return ex.Types.OfType<Type>();
+        }
+        catch (Exception ex)
+        {
+          Log.Error($"Failed to discover types from assembly {a.FullName}", ex);
+          return [];
+        }
+      })
+      .Where(predicate);
+  }
+
   public static IEnumerable<IPluginConfiguration> DiscoverPlugins()
   {
     return PluginUtilities.GetPluginDirectories().Select(LoadPlugin).Where(pc => pc is not null).Cast<IPluginConfiguration>();

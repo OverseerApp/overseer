@@ -56,7 +56,7 @@ namespace Overseer.Server.Api
         )
         .RequireAuthorization(AccessLevel.Administrator.ToString());
 
-      group.MapGet("/types", (IMachineManager machines) => Results.Ok(machines.GetMachineMetadata()));
+      group.MapGet("/metadata", (IMachineManager machines) => Results.Ok(machines.GetMachineMetadata()));
 
       return builder;
     }

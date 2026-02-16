@@ -1,11 +1,10 @@
 import { Component, inject } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, UntypedFormGroup } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { I18NextPipe } from 'angular-i18next';
 import { filter } from 'rxjs';
 import { CardSectionComponent } from '../../components/card-section/card-section.component';
 import { CreateMachineComponent } from '../../components/create-machine/create-machine.component';
-import { MachineForm } from '../../models/form.types';
 import { Machine } from '../../models/machine.model';
 import { CertificateErrorService } from '../../services/certificate-error.service';
 import { DialogService } from '../../services/dialog.service';
@@ -25,7 +24,7 @@ export class AddMachineComponent {
   private certificateErrorService = inject(CertificateErrorService);
   private toastsService = inject(ToastsService);
 
-  form: FormGroup<MachineForm> = this.formBuilder.group({});
+  form: UntypedFormGroup = this.formBuilder.group({});
 
   save(): void {
     this.form.disable();

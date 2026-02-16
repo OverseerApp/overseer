@@ -10,5 +10,6 @@ public record PluginRegistryItem(
   string? DownloadUrl,
   bool? IsInstalled,
   string? InstalledVersion,
-  bool? IsUpdateAvailable
+  bool? IsUpdateAvailable,
+  bool? IsAvailableInRegistry
 );

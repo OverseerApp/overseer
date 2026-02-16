@@ -57,17 +57,6 @@ public static class Extensions
   {
     services.AddHttpClient();
     services.AddSingleton(context);
-    services.AddSingleton<Func<Machine, IMachineProvider>>(provider =>
-      machine =>
-      {
-        var machineProviderType = MachineProviderManager.GetProviderType(machine);
-        var machineProvider =
-          (IMachineProvider)ActivatorUtilities.CreateInstance(provider, machineProviderType, machine)
-          ?? throw new Exception("Unable to create provider");
-
-        return machineProvider;
-      }
-    );
     services.AddSingleton<Func<Machine, MachineJob, JobSentinel>>(provider =>
       (machine, job) =>
       {
@@ -91,7 +80,6 @@ public static class Extensions
     services.AddTransient<IPluginManager, PluginManager>();
 
     services.AddSingleton<IMonitoringService, MonitoringService>();
-    services.AddSingleton<MachineProviderManager>();
     services.AddSingleton<IMachineStatusChannel, MachineStatusChannel>();
     services.AddSingleton<IRestartMonitoringChannel, RestartMonitoringChannel>();
     services.AddSingleton<ICertificateExceptionChannel, CertificateExceptionChannel>();
@@ -111,6 +99,19 @@ public static class Extensions
     {
       pluginConfiguration.ConfigureServices(services);
     }
+
+    // Discover any IMachineProvider<> registrations from plugins and map them by the machine type they provide.
+    // I might need to wrap this in something, but for now just register the dictionary directly.
+    var machineProviderMap = services
+      .Where(d => d.ServiceType.IsGenericType && d.ServiceType.GetGenericTypeDefinition() == typeof(IMachineProvider<>))
+      .ToDictionary(d => d.ServiceType.GetGenericArguments()[0], d => d.ServiceType);
+
+    var machineConfigProviders = services
+      .Where(d => d.ServiceType.IsGenericType && d.ServiceType.GetGenericTypeDefinition() == typeof(IMachineConfigurationProvider<>))
+      .Select(d => d.ServiceType)
+      .ToList();
+
+    services.AddSingleton((provider) => new MachineProviderManager(provider, machineProviderMap, machineConfigProviders));
 
     return services;
   }

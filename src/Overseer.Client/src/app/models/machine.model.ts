@@ -1,57 +1,33 @@
 export type MachineToolType = 'Undetermined' | 'Heater' | 'Extruder';
 
-export type MachineType = 'Unknown' | 'Octoprint' | 'RepRapFirmware' | 'Bambu' | 'Elegoo' | 'Moonraker' | 'DuetSoftwareFramework';
-
-export type WebCamOrientation = 'Default' | 'FlippedVertically' | 'FlippedHorizontally';
-
 export type MachineTool = {
   toolType: MachineToolType;
   index: number;
   name: string;
 };
 
-type MachineBase = {
-  machineType: MachineType;
+export type WebcamOrientation = 'Default' | 'FlippedVertically' | 'FlippedHorizontally';
+
+// properties that can be set by the user
+export const machineInputProperties = ['name', 'webcamUrl', 'webcamOrientation'] as const;
+export type MachineInputProperty = (typeof machineInputProperties)[number];
+
+export const machineInputOptions: Record<MachineInputProperty, string[] | null> = {
+  webcamOrientation: ['Default', 'FlippedVertically', 'FlippedHorizontally'],
+  name: null,
+  webcamUrl: null,
+};
+
+export type Machine = {
   id: number;
-  url: string;
-  name: string;
-  disabled: boolean;
-  webCamUrl: string;
-  webCamOrientation: WebCamOrientation;
+  machineType: string;
   tools: MachineTool[];
   sortIndex: number;
+  properties: Record<string, unknown>;
+  webcamUrl?: string;
+  webcamOrientation?: WebcamOrientation;
+  ['name']?: string;
+  ['webcamUrl']?: string;
+  ['webcamOrientation']?: WebcamOrientation;
+  ['disabled']?: boolean;
 };
-
-export type OctoprintMachine = MachineBase & {
-  machineType: 'Octoprint';
-  apiKey: string;
-  profile: string;
-  availableProfiles: Map<string, string>;
-};
-
-export type RepRapFirmwareMachine = MachineBase & {
-  machineType: 'RepRapFirmware';
-  password: string;
-};
-
-export type BambuLabMachine = MachineBase & {
-  machineType: 'Bambu';
-  serial: string;
-  accessCode: string;
-};
-
-export type ElegooMachine = MachineBase & {
-  machineType: 'Elegoo';
-  ipAddress: string;
-};
-
-export type MoonrakerMachine = MachineBase & {
-  machineType: 'Moonraker';
-  ipAddress: string;
-  availableWebCams: Record<string, string>;
-};
-
-export type DuetSoftwareFrameworkMachine = RepRapFirmwareMachine;
-
-// all the needed properties will just go on the machine
-export type Machine = OctoprintMachine | RepRapFirmwareMachine | BambuLabMachine | ElegooMachine | MoonrakerMachine | DuetSoftwareFrameworkMachine;

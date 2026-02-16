@@ -1,12 +1,12 @@
 import { Location } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { Component, computed, inject, signal } from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
+import { FormBuilder, FormControl, ReactiveFormsModule, UntypedFormGroup } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { I18NextPipe } from 'angular-i18next';
 import { filter, map, Observable, switchMap } from 'rxjs';
 import { CardSectionComponent } from '../../components/card-section/card-section.component';
-import { MachineHostComponent } from '../../components/machine-host/machine-host.component';
-import { MachineForm } from '../../models/form.types';
+import { MachineFormComponent } from '../../components/machine-form/machine-form.component';
 import { Machine } from '../../models/machine.model';
 import { CertificateErrorService } from '../../services/certificate-error.service';
 import { DialogService } from '../../services/dialog.service';
@@ -16,7 +16,7 @@ import { ToastsService } from '../../services/toast.service';
 @Component({
   selector: 'app-edit-machine',
   templateUrl: './edit-machine.component.html',
-  imports: [CardSectionComponent, I18NextPipe, ReactiveFormsModule, RouterLink, MachineHostComponent],
+  imports: [CardSectionComponent, I18NextPipe, ReactiveFormsModule, RouterLink, MachineFormComponent],
   providers: [DialogService, CertificateErrorService],
 })
 export class EditMachineComponent {
@@ -28,9 +28,23 @@ export class EditMachineComponent {
   private certificateErrorService = inject(CertificateErrorService);
   private toastsService = inject(ToastsService);
 
-  form?: FormGroup<MachineForm>;
+  form?: UntypedFormGroup;
 
   machine = signal<Machine | undefined>(undefined);
+
+  allMachineMetadata = rxResource({ stream: () => this.machinesService.getMachineMetadata() });
+
+  machineMetadata = computed(() => {
+    if (this.allMachineMetadata.isLoading()) return undefined;
+    if (this.allMachineMetadata.error()) return undefined;
+
+    console.log('All machine metadata:', this.allMachineMetadata.value());
+    let machine = this.machine();
+    if (!machine?.machineType) return undefined;
+
+    console.log('Current machine type:', machine.machineType);
+    return this.allMachineMetadata.value()?.[machine.machineType];
+  });
 
   constructor() {
     this.route.paramMap
@@ -42,7 +56,8 @@ export class EditMachineComponent {
         this.machine.set(machine);
         this.form = this.formBuilder.nonNullable.group({}, { updateOn: 'change' });
         this.form.addControl('id', new FormControl(machine?.id));
-        this.form.addControl('machineType', new FormControl(null));
+        this.form.addControl('machineType', new FormControl(machine.machineType));
+        this.form.addControl('disabled', new FormControl(machine['disabled'] ?? false));
       });
   }
 
@@ -54,7 +69,17 @@ export class EditMachineComponent {
   }
 
   save() {
-    this.handleNetworkAction(this.machinesService.updateMachine({ ...this.machine(), ...this.form!.getRawValue() } as Machine));
+    var update = this.form!.getRawValue();
+    this.handleNetworkAction(
+      this.machinesService.updateMachine({
+        ...this.machine(),
+        ...update,
+        properties: {
+          ...this.machine()?.properties,
+          ...update.properties,
+        },
+      } as Machine)
+    );
   }
 
   updateMonitoring(disabled: boolean): void {
